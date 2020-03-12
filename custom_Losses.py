@@ -523,7 +523,7 @@ class Custom_losses:
         lbl_arr, img_arr, pose_arr = tf_record_utility.retrieve_tf_record(tfrecord_filename=IbugConf.tf_train_path,
                                                                           number_of_records=30, only_label=False)
         for i in range(20):
-            b_vector_p = cnn_model.calculate_b_vector(lbl_arr[i], True, eigenvalues, eigenvectors, meanvector)
+            b_vector_p = self.calculate_b_vector(lbl_arr[i], True, eigenvalues, eigenvectors, meanvector)
             lbl_new = meanvector + np.dot(eigenvectors, b_vector_p)
 
             labels_true_transformed, landmark_arr_x_t, landmark_arr_y_t = image_utility.\
