@@ -123,7 +123,6 @@ class IbugConf:
     images_dir = '/media/ali/extradata/facial_landmark_ds/from_ibug/train_set/train_before_heatmap/'
     lbls_dir = '/media/ali/extradata/facial_landmark_ds/from_ibug/train_set/train_before_heatmap_npy/'
 
-
     tf_train_path = '/media/ali/extradata/facial_landmark_ds/from_ibug/train_set/train.tfrecords'
     tf_test_path = '/media/ali/extradata/facial_landmark_ds/from_ibug/train_set/test.tfrecords'
     tf_evaluation_path = '/media/ali/extradata/facial_landmark_ds/from_ibug/train_set/evaluation.tfrecords'
@@ -140,8 +139,8 @@ class IbugConf:
     origin_number_of_train_sample = 31989  # 95 % for train
     origin_number_of_evaluation_sample = 1683  # 5% for evaluation
 
-    augmentation_factor = 10  # create 100 image from 1
-    augmentation_factor_rotate = 20  # create 100 image from 1
+    augmentation_factor = 10  # create . image from 1
+    augmentation_factor_rotate = 20  # create . image from 1
 
     sum_of_train_samples = origin_number_of_train_sample * augmentation_factor
     sum_of_validation_samples = origin_number_of_evaluation_sample * augmentation_factor

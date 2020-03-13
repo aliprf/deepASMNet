@@ -56,8 +56,8 @@ class Custom_losses:
         return face, nose, leys, reys, mouth
 
     def custom_loss_hm(self, ten_hm_t, ten_hm_p):
-        # print(ten_hm_t.get_shape().as_list())  #  [None, 56, 56, 68]
-        # print(ten_hm_p.get_shape())
+        print(ten_hm_t.get_shape().as_list())  #  [None, 56, 56, 68]
+        print(ten_hm_p.get_shape())
 
         tf_utility = TFRecordUtility()
 

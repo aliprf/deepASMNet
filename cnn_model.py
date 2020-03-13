@@ -42,6 +42,92 @@ class CNNModel:
         model = hg_net.build_model()
         return model
 
+    def mn_asm_v1(self, tensor):
+        # block_13_project_BN block_10_project_BN block_6_project_BN
+        mobilenet_model = mobilenet_v2.MobileNetV2(input_shape=None,
+                                                   alpha=1.0,
+                                                   include_top=True,
+                                                   weights=None,
+                                                   input_tensor=tensor,
+                                                   pooling=None)
+
+        mobilenet_model.layers.pop()
+
+        inp = mobilenet_model.input
+        '''block_1 {  block_6_project_BN 14, 14, 46 '''
+        x = mobilenet_model.get_layer('block_6_project_BN').output  # 14, 14, 46
+        x = Deconvolution2D(filters=128, kernel_size=(2, 2), strides=(2, 2), padding='same', activation='relu',
+                            name='block_1_deconv_1', kernel_initializer='he_uniform')(x)  # 28, 28, 128
+        x = BatchNormalization(name='block_1_out_bn_1')(x)
+
+        x = Deconvolution2D(filters=128, kernel_size=(2, 2), strides=(2, 2), padding='same', activation='relu',
+                            name='block_1_deconv_2', kernel_initializer='he_uniform')(x)  # 56, 56, 128
+        x = BatchNormalization(name='block_1_out_bn_2')(x)
+
+        block_1_out = Conv2D(LearningConfig.landmark_len // 2, kernel_size=1, padding='same', name='block_1_out')(x)
+        '''block_1 }'''
+
+        '''block_2 {  block_10_project_BN 14, 14, 96 '''
+        x = mobilenet_model.get_layer('block_10_project_BN').output  # 14, 14, 96
+        x = Deconvolution2D(filters=128, kernel_size=(2, 2), strides=(2, 2), padding='same', activation='relu',
+                            name='block_2_deconv_1', kernel_initializer='he_uniform')(x)  # 28, 28, 128
+        x = BatchNormalization(name='block_2_out_bn_1')(x)
+
+        x = Deconvolution2D(filters=128, kernel_size=(2, 2), strides=(2, 2), padding='same', activation='relu',
+                            name='block_2_deconv_2', kernel_initializer='he_uniform')(x)  # 56, 56, 128
+        x = BatchNormalization(name='block_2_out_bn_2')(x)
+
+        block_2_out = Conv2D(LearningConfig.landmark_len // 2, kernel_size=1, padding='same', name='block_2_out')(x)
+        '''block_2 }'''
+
+        '''block_3 {  block_13_project_BN 7, 7, 160 '''
+        x = mobilenet_model.get_layer('block_13_project_BN').output  # 7, 7, 160
+        x = Deconvolution2D(filters=128, kernel_size=(2, 2), strides=(2, 2), padding='same', activation='relu',
+                            name='block_3_deconv_1', kernel_initializer='he_uniform')(x)  # 14, 14, 128
+        x = BatchNormalization(name='block_3_out_bn_1')(x)
+
+        x = Deconvolution2D(filters=128, kernel_size=(2, 2), strides=(2, 2), padding='same', activation='relu',
+                            name='block_3_deconv_2', kernel_initializer='he_uniform')(x)  # 28, 28, 128
+        x = BatchNormalization(name='block_3_out_bn_2')(x)
+
+        x = Deconvolution2D(filters=128, kernel_size=(2, 2), strides=(2, 2), padding='same', activation='relu',
+                            name='block_3_deconv_3', kernel_initializer='he_uniform')(x)  # 56, 56, 128
+        x = BatchNormalization(name='block_3_out_bn_3')(x)
+
+        block_3_out = Conv2D(LearningConfig.landmark_len // 2, kernel_size=1, padding='same', name='block_3_out')(x)
+
+        '''block_3 }'''
+
+        '''heatmap can not be generated from activation layers, so we use out_relu'''
+        x = mobilenet_model.get_layer('out_relu').output  # 7, 7, 1280
+        x = Deconvolution2D(filters=128, kernel_size=(2, 2), strides=(2, 2), padding='same', activation='relu',
+                            name='deconv1', kernel_initializer='he_uniform')(x)  # 14, 14, 256
+        x = BatchNormalization(name='out_bn1')(x)
+
+        x = Deconvolution2D(filters=128, kernel_size=(2, 2), strides=(2, 2), padding='same', activation='relu',
+                            name='deconv2', kernel_initializer='he_uniform')(x)  # 28, 28, 256
+        x = BatchNormalization(name='out_bn2')(x)
+
+        x = Deconvolution2D(filters=128, kernel_size=(2, 2), strides=(2, 2), padding='same', activation='relu',
+                            name='deconv3', kernel_initializer='he_uniform')(x)  # 56, 56, 256
+        x = BatchNormalization(name='out_bn3')(x)
+
+        out_heatmap = Conv2D(LearningConfig.landmark_len // 2, kernel_size=1, padding='same', name='out_heatmap')(x)
+
+        revised_model = Model(inp, [
+            block_1_out, block_2_out, block_3_out, out_heatmap
+        ])
+
+        revised_model.summary()
+        # plot_model(revised_model, to_file='mnv2_hm.png', show_shapes=True, show_layer_names=True)
+        model_json = revised_model.to_json()
+
+        with open("mn_asm_v1.json", "w") as json_file:
+            json_file.write(model_json)
+
+        return revised_model
+
+
     def mnv2_hm(self, tensor):
         mobilenet_model = mobilenet_v2.MobileNetV2(input_shape=None,
                                                    alpha=1.0,

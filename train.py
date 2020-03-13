@@ -167,6 +167,8 @@ class Train:
 
     def _get_model(self, train_images):
         cnn = CNNModel()
+        if self.arch == 'mn_asm':
+            model = cnn.mn_asm_v1(None)
         if self.arch == 'hg':
             model = cnn.hour_glass_network(num_stacks=self.num_output_layers)
         elif self.arch == 'mn_r':

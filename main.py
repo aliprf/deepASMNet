@@ -75,10 +75,10 @@ if __name__ == '__main__':
 
     trainer = Train(use_tf_record=False,
                     dataset_name=DatasetName.ibug,
-                    custom_loss=False,
-                    arch='hg',
+                    custom_loss=True,
+                    arch='mn_asm',
                     inception_mode=True,
-                    num_output_layers=2,
+                    num_output_layers=4,
                     weight=None)
 
 
