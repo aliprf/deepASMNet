@@ -1,5 +1,6 @@
 # Byte-compiled / optimized / DLL files
 __pycache__/
+
 *.npy
 *.pyc
 *.tmp
@@ -7,6 +8,7 @@ __pycache__/
 *.pkl
 data/*
 venv/*
+logs/*
 .idea/*
 *.png
 *.h5

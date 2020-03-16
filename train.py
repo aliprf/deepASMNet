@@ -84,7 +84,7 @@ class Train:
         '''compiling model'''
         model.compile(loss=self._generate_loss(),
                       optimizer=optimizer,
-                      metrics=['mse', 'mae'],
+                      # metrics=['mse'],
                       loss_weights=self._generate_loss_weights()
                       )
 
@@ -167,7 +167,9 @@ class Train:
 
     def _get_model(self, train_images):
         cnn = CNNModel()
-        if self.arch == 'mn_asm':
+        if self.arch == 'mn_asm_0':
+            model = cnn.mn_asm_v0(None)
+        if self.arch == 'mn_asm_1':
             model = cnn.mn_asm_v1(None)
         if self.arch == 'hg':
             model = cnn.hour_glass_network(num_stacks=self.num_output_layers)

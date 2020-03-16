@@ -42,6 +42,52 @@ class CNNModel:
         model = hg_net.build_model()
         return model
 
+    def mn_asm_v0(self, tensor):
+        """
+            has only one output
+            we use custom loss for this network and using ASM to correct points after that
+        """
+
+        # block_13_project_BN block_10_project_BN block_6_project_BN
+        mobilenet_model = mobilenet_v2.MobileNetV2(input_shape=None,
+                                                   alpha=1.0,
+                                                   include_top=True,
+                                                   weights=None,
+                                                   input_tensor=tensor,
+                                                   pooling=None)
+
+        mobilenet_model.layers.pop()
+
+        inp = mobilenet_model.input
+
+        '''heatmap can not be generated from activation layers, so we use out_relu'''
+        x = mobilenet_model.get_layer('out_relu').output  # 7, 7, 1280
+        x = Deconvolution2D(filters=128, kernel_size=(2, 2), strides=(2, 2), padding='same', activation='relu',
+                            name='deconv1', kernel_initializer='he_uniform')(x)  # 14, 14, 256
+        x = BatchNormalization(name='out_bn1')(x)
+
+        x = Deconvolution2D(filters=128, kernel_size=(2, 2), strides=(2, 2), padding='same', activation='relu',
+                            name='deconv2', kernel_initializer='he_uniform')(x)  # 28, 28, 256
+        x = BatchNormalization(name='out_bn2')(x)
+
+        x = Deconvolution2D(filters=128, kernel_size=(2, 2), strides=(2, 2), padding='same', activation='relu',
+                            name='deconv3', kernel_initializer='he_uniform')(x)  # 56, 56, 256
+        x = BatchNormalization(name='out_bn3')(x)
+
+        out_heatmap = Conv2D(LearningConfig.landmark_len // 2, kernel_size=1, padding='same', name='out_heatmap')(x)
+
+        revised_model = Model(inp,  out_heatmap)
+
+        revised_model.summary()
+        # plot_model(revised_model, to_file='mnv2_hm.png', show_shapes=True, show_layer_names=True)
+        model_json = revised_model.to_json()
+
+        with open("mn_asm_v0.json", "w") as json_file:
+            json_file.write(model_json)
+
+        return revised_model
+
+
     def mn_asm_v1(self, tensor):
         # block_13_project_BN block_10_project_BN block_6_project_BN
         mobilenet_model = mobilenet_v2.MobileNetV2(input_shape=None,

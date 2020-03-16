@@ -247,6 +247,7 @@ class TFRecordUtility:
                 img_filenames.append(images_dir + str(file))
                 lbls_filenames.append(lbls_dir + str(file)[:-3] + "npy")
 
+
         return np.array(img_filenames), np.array(lbls_filenames)
 
     def generate_hm_and_save(self):
