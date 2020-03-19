@@ -1,7 +1,9 @@
-from configuration import DatasetName, DatasetType, AffectnetConf, IbugConf, W300Conf, InputDataSize
+from configuration import DatasetName, DatasetType, AffectnetConf, IbugConf, W300Conf, InputDataSize,LearningConfig
 from image_utility import ImageUtility
 
 import tensorflow as tf
+from keras import backend as K
+
 import numpy as np
 import os
 from skimage.transform import resize
@@ -9,6 +11,7 @@ import csv
 import sys
 from PIL import Image
 from pathlib import Path
+
 sys.path.append('../')
 import sqlite3
 import cv2
@@ -17,12 +20,48 @@ from keras import backend as K
 
 from scipy import misc
 from scipy.ndimage import gaussian_filter, maximum_filter
-import copy
+import copy_multitask
 from numpy import save, load, asarray
 import img_printer as imgpr
 
 
 class TFRecordUtility:
+
+    def test_hm_accuracy(self):
+        images_dir = IbugConf.images_dir
+
+        counter = 0
+        for file in os.listdir(images_dir):
+            if file.endswith(".pts"):
+                points_arr = []
+                file_name = os.path.join(images_dir, file)
+                img_file_name = str(file_name)[:-3] + "jpg"
+                if os.path.exists(img_file_name):
+                    with open(file_name) as fp:
+                        line = fp.readline()
+                        cnt = 1
+                        while line:
+                            if 3 < cnt < 72:
+                                x_y_pnt = line.strip()
+                                x = float(x_y_pnt.split(" ")[0])
+                                y = float(x_y_pnt.split(" ")[1])
+                                points_arr.append(x)
+                                points_arr.append(y)
+                            line = fp.readline()
+                            cnt += 1
+                    hm = self.generate_hm(56, 56, np.array(points_arr), 1.0, False)
+                    img = Image.open(img_file_name)
+                    self.calculate_hm_to_point_accuracy(img, hm, points_arr, counter)
+                    counter += 1
+
+    def calculate_hm_to_point_accuracy(self, img, heatmap, orig_lbls, counter):
+        image_utility = ImageUtility()
+
+        x_h_c, y_h_c, xy_h_c = self.from_heatmap_to_point(heatmap, number_of_points=5)
+        xy_h_o, x_h_o, y_h_o = image_utility.create_landmarks(landmarks=orig_lbls, scale_factor_x=1, scale_factor_y=1)
+
+        imgpr.print_image_arr('orig' + str(counter), img, x_h_o, y_h_o)
+        imgpr.print_image_arr('conv' + str(counter), img, x_h_c, y_h_c)
 
     def get_predicted_kp_from_htmap(self, heatmap, center, scale, outres):
         # nms to get location
@@ -30,13 +69,13 @@ class TFRecordUtility:
         kps = np.array(kplst)
 
         return kps
+
         # # use meta information to transform back to original image
         # mkps = copy.copy(kps)
         # for i in range(kps.shape[0]):
         #     mkps[i, 0:2] = data_process.transform(kps[i], center, scale, res=outres, invert=1, rot=0)
         #
         # return mkps
-
 
     def post_process_heatmap(self, heatMap, kpConfidenceTh=0.2):
         kplst = list()
@@ -48,20 +87,16 @@ class TFRecordUtility:
 
             y, x = np.where(_nmsPeaks == _nmsPeaks.max())
             if len(x) > 0 and len(y) > 0:
-                kplst.append(( int(x[0])*4, int(y[0])*4 , _nmsPeaks[y[0], x[0]] ) )
+                kplst.append((int(x[0]) * 4, int(y[0]) * 4, _nmsPeaks[y[0], x[0]]))
             else:
                 kplst.append((0, 0, 0))
         return kplst
-
 
     def non_max_supression(self, plain, windowSize=3, threshold=1e-6):
         # clear value less than threshold
         under_th_indices = plain < threshold
         plain[under_th_indices] = 0
         return plain * (plain == maximum_filter(plain, footprint=np.ones((windowSize, windowSize))))
-
-
-
 
     def create_tf_record(self, dataset_name, dataset_type, thread_number, number_of_threads, heatmap):
         if dataset_name == DatasetName.affectnet:
@@ -173,20 +208,53 @@ class TFRecordUtility:
             images, landmarks, landmarks_face, landmarks_noise, landmarks_eyes, landmarks_mouth, _pose, _heatmap, _heatmap_all = iterator.get_next()
             return images, landmarks, landmarks_face, landmarks_noise, landmarks_eyes, landmarks_mouth, _pose, _heatmap, _heatmap_all
 
+    def __top_n_indexes_tensor(self, arr, n):
+        shape = tf.shape(arr)
+        top_values, top_indices = tf.nn.top_k(tf.reshape(arr, (-1,)), n)
+        top_indices = tf.stack(((top_indices // shape[1]), (top_indices % shape[1])), -1)
+        return top_values, top_indices
+
     def __top_n_indexes(self, arr, n):
         import bottleneck as bn
         idx = bn.argpartition(arr, arr.size - n, axis=None)[-n:]
         width = arr.shape[1]
         return [divmod(i, width) for i in idx]
 
+    @tf.function
+    def __find_nth_biggest_avg_tensor(self, heatmap, points, scalar):
+        values, indices = self.__top_n_indexes_tensor(heatmap, points)
+        return indices
+
+        x_arr = []
+        y_arr = []
+        w_s = 0
+        x_s = 0
+        y_s = 0
+
+        for index in indices:
+            x_arr.append(index[1])
+            y_arr.append(index[0])
+            w_i = values[index]
+            w_s += w_i
+
+            x_s += (w_i * index[1])
+            y_s += (w_i * index[0])
+
+        if w_s > 0:
+            x_s = (x_s / w_s) * scalar
+            y_s = (y_s / w_s) * scalar
+            return x_s, y_s
+        else:
+            return 0, 0
+
     def __find_nth_biggest_avg(self, heatmap, points, scalar):
         indices = self.__top_n_indexes(heatmap, points)
 
-        x_arr =[]
-        y_arr =[]
+        x_arr = []
+        y_arr = []
         w_s = 0
-        x_s =0
-        y_s =0
+        x_s = 0
+        y_s = 0
 
         for index in indices:
             x_arr.append(index[1])
@@ -200,12 +268,12 @@ class TFRecordUtility:
                 w_i = 0.00000000001
 
             w_s += w_i
-            x_s += (w_i*index[1])
-            y_s += (w_i*index[0])
+            x_s += (w_i * index[1])
+            y_s += (w_i * index[0])
 
         if w_s > 0:
-            x_s = (x_s/w_s) * scalar
-            y_s = (y_s/w_s) * scalar
+            x_s = (x_s / w_s) * scalar
+            y_s = (y_s / w_s) * scalar
             return x_s, y_s
         else:
             return 0, 0
@@ -213,13 +281,35 @@ class TFRecordUtility:
         # indices = indices[0]
         # return indices[1]*4, indices[0]*4
 
-    def from_heatmap_to_point(self, heatmaps, points, scalar=4): # 56*56*68 => {(x,y), (), }
+    def from_heatmap_to_point_tensor(self, heatmaps, number_of_points, scalar=4):  # 56*56*68 => {(x,y), (), }
+        # x_points = []
+        # y_points = []
+        # xy_points = []
+        # print(heatmaps.shape)
+        # indices =
+
+        x = tf.stack([self.__find_nth_biggest_avg_tensor(heatmaps[:, :, i], number_of_points, scalar)
+                      for i in range(LearningConfig.point_len)], -1)
+        return x
+
+        # return np.array(x_points), np.array(y_points), np.array(xy_points)
+
+        # for i in range(heatmaps.shape[2]):
+        #     x, y = self.__find_nth_biggest_avg_tensor(heatmaps[:, :, i], number_of_points, scalar)
+        #     x_points.append(x)
+        #     y_points.append(y)
+        #     xy_points.append(x)
+        #     xy_points.append(y)
+        # return np.array(x_points), np.array(y_points), np.array(xy_points)
+
+    def from_heatmap_to_point(self, heatmaps, number_of_points, scalar=4):  # 56*56*68 => {(x,y), (), }
+        """"""
         x_points = []
         y_points = []
         xy_points = []
         # print(heatmaps.shape)
         for i in range(heatmaps.shape[2]):
-            x, y = self.__find_nth_biggest_avg(heatmaps[:, :, i], points, scalar)
+            x, y = self.__find_nth_biggest_avg(heatmaps[:, :, i], number_of_points, scalar)
             x_points.append(x)
             y_points.append(y)
             xy_points.append(x)
@@ -237,22 +327,23 @@ class TFRecordUtility:
 
     def create_image_and_labels_name(self):
         images_dir = IbugConf.images_dir
-        lbls_dir = IbugConf.lbls_dir
+        lbls_dir = IbugConf.npy_lbl_dir
 
         img_filenames = []
         lbls_filenames = []
 
         for file in os.listdir(images_dir):
             if file.endswith(".jpg") or file.endswith(".png"):
-                img_filenames.append(images_dir + str(file))
-                lbls_filenames.append(lbls_dir + str(file)[:-3] + "npy")
-
+                lbl_file = lbls_dir + str(file)[:-3] + "npy"
+                if os.path.exists(lbl_file):
+                    img_filenames.append(images_dir + str(file))
+                    lbls_filenames.append(lbl_file)
 
         return np.array(img_filenames), np.array(lbls_filenames)
 
     def generate_hm_and_save(self):
         images_dir = IbugConf.images_dir
-        npy_dir = IbugConf.lbls_dir
+        npy_dir = IbugConf.npy_lbl_dir
 
         for file in os.listdir(images_dir):
             if file.endswith(".pts"):
@@ -271,12 +362,12 @@ class TFRecordUtility:
                             points_arr.append(y)
                         line = fp.readline()
                         cnt += 1
-                hm = self.generate_hm(56, 56, np.array(points_arr), 1.5, False)
-                hm_f = npy_dir+file_name_save
+                hm = self.generate_hm(56, 56, np.array(points_arr), 1, False)
+                hm_f = npy_dir + file_name_save
                 # imgpr.print_image_arr_heat(1, hm, print_single=False)
 
                 save(hm_f, hm)
-
+        print('generate_hm_and_save COMPLETED!!!')
 
     def generate_hm(self, height, width, landmarks, s=1.0, upsample=True):
         """ Generate a full Heap Map for every landmarks in an array
@@ -417,7 +508,7 @@ class TFRecordUtility:
                 # Crop the face from the image
                 image_cropped = np.copy(image[face_y:face_y + face_h, face_x:face_x + face_w])
 
-                #relocate landmarks after resize
+                # relocate landmarks after resize
                 for i in range(len(facial_array)):
                     if facial_array[i][0] == 1:
                         facial_array[i][1] = abs(face_x - facial_array[i][1])
@@ -428,7 +519,7 @@ class TFRecordUtility:
                 #                         anti_aliasing=True)
 
                 image_utility = ImageUtility()
-                landmark_arr_flat, landmark_arr_x, landmark_arr_y =\
+                landmark_arr_flat, landmark_arr_x, landmark_arr_y = \
                     image_utility.create_landmarks_aflw(landmarks=facial_array, scale_factor_x=1, scale_factor_y=1)
 
                 imgpr.print_image_arr(counter, image_cropped, landmark_arr_x, landmark_arr_y)
@@ -455,7 +546,6 @@ class TFRecordUtility:
 
         # Once finished the iteration it closes the database
         c.close()
-
 
     def __create_tfrecord_affectnet(self, dataset_type, need_augmentation):
         fileDir = os.path.dirname(os.path.realpath('__file__'))
@@ -510,7 +600,8 @@ class TFRecordUtility:
                         img_arr = np.array(img) / 255.0
 
                         # resize image to 224*224
-                        resized_img = resize(img_arr, (InputDataSize.image_input_size, InputDataSize.image_input_size, 3),
+                        resized_img = resize(img_arr,
+                                             (InputDataSize.image_input_size, InputDataSize.image_input_size, 3),
                                              anti_aliasing=True)
                         dims = img_arr.shape
                         height = dims[0]
@@ -537,7 +628,8 @@ class TFRecordUtility:
                             landmark_arr_flat_aug, img_aug = \
                                 image_utility.random_augmentation(landmark_arr_flat, resized_img)
                             resized_img_aug = resize(img_aug,
-                                                     (InputDataSize.image_input_size, InputDataSize.image_input_size, 3),
+                                                     (
+                                                     InputDataSize.image_input_size, InputDataSize.image_input_size, 3),
                                                      anti_aliasing=True)
                             dims = img_aug.shape
                             height = dims[0]
@@ -551,7 +643,8 @@ class TFRecordUtility:
                                                                scale_factor_y=scale_factor_y)
 
                             writable_img = np.reshape(resized_img_aug,
-                                                      [InputDataSize.image_input_size * InputDataSize.image_input_size * 3])
+                                                      [
+                                                          InputDataSize.image_input_size * InputDataSize.image_input_size * 3])
                             feature = {'landmarks': self.__float_feature(landmark_arr_xy),
                                        'image_raw': self.__float_feature(writable_img)}
                             example = tf.train.Example(features=tf.train.Features(feature=feature))
@@ -569,6 +662,7 @@ class TFRecordUtility:
         return number_of_samples
 
     '''w300 is just for test, so we use the basic bounding boxes, no augmentation and just test_tf_record'''
+
     def __create_tfrecord_w300(self, dataset_type):
         png_file_arr = []
 
@@ -726,7 +820,8 @@ class TFRecordUtility:
 
             for j in range(IbugConf.augmentation_factor_rotate):
                 image_utility.random_rotate(resized_img, landmark_arr_xy,
-                                            IbugConf.rotated_img_path_prefix + str(10000 * (i + 1) + j), str(10000 * (i + 1) + j))
+                                            IbugConf.rotated_img_path_prefix + str(10000 * (i + 1) + j),
+                                            str(10000 * (i + 1) + j))
 
     def __create_tfrecord_ibug_all_heatmap(self):
         # try:
@@ -770,8 +865,9 @@ class TFRecordUtility:
             resized_img = np.array(img) / 255.0
 
             '''crop data: we add a small margin to the images'''
-            landmark_arr_xy, landmark_arr_x, landmark_arr_y  = image_utility.create_landmarks(landmarks=points_arr,
-                                                                           scale_factor_x=1, scale_factor_y=1)
+            landmark_arr_xy, landmark_arr_x, landmark_arr_y = image_utility.create_landmarks(landmarks=points_arr,
+                                                                                             scale_factor_x=1,
+                                                                                             scale_factor_y=1)
 
             '''augment the images, then normalize the landmarks based on the hyperface method'''
             for k in range(IbugConf.augmentation_factor):
@@ -845,7 +941,8 @@ class TFRecordUtility:
                 # imgpr.print_image_arr((i*100)+(k+1), resized_img_new, landmark_arr_x_n, landmark_arr_y_n)
 
                 '''create tf_record'''
-                writable_img = np.reshape(resized_img_new, [InputDataSize.image_input_size * InputDataSize.image_input_size * 3])
+                writable_img = np.reshape(resized_img_new,
+                                          [InputDataSize.image_input_size * InputDataSize.image_input_size * 3])
 
                 heatmap_landmark = self.__generate_hm(56, 56, landmark_arr_flat_normalized, s=3.0)
                 writable_heatmap = np.reshape(heatmap_landmark, [56 * 56 * 68])
@@ -897,12 +994,10 @@ class TFRecordUtility:
                 pnt_file.write("} \n")
                 pnt_file.close()
 
-
         writer_train.close()
         writer_evaluate.close()
 
         return number_of_samples
-
 
     def __create_tfrecord_ibug_all(self):
         # try:
@@ -1011,9 +1106,10 @@ class TFRecordUtility:
                                                    scale_factor_x=scale_factor_x,
                                                    scale_factor_y=scale_factor_y)
                 '''calculate pose'''
-                #detect = PoseDetector()
+                # detect = PoseDetector()
                 resized_img_new_cp = np.array(resized_img_new)
-                yaw_predicted, pitch_predicted, roll_predicted = detect.detect(resized_img_new_cp, isFile=False, show=False)
+                yaw_predicted, pitch_predicted, roll_predicted = detect.detect(resized_img_new_cp, isFile=False,
+                                                                               show=False)
                 '''normalize pose -1 -> +1 '''
                 min_degree = -65
                 max_degree = 65
@@ -1031,7 +1127,7 @@ class TFRecordUtility:
                 landmark_arr_flat_normalized = []
                 for p in range(0, len(landmark_arr_flat), 2):
                     landmark_arr_flat_normalized.append((x_center - landmark_arr_flat[p]) / width)
-                    landmark_arr_flat_normalized.append((y_center - landmark_arr_flat[p+1]) / height)
+                    landmark_arr_flat_normalized.append((y_center - landmark_arr_flat[p + 1]) / height)
 
                 '''creating landmarks for partial tasks'''
                 landmark_face = landmark_arr_flat_normalized[0:54]  # landmark_face_len = 54
@@ -1093,11 +1189,15 @@ class TFRecordUtility:
 
         features = tf.parse_single_example(serialized_example,
                                            features={
-                                               'landmarks': tf.FixedLenFeature([InputDataSize.landmark_len], tf.float32),
-                                               'face': tf.FixedLenFeature([InputDataSize.landmark_face_len], tf.float32),
+                                               'landmarks': tf.FixedLenFeature([InputDataSize.landmark_len],
+                                                                               tf.float32),
+                                               'face': tf.FixedLenFeature([InputDataSize.landmark_face_len],
+                                                                          tf.float32),
                                                'eyes': tf.FixedLenFeature([InputDataSize.landmark_eys_len], tf.float32),
-                                               'nose': tf.FixedLenFeature([InputDataSize.landmark_nose_len], tf.float32),
-                                               'mouth': tf.FixedLenFeature([InputDataSize.landmark_mouth_len], tf.float32),
+                                               'nose': tf.FixedLenFeature([InputDataSize.landmark_nose_len],
+                                                                          tf.float32),
+                                               'mouth': tf.FixedLenFeature([InputDataSize.landmark_mouth_len],
+                                                                           tf.float32),
                                                'pose': tf.FixedLenFeature([InputDataSize.pose_len], tf.float32),
                                                'heatmap': tf.FixedLenFeature([56 * 56 * 68], tf.float32),
                                                'image_raw': tf.FixedLenFeature(
@@ -1120,7 +1220,8 @@ class TFRecordUtility:
 
         features = tf.parse_single_example(serialized_example,
                                            features={
-                                               'landmarks': tf.FixedLenFeature([InputDataSize.landmark_len], tf.float32),
+                                               'landmarks': tf.FixedLenFeature([InputDataSize.landmark_len],
+                                                                               tf.float32),
                                                'image_raw': tf.FixedLenFeature(
                                                    [InputDataSize.image_input_size *
                                                     InputDataSize.image_input_size * 3]

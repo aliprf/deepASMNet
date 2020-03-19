@@ -5,13 +5,17 @@ from pca_utility import PCAUtility
 from image_utility import ImageUtility
 import numpy as np
 from train import Train
+
 if __name__ == '__main__':
     tf_record_util = TFRecordUtility()
     pca_utility = PCAUtility()
     cnn_model = CNNModel()
     image_utility = ImageUtility()
 
+    # tf_record_util.test_hm_accuracy()
+
     # tf_record_util.generate_hm_and_save()
+
     # tf_record_util.retrive_hm_and_test()
 
     # mat = np.random.randint(0, 10, size=10)
@@ -75,10 +79,10 @@ if __name__ == '__main__':
 
     trainer = Train(use_tf_record=False,
                     dataset_name=DatasetName.ibug,
-                    custom_loss=False,
-                    arch='mn_asm',
+                    custom_loss=True,
+                    arch='mn_asm_0',
                     inception_mode=True,
-                    num_output_layers=4,
+                    num_output_layers=1,
                     weight=None)
 
 

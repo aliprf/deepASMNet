@@ -59,8 +59,9 @@ class LearningConfig:
     steps_per_validation_epochs = 5
     epochs = 150
     landmark_len = 136
+    point_len = 68
 
-    reg_term_face = 5.0  # 0.9
+    reg_term_face = 1.0  # 0.9
     reg_term_mouth = 10.0  # 0.9
     reg_term_nose = 10.0  # 0.9
     reg_term_leye = 10.0  # 0.9
@@ -120,8 +121,12 @@ class W300Conf:
 
 class IbugConf:
 
-    images_dir = '/media/data2/alip/fala/train_before_heatmap/'
-    lbls_dir = '/media/data2/alip/fala/train_before_heatmap_npy/'
+    images_dir = '/media/ali/data/train_before_heatmap/'
+    pts_lbl_dir = '/media/ali/data/train_before_heatmap/'
+    npy_lbl_dir = '/media/ali/data/train_before_heatmap_npy/'
+
+    # images_dir = '/media/data2/alip/fala/train_before_heatmap/'
+    # lbls_dir = '/media/data2/alip/fala/train_before_heatmap_npy/'
 
     # images_dir = '/media/ali/extradata/facial_landmark_ds/from_ibug/train_set/train_before_heatmap/'
     # lbls_dir = '/media/ali/extradata/facial_landmark_ds/from_ibug/train_set/train_before_heatmap_npy/'

@@ -2,7 +2,9 @@ from keras.models import *
 from keras.optimizers import Adam, RMSprop
 from keras.losses import mean_squared_error
 import keras.backend as K
-
+from keras.layers import Dense, MaxPooling2D, Conv2D, Flatten, \
+    BatchNormalization, Activation, GlobalAveragePooling2D, DepthwiseConv2D, Dropout, \
+    ReLU, Concatenate, Deconvolution2D, SeparableConv2D, Add, MaxPool2D, UpSampling2D
 
 class HourglassNet(object):
     def __init__(self, num_classes, num_stacks, num_filters, in_shape, out_shape):

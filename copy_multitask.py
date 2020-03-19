@@ -45,4 +45,4 @@ class ThreadedCopy:
             fileQueue.put(fileName)
         fileQueue.join()
 
-ThreadedCopy()
+# ThreadedCopy()

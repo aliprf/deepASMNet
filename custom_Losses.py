@@ -19,6 +19,7 @@ import os.path
 from keras.utils.vis_utils import plot_model
 from scipy.spatial import distance
 import scipy.io as sio
+import img_printer as imgpr
 
 
 class Custom_losses:
@@ -56,6 +57,45 @@ class Custom_losses:
         return face, nose, leys, reys, mouth
 
     def custom_loss_hm(self, ten_hm_t, ten_hm_p):
+        print(ten_hm_t.get_shape())  #  [None, 56, 56, 68]
+        print(ten_hm_p.get_shape())
+
+        tf_utility = TFRecordUtility()
+
+        sqr = K.square(ten_hm_t - ten_hm_p)  # [None, 56, 56, 68]
+        mean1 = K.mean(sqr, axis=1)
+        mean2 = K.mean(mean1, axis=1)
+        tensor_mean_square_error = K.mean(mean2, axis=1)
+
+        # print(tensor_mean_square_error.get_shape().as_list())  # [None, 68]
+
+        # vec_mse = K.eval(tensor_mean_square_error)
+        # print("mse.shape:")
+        # print(vec_mse.shape)  # (50, 68)
+        # print(vec_mse)
+        # print("----------->>>")
+
+        '''convert tensor to vector'''
+
+        p_indices_batch = tf.stack([tf_utility.from_heatmap_to_point_tensor(ten_hm_p[i], 5, 1)
+                                    for i in range(LearningConfig.batch_size)])
+
+        t_indices_batch = tf.stack([tf_utility.from_heatmap_to_point_tensor(ten_hm_t[i], 5, 1)
+                                    for i in range(LearningConfig.batch_size)])
+
+        l2_sqr = K.square(t_indices_batch - p_indices_batch)  # [None, 56, 56, 68]
+        l2_mean1 = K.mean(l2_sqr, axis=1)
+        l2_mean2 = K.mean(l2_mean1, axis=1)
+        tensor_indices_mean_square_error = K.mean(l2_mean2, axis=1)
+        tensor_indices_mean_square_error = tf.cast(tensor_indices_mean_square_error, tf.float32)
+
+        # tensor_total_loss = tf.reduce_mean([tensor_mean_square_error, tensor_indices_mean_square_error])
+
+        tensor_total_loss = tf.add(tensor_mean_square_error, tensor_indices_mean_square_error)
+        return tensor_total_loss
+
+
+    def custom_loss_hm_distance(self, ten_hm_t, ten_hm_p):
         print(ten_hm_t.get_shape().as_list())  #  [None, 56, 56, 68]
         print(ten_hm_p.get_shape())
 

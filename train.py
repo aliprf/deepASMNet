@@ -26,6 +26,8 @@ from sklearn.model_selection import train_test_split
 from numpy import save, load, asarray
 import os.path
 from keras import losses
+from keras import backend as K
+
 
 class Train:
     def __init__(self, use_tf_record, dataset_name, custom_loss, arch, inception_mode, num_output_layers, weight=None):
@@ -78,6 +80,7 @@ class Train:
         '''creating model'''
         model = self._get_model(None)
 
+        '''loading weights'''
         if self.weight is not None:
             model.load_weights(self.weight)
 
@@ -97,8 +100,8 @@ class Train:
                             steps_per_epoch=self.STEPS_PER_EPOCH,
                             callbacks=callbacks_list,
                             use_multiprocessing=True,
-                            workers=16,
-                            max_queue_size=64
+                            workers=1,
+                            max_queue_size=1
                             )
 
     def train_fit(self):
@@ -168,9 +171,9 @@ class Train:
     def _get_model(self, train_images):
         cnn = CNNModel()
         if self.arch == 'mn_asm_0':
-            model = cnn.mn_asm_v0(None)
+            model = cnn.mn_asm_v0(train_images)
         if self.arch == 'mn_asm_1':
-            model = cnn.mn_asm_v1(None)
+            model = cnn.mn_asm_v1(train_images)
         if self.arch == 'hg':
             model = cnn.hour_glass_network(num_stacks=self.num_output_layers)
         elif self.arch == 'mn_r':
@@ -180,7 +183,7 @@ class Train:
         return model
 
     def _get_optimizer(self):
-        return adam(lr=1e-2, beta_1=0.9, beta_2=0.999, epsilon=None, decay=1e-5, amsgrad=False)
+        return adam(lr=1e-2, beta_1=0.9, beta_2=0.999, decay=1e-5, amsgrad=False)
 
     def _prepare_callback(self):
         early_stop = keras.callbacks.EarlyStopping(monitor='val_loss', min_delta=0, patience=50, verbose=1, mode='min')
