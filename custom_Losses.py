@@ -57,8 +57,8 @@ class Custom_losses:
         return face, nose, leys, reys, mouth
 
     def custom_loss_hm(self, ten_hm_t, ten_hm_p):
-        print(ten_hm_t.get_shape())  #  [None, 56, 56, 68]
-        print(ten_hm_p.get_shape())
+        # print(ten_hm_t.get_shape())  #  [None, 56, 56, 68]
+        # print(ten_hm_p.get_shape())
 
         tf_utility = TFRecordUtility()
 
@@ -75,15 +75,16 @@ class Custom_losses:
         # print(vec_mse)
         # print("----------->>>")
 
-        '''convert tensor to vector'''
+        '''calculate points from generated hm'''
 
-        p_indices_batch = tf.stack([tf_utility.from_heatmap_to_point_tensor(ten_hm_p[i], 5, 1)
-                                    for i in range(LearningConfig.batch_size)])
+        p_points_batch = tf.stack([tf_utility.from_heatmap_to_point_tensor(ten_hm_p[i], 5, 1)
+                                   for i in range(LearningConfig.batch_size)])
 
-        t_indices_batch = tf.stack([tf_utility.from_heatmap_to_point_tensor(ten_hm_t[i], 5, 1)
-                                    for i in range(LearningConfig.batch_size)])
-        '''p_indices_batch is [batch, 2, 68]'''
-        sqr_2 = K.square(t_indices_batch - p_indices_batch)  # [None, 2, 68]
+        t_points_batch = tf.stack([tf_utility.from_heatmap_to_point_tensor(ten_hm_t[i], 5, 1)
+                                   for i in range(LearningConfig.batch_size)])
+
+        '''p_points_batch is [batch, 2, 68]'''
+        sqr_2 = K.square(t_points_batch - p_points_batch)  # [None, 2, 68]
         mean_1 = K.mean(sqr_2, axis=1)
         tensor_indices_mean_square_error = K.mean(mean_1, axis=1)
 
