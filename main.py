@@ -14,7 +14,7 @@ if __name__ == '__main__':
 
     # tf_record_util.test_hm_accuracy()
 
-    tf_record_util.generate_hm_and_save()
+    # tf_record_util.generate_hm_and_save()
 
     # tf_record_util.retrive_hm_and_test()
 
@@ -77,13 +77,13 @@ if __name__ == '__main__':
     # cnn_model.train_new(dataset_name=DatasetName.ibug, custom_loss=False, arch='mn_r', inception_mode=True) # mn, mn_r
     # cnn_model.test_new(arch='mn_r') # mn, mn_r
 
-    # trainer = Train(use_tf_record=False,
-    #                 dataset_name=DatasetName.ibug,
-    #                 custom_loss=True,
-    #                 arch='mn_asm_0',
-    #                 inception_mode=True,
-    #                 num_output_layers=1,
-    #                 weight=None)
+    trainer = Train(use_tf_record=False,
+                    dataset_name=DatasetName.ibug,
+                    custom_loss=True,
+                    arch='mn_asm_0',
+                    inception_mode=True,
+                    num_output_layers=1,
+                    weight=None)
 
 
 
