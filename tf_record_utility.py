@@ -23,7 +23,7 @@ from scipy.ndimage import gaussian_filter, maximum_filter
 import copy_multitask
 from numpy import save, load, asarray
 import img_printer as imgpr
-
+from tqdm import tqdm
 
 class TFRecordUtility:
 
@@ -332,7 +332,7 @@ class TFRecordUtility:
         images_dir = IbugConf.images_dir
         npy_dir = IbugConf.npy_lbl_dir
 
-        for file in os.listdir(images_dir):
+        for file in tqdm(os.listdir(images_dir)):
             if file.endswith(".pts"):
                 points_arr = []
                 file_name = os.path.join(images_dir, file)
