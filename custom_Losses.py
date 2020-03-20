@@ -82,12 +82,10 @@ class Custom_losses:
 
         t_indices_batch = tf.stack([tf_utility.from_heatmap_to_point_tensor(ten_hm_t[i], 5, 1)
                                     for i in range(LearningConfig.batch_size)])
-
-        l2_sqr = K.square(t_indices_batch - p_indices_batch)  # [None, 56, 56, 68]
-        l2_mean1 = K.mean(l2_sqr, axis=1)
-        l2_mean2 = K.mean(l2_mean1, axis=1)
-        tensor_indices_mean_square_error = K.mean(l2_mean2, axis=1)
-        tensor_indices_mean_square_error = tf.cast(tensor_indices_mean_square_error, tf.float32)
+        '''p_indices_batch is [batch, 2, 68]'''
+        sqr_2 = K.square(t_indices_batch - p_indices_batch)  # [None, 2, 68]
+        mean_1 = K.mean(sqr_2, axis=1)
+        tensor_indices_mean_square_error = K.mean(mean_1, axis=1)
 
         # tensor_total_loss = tf.reduce_mean([tensor_mean_square_error, tensor_indices_mean_square_error])
 

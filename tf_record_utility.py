@@ -222,30 +222,18 @@ class TFRecordUtility:
 
     @tf.function
     def __find_nth_biggest_avg_tensor(self, heatmap, points, scalar):
-        values, indices = self.__top_n_indexes_tensor(heatmap, points)
-        return indices
+        weights, indices = self.__top_n_indexes_tensor(heatmap, points)
 
-        x_arr = []
-        y_arr = []
-        w_s = 0
-        x_s = 0
-        y_s = 0
+        x_indices = tf.cast(indices[:, 0], tf.float32)
+        y_indices = tf.cast(indices[:, 1], tf.float32)
+        '''weighted average over x and y'''
+        w_avg_x = tf.math.scalar_mul(1/tf.math.reduce_sum(weights), tf.math.reduce_sum([tf.multiply(x_indices, weights)]))
+        w_avg_x = tf.math.scalar_mul(1/56, w_avg_x)
 
-        for index in indices:
-            x_arr.append(index[1])
-            y_arr.append(index[0])
-            w_i = values[index]
-            w_s += w_i
+        w_avg_y = tf.math.scalar_mul(1/tf.math.reduce_sum(weights), tf.math.reduce_sum([tf.multiply(y_indices, weights)]))
+        w_avg_y = tf.math.scalar_mul(1 / 56, w_avg_y)
 
-            x_s += (w_i * index[1])
-            y_s += (w_i * index[0])
-
-        if w_s > 0:
-            x_s = (x_s / w_s) * scalar
-            y_s = (y_s / w_s) * scalar
-            return x_s, y_s
-        else:
-            return 0, 0
+        return tf.stack([w_avg_x, w_avg_y])
 
     def __find_nth_biggest_avg(self, heatmap, points, scalar):
         indices = self.__top_n_indexes(heatmap, points)
