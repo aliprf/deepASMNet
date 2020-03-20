@@ -220,7 +220,6 @@ class TFRecordUtility:
         width = arr.shape[1]
         return [divmod(i, width) for i in idx]
 
-    @tf.function
     def __find_nth_biggest_avg_tensor(self, heatmap, points, scalar):
         weights, indices = self.__top_n_indexes_tensor(heatmap, points)
 
