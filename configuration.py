@@ -121,12 +121,13 @@ class W300Conf:
 
 class IbugConf:
 
-    images_dir = '/media/ali/data/train_before_heatmap/'
-    pts_lbl_dir = '/media/ali/data/train_before_heatmap/'
-    npy_lbl_dir = '/media/ali/data/train_before_heatmap_npy/'
+    # images_dir = '/media/ali/data/train_before_heatmap/'
+    # pts_lbl_dir = '/media/ali/data/train_before_heatmap/'
+    # npy_lbl_dir = '/media/ali/data/train_before_heatmap_npy/'
 
-    # images_dir = '/media/data2/alip/fala/train_before_heatmap/'
-    # lbls_dir = '/media/data2/alip/fala/train_before_heatmap_npy/'
+    images_dir = '/media/data2/alip/fala/train_before_heatmap/'
+    npy_lbl_dir = '/media/data2/alip/fala/train_before_heatmap_npy/'
+
 
     # images_dir = '/media/ali/extradata/facial_landmark_ds/from_ibug/train_set/train_before_heatmap/'
     # lbls_dir = '/media/ali/extradata/facial_landmark_ds/from_ibug/train_set/train_before_heatmap_npy/'
