@@ -226,10 +226,10 @@ class TFRecordUtility:
         x_indices = tf.cast(indices[:, 0], tf.float32)
         y_indices = tf.cast(indices[:, 1], tf.float32)
         '''weighted average over x and y'''
-        w_avg_x = tf.scalar_mul(1/tf.math.reduce_sum(weights), tf.math.reduce_sum([tf.multiply(x_indices, weights)]))
+        w_avg_x = tf.scalar_mul(1/tf.reduce_sum(weights), tf.reduce_sum([tf.multiply(x_indices, weights)]))
         w_avg_x = tf.scalar_mul(1/56, w_avg_x)
 
-        w_avg_y = tf.scalar_mul(1/tf.math.reduce_sum(weights), tf.math.reduce_sum([tf.multiply(y_indices, weights)]))
+        w_avg_y = tf.scalar_mul(1/tf.reduce_sum(weights), tf.reduce_sum([tf.multiply(y_indices, weights)]))
         w_avg_y = tf.scalar_mul(1 / 56, w_avg_y)
 
         return tf.stack([w_avg_x, w_avg_y])

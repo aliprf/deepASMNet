@@ -327,7 +327,7 @@ class Custom_losses:
         loss_array = np.array(loss_array)
         tensor_asm_loss = K.variable(loss_array)
 
-        # sum_loss_tensor = tf.math.add(tensor_mean_square_error, tensor_asm_loss)
+        # sum_loss_tensor = tf.add(tensor_mean_square_error, tensor_asm_loss)
         tensor_total_loss = tf.reduce_mean([tensor_mean_square_error, tensor_asm_loss], axis=0)
 
         # sum_loss = np.array(K.eval(tensor_asm_loss))
@@ -456,7 +456,7 @@ class Custom_losses:
         # print("eigenvectors -> " + str(eigenvectors.shape))  # (50,)
         # print("mean_tensor -> " + str(mean_tensor.shape))  # (50,)
 
-        tmp1 = tf.expand_dims(tf.math.subtract(predicted_tensor, mean_tensor), 2)
+        tmp1 = tf.expand_dims(tf.subtract(predicted_tensor, mean_tensor), 2)
         # print("tmp1 -> " + str(tmp1.shape))  # (50,)
 
         b_vector_tensor = tf.matmul(self._eigenvectors_T, tmp1)  # (50, 50, 1)
@@ -517,8 +517,8 @@ class Custom_losses:
         # print("mul_tensor -> " + str(mul_tensor.shape))  # (50, 50, 1)
         # print("add_arr -> " + str(add_arr.shape))  # (50, 50, 1)
 
-        tmp_mul = tf.math.multiply(b_vector_tensor, mul_tensor)
-        tmp_add = tf.math.add(tmp_mul, add_arr)
+        tmp_mul = tf.multiply(b_vector_tensor, mul_tensor)
+        tmp_add = tf.add(tmp_mul, add_arr)
 
         print("tmp_add -> " + str(tmp_add.shape))  # (50, 50, 1)
 
