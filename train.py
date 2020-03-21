@@ -146,7 +146,7 @@ class Train:
                             validation_steps=self.STEPS_PER_VALIDATION_EPOCH,
                             verbose=1, callbacks=callbacks_list,
                             use_multiprocessing=True,
-                            workers=16,
+                            workers=8,
                             max_queue_size=32
                             )
 
