@@ -14,7 +14,7 @@ if __name__ == '__main__':
 
     # tf_record_util.test_hm_accuracy()
 
-    # tf_record_util.generate_hm_and_save()
+    #tf_record_util.generate_hm_and_save()
 
     # tf_record_util.retrive_hm_and_test()
 
