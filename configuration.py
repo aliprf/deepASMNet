@@ -148,7 +148,7 @@ class IbugConf:
     origin_number_of_train_sample = 31989  # 95 % for train
     origin_number_of_evaluation_sample = 1683  # 5% for evaluation
 
-    augmentation_factor = 10  # create . image from 1
+    augmentation_factor = 3  # create . image from 1
     augmentation_factor_rotate = 20  # create . image from 1
 
     sum_of_train_samples = origin_number_of_train_sample * augmentation_factor
@@ -156,5 +156,12 @@ class IbugConf:
 
     img_path_prefix = '/media/ali/extradata/facial_landmark_ds/from_ibug/train_set/all/'
 
-    rotated_img_path_prefix = '/media/ali/extradata/facial_landmark_ds/from_ibug/train_set/train_rotated/'
+    # rotated_img_path_prefix = '/media/ali/extradata/facial_landmark_ds/from_ibug/train_set/train_rotated/'
+    rotated_img_path_prefix = '/media/ali/data/train_before_heatmap/'
+
     before_heatmap_img_path_prefix = '/media/ali/extradata/facial_landmark_ds/from_ibug/train_set/train_before_heatmap/'
+
+    ready_img_path_prefix = '/media/ali/data/ready_img/'
+
+    # ready_img_path_prefix = '/media/ali/extradata/facial_landmark_ds/from_ibug/train_set/ready_img/'
+    ready_hm_path_prefix = '/media/ali/extradata/facial_landmark_ds/from_ibug/train_set/ready_hm/'

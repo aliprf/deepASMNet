@@ -148,6 +148,119 @@ class TFRecordUtility:
             """ the output image is x y x y array"""
             return lbl_arr, img_arr, pose_arr, heatmap
 
+    def create_adv_att_img_hm(self):
+        png_file_arr = []
+        for file in os.listdir(IbugConf.rotated_img_path_prefix):
+            if file.endswith(".jpg") or file.endswith(".png"):
+                png_file_arr.append(os.path.join(IbugConf.rotated_img_path_prefix, file))
+
+        number_of_samples = IbugConf.origin_number_of_all_sample
+
+        image_utility = ImageUtility()
+
+        for i in range(number_of_samples):
+            img_file = png_file_arr[i]
+            pts_file = png_file_arr[i][:-3] + "pts"
+
+            if not os.path.exists(pts_file):
+                continue
+
+            points_arr = []
+            with open(pts_file) as fp:
+                line = fp.readline()
+                cnt = 1
+                while line:
+                    if 3 < cnt < 72:
+                        x_y_pnt = line.strip()
+                        x = float(x_y_pnt.split(" ")[0])
+                        y = float(x_y_pnt.split(" ")[1])
+                        points_arr.append(x)
+                        points_arr.append(y)
+                    line = fp.readline()
+                    cnt += 1
+
+            img = Image.open(img_file)
+
+            '''normalize image'''
+            resized_img = np.array(img) / 255.0
+
+            '''crop data: we add a small margin to the images'''
+            landmark_arr_xy, landmark_arr_x, landmark_arr_y = image_utility.create_landmarks(landmarks=points_arr,
+                                                                                             scale_factor_x=1,
+                                                                                             scale_factor_y=1)
+
+            '''augment the images, then normalize the landmarks based on the hyperface method'''
+            for k in range(IbugConf.augmentation_factor):
+                '''save the origin image as well'''
+                if k == 0:
+                    landmark_arr_flat_aug = landmark_arr_xy
+                    img_aug = resized_img
+
+                else:
+                    '''save the augmented images'''
+                    if k % 2 == 0:
+                        landmark_arr_flat_aug, img_aug = image_utility.random_augmentation(landmark_arr_xy, resized_img)
+                    else:
+                        landmark_arr_flat_aug, img_aug = image_utility.augment(resized_img, landmark_arr_xy)
+
+                '''test '''
+                # imgpr.print_image_arr(k, img_aug, [], [])
+
+                '''again resize image to 224*224 after augmentation'''
+                resized_img_new = resize(img_aug,
+                                         (InputDataSize.image_input_size, InputDataSize.image_input_size, 3)
+                                         , anti_aliasing=True)
+
+                # imgpr.print_image_arr(k, resized_img_new, [], [])
+
+                dims = img_aug.shape
+                height = dims[0]
+                width = dims[1]
+                scale_factor_y = InputDataSize.image_input_size / height
+                scale_factor_x = InputDataSize.image_input_size / width
+
+                '''retrieve and rescale landmarks in after augmentation'''
+                landmark_arr_flat, landmark_arr_x, landmark_arr_y = \
+                    image_utility.create_landmarks(landmarks=landmark_arr_flat_aug,
+                                                   scale_factor_x=scale_factor_x,
+                                                   scale_factor_y=scale_factor_y)
+
+                # imgpr.print_image_arr(k, resized_img_new, landmark_arr_x, landmark_arr_y)
+
+                '''normalize landmarks based on hyperface method'''
+                width = len(resized_img_new[0])
+                height = len(resized_img_new[1])
+                x_center = width / 2
+                y_center = height / 2
+                landmark_arr_flat_normalized = []
+                for p in range(0, len(landmark_arr_flat), 2):
+                    landmark_arr_flat_normalized.append((x_center - landmark_arr_flat[p]) / width)
+                    landmark_arr_flat_normalized.append((y_center - landmark_arr_flat[p + 1]) / height)
+
+                '''test print after augmentation'''
+                # landmark_arr_flat_n, landmark_arr_x_n, landmark_arr_y_n = image_utility.\
+                #     create_landmarks_from_normalized(landmark_arr_flat_normalized, 224, 224, 112, 112)
+                # imgpr.print_image_arr((i*100)+(k+1), resized_img_new, landmark_arr_x_n, landmark_arr_y_n)
+
+                '''save image'''
+                im = Image.fromarray((resized_img_new * 255).astype(np.uint8))
+                file_name = IbugConf.ready_img_path_prefix + str(10000 * (i + 1) + k)
+                im.save(str(file_name) + '.jpg')
+                '''save points'''
+                pnt_file = open(str(file_name) + ".pts", "w")
+                pre_txt = ["version: 1 \n", "n_points: 68 \n", "{ \n"]
+                pnt_file.writelines(pre_txt)
+                points_txt = ""
+                for l in range(0, len(landmark_arr_xy), 2):
+                    points_txt += str(landmark_arr_xy[l]) + " " + str(landmark_arr_xy[l + 1]) + "\n"
+
+                pnt_file.writelines(points_txt)
+                pnt_file.write("} \n")
+                pnt_file.close()
+
+        return number_of_samples
+
+
     def retrieve_tf_record_test_set(self, tfrecord_filename, number_of_records, only_label=True):
         with tf.Session() as sess:
             filename_queue = tf.train.string_input_producer([tfrecord_filename])
@@ -894,18 +1007,6 @@ class TFRecordUtility:
 
                 # imgpr.print_image_arr(k, resized_img_new, landmark_arr_x, landmark_arr_y)
 
-                '''calculate pose'''
-                resized_img_new_cp = np.array(resized_img_new)
-                # yaw_predicted, pitch_predicted, roll_predicted = detect.detect(resized_img_new_cp, isFile=False,show=False)
-                '''normalize pose -1 -> +1 '''
-                # min_degree = -65
-                # max_degree = 65
-                # yaw_normalized = 2 * ((yaw_predicted - min_degree) / (max_degree - min_degree)) - 1
-                # pitch_normalized = 2 * ((pitch_predicted - min_degree) / (max_degree - min_degree)) - 1
-                # roll_normalized = 2 * ((roll_predicted - min_degree) / (max_degree - min_degree)) - 1
-                # pose_array = np.array([yaw_normalized, pitch_normalized, roll_normalized])
-                pose_array = np.array([1, 1, 1])
-
                 '''normalize landmarks based on hyperface method'''
                 width = len(resized_img_new[0])
                 height = len(resized_img_new[1])
@@ -916,54 +1017,15 @@ class TFRecordUtility:
                     landmark_arr_flat_normalized.append((x_center - landmark_arr_flat[p]) / width)
                     landmark_arr_flat_normalized.append((y_center - landmark_arr_flat[p + 1]) / height)
 
-                '''creating landmarks for partial tasks'''
-                landmark_face = landmark_arr_flat_normalized[0:54]  # landmark_face_len = 54
-                landmark_nose = landmark_arr_flat_normalized[54:72]  # landmark_nose_len = 18
-                landmark_eys = landmark_arr_flat_normalized[72:96]  # landmark_eys_len = 24
-                landmark_mouth = landmark_arr_flat_normalized[96:136]  # landmark_mouth_len = 40
-
                 '''test print after augmentation'''
                 # landmark_arr_flat_n, landmark_arr_x_n, landmark_arr_y_n = image_utility.\
                 #     create_landmarks_from_normalized(landmark_arr_flat_normalized, 224, 224, 112, 112)
                 # imgpr.print_image_arr((i*100)+(k+1), resized_img_new, landmark_arr_x_n, landmark_arr_y_n)
 
-                '''create tf_record'''
-                writable_img = np.reshape(resized_img_new,
-                                          [InputDataSize.image_input_size * InputDataSize.image_input_size * 3])
-
-                heatmap_landmark = self.__generate_hm(56, 56, landmark_arr_flat_normalized, s=3.0)
-                writable_heatmap = np.reshape(heatmap_landmark, [56 * 56 * 68])
-
-                heatmap_landmark_all = np.sum(self.__generate_hm(56, 56, landmark_arr_flat_normalized, s=0.2), axis=2)
-                writable_heatmap_all = np.reshape(heatmap_landmark_all, [56 * 56])
+                heatmap_landmark = self.generate_hm(56, 56, landmark_arr_flat_normalized, s=1.0)
 
                 # imgpr.print_image_arr_heat((i + 1) * (k + 1), heatmap_landmark)
                 # imgpr.print_image_arr((i * 100) + (k + 1), heatmap_landmark_all, [], [])
-
-                landmark_arr_flat_normalized = np.array(landmark_arr_flat_normalized)
-                feature = {'landmarks': self.__float_feature(landmark_arr_flat_normalized),
-                           # 'face': self.__float_feature(landmark_face),
-                           # 'eyes': self.__float_feature(landmark_eys),
-                           # 'nose': self.__float_feature(landmark_nose),
-                           # 'mouth': self.__float_feature(landmark_mouth),
-                           # 'pose': self.__float_feature(pose_array),
-                           'heatmap': self.__float_feature(writable_heatmap),
-                           # 'heatmap_all': self.__float_feature(writable_heatmap_all),
-                           'image_raw': self.__float_feature(writable_img),
-                           }
-                example = tf.train.Example(features=tf.train.Features(feature=feature))
-
-                if i <= number_of_train:
-                    writer_train.write(example.SerializeToString())
-                    msg = 'train --> \033[92m' + " sample number " + str(i + 1) + \
-                          " created." + '\033[94m' + "remains " + str(number_of_samples - i - 1)
-                    sys.stdout.write('\r' + msg)
-
-                else:
-                    writer_evaluate.write(example.SerializeToString())
-                    msg = 'eval --> \033[92m' + " sample number " + str(i + 1) + \
-                          " created." + '\033[94m' + "remains " + str(number_of_samples - i - 1)
-                    sys.stdout.write('\r' + msg)
 
                 '''save image'''
                 im = Image.fromarray((resized_img_new * 255).astype(np.uint8))
