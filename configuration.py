@@ -156,8 +156,8 @@ class IbugConf:
 
     img_path_prefix = '/media/ali/extradata/facial_landmark_ds/from_ibug/train_set/all/'
 
-    # rotated_img_path_prefix = '/media/ali/extradata/facial_landmark_ds/from_ibug/train_set/train_rotated/'
-    rotated_img_path_prefix = '/media/ali/data/train_before_heatmap/'
+    rotated_img_path_prefix = '/media/data2/alip/fala/train_rotated/'
+    # rotated_img_path_prefix = '/media/ali/data/train_before_heatmap/'
 
     before_heatmap_img_path_prefix = '/media/ali/extradata/facial_landmark_ds/from_ibug/train_set/train_before_heatmap/'
 
