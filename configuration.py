@@ -161,7 +161,7 @@ class IbugConf:
 
     before_heatmap_img_path_prefix = '/media/ali/extradata/facial_landmark_ds/from_ibug/train_set/train_before_heatmap/'
 
-    ready_img_path_prefix = '/media/ali/data/ready_img/'
+    # ready_img_path_prefix = '/media/ali/data/ready_img/'
 
-    # ready_img_path_prefix = '/media/ali/extradata/facial_landmark_ds/from_ibug/train_set/ready_img/'
-    ready_hm_path_prefix = '/media/ali/extradata/facial_landmark_ds/from_ibug/train_set/ready_hm/'
+    ready_img_path_prefix = '/media/data2/alip/fala/ready_img_pts/'
+    ready_hm_path_prefix = '/media/data2/alip/fala/ready_hm_orig/'
