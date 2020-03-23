@@ -328,6 +328,7 @@ class ImageUtility:
         landmark_arr_x = []
         landmark_arr_y = []
         for j in range(0, len(landmarks), 2):
+
             x = float(landmarks[j]) * scale_factor_x
             y = float(landmarks[j + 1]) * scale_factor_y
 
