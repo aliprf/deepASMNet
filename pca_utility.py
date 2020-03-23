@@ -1,17 +1,133 @@
 from configuration import DatasetName, DatasetType,\
     AffectnetConf, IbugConf, W300Conf, InputDataSize, LearningConfig
-from tf_record_utility import TFRecordUtility
-
+from image_utility import ImageUtility
 from sklearn.decomposition import PCA, IncrementalPCA
 from sklearn.decomposition import TruncatedSVD
 import numpy as np
 import pickle
+import os
+from tqdm import tqdm
+from numpy import save, load
+import math
+from PIL import Image
 
 
 class PCAUtility:
-    __eigenvalues_prefix = "_eigenvalues_"
-    __eigenvectors_prefix = "_eigenvectors_"
-    __meanvector_prefix = "_meanvector_"
+    _eigenvalues_prefix = "_eigenvalues_"
+    _eigenvectors_prefix = "_eigenvectors_"
+    _meanvector_prefix = "_meanvector_"
+
+    def create_pca_from_points(self, dataset_name, pca_postfix):
+        lbl_arr = []
+        path = None
+        if dataset_name == DatasetName.ibug:
+            path = IbugConf.rotated_img_path_prefix  # rotated is ok, since advs_aug is the same as rotated
+
+        for file in tqdm(os.listdir(path)):
+            if file.endswith(".pts"):
+                pts_file = os.path.join(path, file)
+
+                points_arr = []
+                with open(pts_file) as fp:
+                    line = fp.readline()
+                    cnt = 1
+                    while line:
+                        if 3 < cnt < 72:
+                            x_y_pnt = line.strip()
+                            x = float(x_y_pnt.split(" ")[0])
+                            y = float(x_y_pnt.split(" ")[1])
+                            points_arr.append(x)
+                            points_arr.append(y)
+                        line = fp.readline()
+                        cnt += 1
+                lbl_arr.append(points_arr)
+
+        lbl_arr = np.array(lbl_arr)
+
+        print('PCA calculation started')
+
+        ''' no normalization is needed, since we want to generate hm'''
+        reduced_lbl_arr, eigenvalues, eigenvectors = self.__func_PCA(lbl_arr, pca_postfix)
+        mean_lbl_arr = np.mean(lbl_arr, axis=0)
+        eigenvectors = eigenvectors.T
+        #
+        # self.__save_obj(eigenvalues, dataset_name + self.__eigenvalues_prefix + str(pca_postfix))
+        # self.__save_obj(eigenvectors, dataset_name + self.__eigenvectors_prefix + str(pca_postfix))
+        # self.__save_obj(mean_lbl_arr, dataset_name + self.__meanvector_prefix + str(pca_postfix))
+        #
+        save('pca_obj/' + dataset_name + self._eigenvalues_prefix + str(pca_postfix), eigenvalues)
+        save('pca_obj/' + dataset_name + self._eigenvectors_prefix + str(pca_postfix), eigenvectors)
+        save('pca_obj/' + dataset_name + self._meanvector_prefix + str(pca_postfix), mean_lbl_arr)
+
+    def test_pca_validity(self, dataset_name, pca_postfix):
+        image_utility = ImageUtility()
+
+        eigenvalues = load('pca_obj/' + dataset_name + self._eigenvalues_prefix + str(pca_postfix)+".npy")
+        eigenvectors = load('pca_obj/' + dataset_name + self._eigenvectors_prefix + str(pca_postfix)+".npy")
+        meanvector = load('pca_obj/' + dataset_name + self._meanvector_prefix + str(pca_postfix)+".npy")
+
+        '''load data: '''
+        lbl_arr = []
+        img_arr = []
+        path = None
+        if dataset_name == DatasetName.ibug:
+            path = IbugConf.rotated_img_path_prefix  # rotated is ok, since advs_aug is the same as rotated
+
+        for file in tqdm(os.listdir(path)):
+            if file.endswith(".pts"):
+                pts_file = os.path.join(path, file)
+                img_file = pts_file[:-3] + "jpg"
+                if not os.path.exists(img_file):
+                    continue
+
+                points_arr = []
+                with open(pts_file) as fp:
+                    line = fp.readline()
+                    cnt = 1
+                    while line:
+                        if 3 < cnt < 72:
+                            x_y_pnt = line.strip()
+                            x = float(x_y_pnt.split(" ")[0])
+                            y = float(x_y_pnt.split(" ")[1])
+                            points_arr.append(x)
+                            points_arr.append(y)
+                        line = fp.readline()
+                        cnt += 1
+                lbl_arr.append(points_arr)
+                img_arr.append(Image.open(img_file))
+
+        for i in range(20):
+            b_vector_p = self.calculate_b_vector(lbl_arr[i], True, eigenvalues, eigenvectors, meanvector)
+            lbl_new = meanvector + np.dot(eigenvectors, b_vector_p)
+            lbl_new = lbl_new.tolist()
+
+            labels_true_transformed, landmark_arr_x_t, landmark_arr_y_t = image_utility. \
+                create_landmarks(lbl_arr[i], 1, 1)
+
+            labels_true_transformed_pca, landmark_arr_x_pca, landmark_arr_y_pca = image_utility. \
+                create_landmarks(lbl_new, 1, 1)
+
+            image_utility.print_image_arr(i, img_arr[i], landmark_arr_x_t, landmark_arr_y_t)
+            image_utility.print_image_arr(i * 1000, img_arr[i], landmark_arr_x_pca, landmark_arr_y_pca)
+
+    def calculate_b_vector(self, predicted_vector, correction, eigenvalues, eigenvectors, meanvector):
+        tmp1 = predicted_vector - meanvector
+        b_vector = np.dot(eigenvectors.T, tmp1)
+
+        # put b in -3lambda =>
+        if correction:
+            i = 0
+            for b_item in b_vector:
+                lambda_i_sqr = 3 * math.sqrt(eigenvalues[i])
+
+                if b_item > 0:
+                    b_item = min(b_item, lambda_i_sqr)
+                else:
+                    b_item = max(b_item, -1 * lambda_i_sqr)
+                b_vector[i] = b_item
+                i += 1
+
+        return b_vector
 
     def create_pca(self, dataset_name, pca_postfix):
         tf_record_util = TFRecordUtility()
