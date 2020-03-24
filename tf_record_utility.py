@@ -444,9 +444,11 @@ class TFRecordUtility:
 
     def generate_hm_and_save(self, dataset_name, pca_percentage=100):
         pca_util = PCAUtility()
-        eigenvalues = load('pca_obj/' + dataset_name + pca_util._eigenvalues_prefix + str(pca_percentage) + ".npy")
-        eigenvectors = load('pca_obj/' + dataset_name + pca_util._eigenvectors_prefix + str(pca_percentage) + ".npy")
-        meanvector = load('pca_obj/' + dataset_name + pca_util._meanvector_prefix + str(pca_percentage) + ".npy")
+
+        if pca_percentage != 100:
+            eigenvalues = load('pca_obj/' + dataset_name + pca_util._eigenvalues_prefix + str(pca_percentage) + ".npy")
+            eigenvectors = load('pca_obj/' + dataset_name + pca_util._eigenvectors_prefix + str(pca_percentage) + ".npy")
+            meanvector = load('pca_obj/' + dataset_name + pca_util._meanvector_prefix + str(pca_percentage) + ".npy")
 
         images_dir = IbugConf.train_images_dir
         npy_dir = IbugConf.train_hm_dir
