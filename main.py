@@ -16,10 +16,11 @@ if __name__ == '__main__':
 
     # tf_record_util.create_adv_att_img_hm()
     pca_utility.create_pca_from_points(DatasetName.ibug, 85)
-    tf_record_util.generate_hm_and_save(dataset_name=DatasetName.ibug, pca_percentage=85)
     pca_utility.create_pca_from_points(DatasetName.ibug, 90)
-    tf_record_util.generate_hm_and_save(dataset_name=DatasetName.ibug, pca_percentage=90)
     pca_utility.create_pca_from_points(DatasetName.ibug, 97)
+    tf_record_util.generate_hm_and_save(dataset_name=DatasetName.ibug)
+    tf_record_util.generate_hm_and_save(dataset_name=DatasetName.ibug, pca_percentage=85)
+    tf_record_util.generate_hm_and_save(dataset_name=DatasetName.ibug, pca_percentage=90)
     tf_record_util.generate_hm_and_save(dataset_name=DatasetName.ibug, pca_percentage=97)
 
     # pca_utility.test_pca_validity(DatasetName.ibug, 90)

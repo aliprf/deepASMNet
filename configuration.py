@@ -121,16 +121,12 @@ class W300Conf:
 
 class IbugConf:
 
-    # images_dir = '/media/ali/data/train_before_heatmap/'
-    # pts_lbl_dir = '/media/ali/data/train_before_heatmap/'
-    # npy_lbl_dir = '/media/ali/data/train_before_heatmap_npy/'
-
     '''server_config'''
-    train_images_dir = '/media/data2/alip/fala/train_images_dir/'
-    train_npy_lbl_dir = '/media/data2/alip/fala/train_npy_lbl_dir/'
-    train_npy_lbl_dir_85 = '/media/data2/alip/fala/train_npy_lbl_dir_85/'
-    train_npy_lbl_dir_90 = '/media/data2/alip/fala/train_npy_lbl_dir_90/'
-    train_npy_lbl_dir_97 = '/media/data2/alip/fala/train_npy_lbl_dir_97/'
+    train_images_dir = '/media/data2/alip/fala/train_images_pts_dir/'
+    train_hm_dir = '/media/data2/alip/fala/train_hm_dir/'
+    train_hm_dir_85 = '/media/data2/alip/fala/train_hm_dir_85/'
+    train_hm_dir_90 = '/media/data2/alip/fala/train_hm_dir_90/'
+    train_hm_dir_97 = '/media/data2/alip/fala/train_hm_dir_97/'
 
     '''local'''
     # train_images_dir = '/media/ali/data/train_before_heatmap/'
@@ -171,8 +167,3 @@ class IbugConf:
     # rotated_img_path_prefix = '/media/ali/data/train_before_heatmap/'
 
     before_heatmap_img_path_prefix = '/media/ali/extradata/facial_landmark_ds/from_ibug/train_set/train_before_heatmap/'
-
-    ready_img_path_prefix = '/media/ali/data/ready_img/'
-
-    # ready_img_path_prefix = '/media/data2/alip/fala/ready_img_pts/'
-    ready_hm_path_prefix = '/media/data2/alip/fala/ready_hm_orig/'
