@@ -449,14 +449,14 @@ class TFRecordUtility:
         meanvector = load('pca_obj/' + dataset_name + pca_util._meanvector_prefix + str(pca_percentage) + ".npy")
 
         images_dir = IbugConf.train_images_dir
-        npy_dir = IbugConf.train_npy_lbl_dir
+        npy_dir = IbugConf.train_hm_dir
 
         if pca_percentage == 85:
-            npy_dir = IbugConf.train_npy_lbl_dir_85
+            npy_dir = IbugConf.train_hm_dir_85
         if pca_percentage == 90:
-            npy_dir = IbugConf.train_npy_lbl_dir_90
+            npy_dir = IbugConf.train_hm_dir_90
         if pca_percentage == 97:
-            npy_dir = IbugConf.train_npy_lbl_dir_97
+            npy_dir = IbugConf.train_hm_dir_97
 
         counter = 1
         for file in tqdm(os.listdir(images_dir)):
