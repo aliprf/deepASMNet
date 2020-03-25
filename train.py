@@ -162,7 +162,8 @@ class Train:
         return tensors
 
     def _generate_loss_weights(self):
-        wights = [1.5, 0.75, 0.50]
+        wights = [1.5]
+        # wights = [1.5, 0.75, 0.50]
         # wights = [1.5, 0.75, 0.50, 0.25]
         # wights = []
         # for i in range(self.num_output_layers):
