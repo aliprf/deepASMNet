@@ -59,7 +59,6 @@ class Train:
         else:
             self.train_fit_gen()
 
-
     def train_fit_gen(self):
         """train_fit_gen"""
 
@@ -163,9 +162,10 @@ class Train:
         return tensors
 
     def _generate_loss_weights(self):
-        wights = []
-        for i in range(self.num_output_layers):
-            wights.append(1)
+        wights = [1.5, 0.75, 0.50, 0.25]
+        # wights = []
+        # for i in range(self.num_output_layers):
+        #     wights.append(1)
         return wights
 
     def _get_model(self, train_images):
