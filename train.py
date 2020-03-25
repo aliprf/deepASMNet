@@ -99,8 +99,8 @@ class Train:
                             steps_per_epoch=self.STEPS_PER_EPOCH,
                             callbacks=callbacks_list,
                             use_multiprocessing=True,
-                            workers=32,
-                            max_queue_size=64
+                            workers=3,
+                            max_queue_size=1
                             )
 
     def train_fit(self):
