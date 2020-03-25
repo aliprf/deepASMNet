@@ -160,7 +160,7 @@ class CNNModel:
         out_heatmap = Conv2D(LearningConfig.landmark_len // 2, kernel_size=1, padding='same', name='out_heatmap')(x)
 
         revised_model = Model(inp, [
-            out_heatmap#, block_3_out, block_2_out, block_1_out
+            out_heatmap, block_3_out, block_2_out#, block_1_out
         ])
 
         revised_model.summary()
