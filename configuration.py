@@ -130,10 +130,10 @@ class IbugConf:
 
     '''local'''
     # train_images_dir = '/media/ali/data/train_before_heatmap/'
-    # train_npy_lbl_dir = '/media/ali/data/train_before_heatmap_npy/'
-    # train_npy_lbl_dir_85 = '/media/ali/data/train_before_heatmap_npy_85/'
-    # train_npy_lbl_dir_90 = '/media/ali/data/train_before_heatmap_npy_90/'
-    # train_npy_lbl_dir_97 = '/media/ali/data/train_before_heatmap_npy_97/'
+    # train_hm_dir = '/media/ali/data/train_before_heatmap_npy/'
+    # train_hm_dir_85 = '/media/ali/data/train_before_heatmap_npy_85/'
+    # train_hm_dir_90 = '/media/ali/data/train_before_heatmap_npy_90/'
+    # train_hm_dir_97 = '/media/ali/data/train_before_heatmap_npy_97/'
 
 
     # images_dir = '/media/ali/extradata/facial_landmark_ds/from_ibug/train_set/train_before_heatmap/'

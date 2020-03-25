@@ -87,7 +87,6 @@ class CNNModel:
 
         return revised_model
 
-
     def mn_asm_v1(self, tensor):
         # block_13_project_BN block_10_project_BN block_6_project_BN
         mobilenet_model = mobilenet_v2.MobileNetV2(input_shape=None,
@@ -161,7 +160,7 @@ class CNNModel:
         out_heatmap = Conv2D(LearningConfig.landmark_len // 2, kernel_size=1, padding='same', name='out_heatmap')(x)
 
         revised_model = Model(inp, [
-            block_1_out, block_2_out, block_3_out, out_heatmap
+            out_heatmap, block_3_out, block_2_out, block_1_out
         ])
 
         revised_model.summary()

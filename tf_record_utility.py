@@ -427,17 +427,19 @@ class TFRecordUtility:
     # def retrive_hm_and_test(self):
 
     def create_image_and_labels_name(self):
-        images_dir = IbugConf.images_dir
-        lbls_dir = IbugConf.npy_lbl_dir
+        images_dir = IbugConf.train_images_dir
+        lbls_dir = IbugConf.train_hm_dir
 
         img_filenames = []
         lbls_filenames = []
 
         for file in os.listdir(images_dir):
             if file.endswith(".jpg") or file.endswith(".png"):
-                lbl_file = lbls_dir + str(file)[:-3] + "npy"
-                if os.path.exists(lbl_file):
-                    img_filenames.append(images_dir + str(file))
+                # lbl_file = lbls_dir + str(file)[:-3] + "npy"  # filename and address
+                lbl_file = str(file)[:-3] + "npy"  # just name
+                if os.path.exists(lbls_dir + lbl_file):
+                    # img_filenames.append(images_dir + str(file)) # filename and address
+                    img_filenames.append(str(file))
                     lbls_filenames.append(lbl_file)
 
         return np.array(img_filenames), np.array(lbls_filenames)
