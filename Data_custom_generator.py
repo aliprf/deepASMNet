@@ -32,12 +32,12 @@ class Custom_Heatmap_Generator(keras.utils.Sequence):
         batch_y = self.label_filenames[idx * self.batch_size:(idx + 1) * self.batch_size]
 
         img_batch = np.array([imread(img_path + file_name) for file_name in batch_x])
-        # lbl_batch_85 = np.array([load(tr_path_85 + file_name) for file_name in batch_y])
-        # lbl_batch_90 = np.array([load(tr_path_90 + file_name) for file_name in batch_y])
-        # lbl_batch_97 = np.array([load(tr_path_97 + file_name) for file_name in batch_y])
+        lbl_batch_85 = np.array([load(tr_path_85 + file_name) for file_name in batch_y])
+        lbl_batch_90 = np.array([load(tr_path_90 + file_name) for file_name in batch_y])
+        lbl_batch_97 = np.array([load(tr_path_97 + file_name) for file_name in batch_y])
         lbl_batch = np.array([load(tr_path + file_name) for file_name in batch_y])
 
-        lbl_out_array = [lbl_batch]#, lbl_batch_97, lbl_batch_90]#, lbl_batch_85]
+        lbl_out_array = [lbl_batch, lbl_batch_97, lbl_batch_90]#, lbl_batch_85]
         # lbl_out_array = []
         # for i in range(self.n_outputs):
         #     lbl_out_array.append(lbl_batch)
