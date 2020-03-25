@@ -33,7 +33,7 @@ import scipy.io as sio
 
 class CNNModel:
 
-    def hour_glass_network(self, num_classes=68, num_stacks=4, num_filters=512,
+    def hour_glass_network(self, num_classes=68, num_stacks=4, num_filters=256,
                            in_shape=(224, 224), out_shape=(56, 56)):
         hg_net = HourglassNet(num_classes=num_classes, num_stacks=num_stacks,
                               num_filters=num_filters,
@@ -160,7 +160,7 @@ class CNNModel:
         out_heatmap = Conv2D(LearningConfig.landmark_len // 2, kernel_size=1, padding='same', name='out_heatmap')(x)
 
         revised_model = Model(inp, [
-            out_heatmap, block_3_out, block_2_out, block_1_out
+            block_1_out, block_2_out, block_3_out, out_heatmap
         ])
 
         revised_model.summary()
