@@ -51,7 +51,7 @@ if __name__ == '__main__':
                     custom_loss=True,
                     arch='mn_asm_1',
                     inception_mode=True,
-                    num_output_layers=2,
+                    num_output_layers=1,
                     weight=None)
 
 
