@@ -49,9 +49,9 @@ if __name__ == '__main__':
     trainer = Train(use_tf_record=False,
                     dataset_name=DatasetName.ibug,
                     custom_loss=True,
-                    arch='mn_asm_0',
+                    arch='mn_asm_1',
                     inception_mode=True,
-                    num_output_layers=1,
+                    num_output_layers=3,
                     weight=None)
 
 

@@ -145,7 +145,7 @@ class Train:
                             validation_steps=self.STEPS_PER_VALIDATION_EPOCH,
                             verbose=1, callbacks=callbacks_list,
                             use_multiprocessing=True,
-                            workers=8,
+                            workers=16,
                             max_queue_size=32
                             )
 
@@ -162,7 +162,7 @@ class Train:
         return tensors
 
     def _generate_loss_weights(self):
-        wights = [1.5]#, 0.75]
+        wights = [1.5, 0.75, 0.50]
         # wights = [1.5, 0.75, 0.50, 0.25]
         # wights = []
         # for i in range(self.num_output_layers):
