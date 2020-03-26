@@ -1,0 +1,12 @@
+bottleneck
+keras
+tensorflow==1.15.2
+numpy
+matplotlib
+opencv-python
+opencv-contrib-python
+scipy
+scikit-learn
+scikit-image
+Pillow
+tqdm
