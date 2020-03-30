@@ -100,7 +100,7 @@ class Train:
                             callbacks=callbacks_list,
                             use_multiprocessing=True,
                             workers=16,
-                            max_queue_size=32
+                            max_queue_size=64
                             )
 
     def train_fit(self):
