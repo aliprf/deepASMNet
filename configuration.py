@@ -55,8 +55,8 @@ class LearningConfig:
     MAX_LR = 1e-2
     STEP_SIZE = 10
 
-    batch_size = 20
-    steps_per_validation_epochs = 5
+    batch_size = 5
+    steps_per_validation_epochs =git  5
     epochs = 200
     landmark_len = 136
     point_len = 68
