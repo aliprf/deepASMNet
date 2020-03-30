@@ -8,6 +8,7 @@ from Data_custom_generator import Custom_Heatmap_Generator
 import tensorflow as tf
 import keras
 
+
 print(tf.__version__)
 print(keras.__version__)
 
@@ -99,8 +100,8 @@ class Train:
                             steps_per_epoch=self.STEPS_PER_EPOCH,
                             callbacks=callbacks_list,
                             use_multiprocessing=True,
-                            workers=16,
-                            max_queue_size=32
+                            workers=8,
+                            max_queue_size=16
                             )
 
     def train_fit(self):
