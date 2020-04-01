@@ -4,7 +4,7 @@ from tf_record_utility import TFRecordUtility
 from clr_callback import CyclicLR
 from cnn_model import CNNModel
 from custom_Losses import Custom_losses
-from Data_custom_generator import Custom_Heatmap_Generator
+from Data_custom_generator import CustomHeatmapGenerator
 import tensorflow as tf
 import keras
 
@@ -72,10 +72,10 @@ class Train:
         '''create train, validation, test data iterator'''
         x_train_filenames, x_val_filenames, y_train_filenames, y_val_filenames = self._create_generators()
 
-        my_training_batch_generator = Custom_Heatmap_Generator(x_train_filenames, y_train_filenames,
+        my_training_batch_generator = CustomHeatmapGenerator(x_train_filenames, y_train_filenames,
+                                                             self.BATCH_SIZE, self.num_output_layers)
+        my_validation_batch_generator = CustomHeatmapGenerator(x_val_filenames, y_val_filenames,
                                                                self.BATCH_SIZE, self.num_output_layers)
-        my_validation_batch_generator = Custom_Heatmap_Generator(x_val_filenames, y_val_filenames,
-                                                                 self.BATCH_SIZE, self.num_output_layers)
 
         '''creating model'''
         model = self._get_model(None)
@@ -87,7 +87,7 @@ class Train:
         '''compiling model'''
         model.compile(loss=self._generate_loss(),
                       optimizer=optimizer,
-                      # metrics=['mse'],
+                      metrics=['mse', 'mae'],
                       loss_weights=self._generate_loss_weights()
                       )
 
@@ -164,7 +164,7 @@ class Train:
 
     def _generate_loss_weights(self):
 
-        wights = [1.5, 0.75, 0.50, 0.25]
+        wights = [1, 1, 1]
         # wights = []
         # for i in range(self.num_output_layers):
         #     wights.append(1)
@@ -172,6 +172,8 @@ class Train:
 
     def _get_model(self, train_images):
         cnn = CNNModel()
+        if self.arch == 'mb_mn':
+            model = cnn.create_multi_branch_mn(inp_shape=[224, 224, 3], num_branches=self.num_output_layers)
         if self.arch == 'mn_asm_0':
             model = cnn.mn_asm_v0(train_images)
         if self.arch == 'mn_asm_1':

@@ -5,7 +5,7 @@ from pca_utility import PCAUtility
 from image_utility import ImageUtility
 import numpy as np
 from train import Train
-
+from Train_Gan import TrainGan
 if __name__ == '__main__':
     tf_record_util = TFRecordUtility()
     pca_utility = PCAUtility()
@@ -46,12 +46,15 @@ if __name__ == '__main__':
     # cnn_model.train_new(dataset_name=DatasetName.ibug, custom_loss=False, arch='mn_r', inception_mode=True) # mn, mn_r
     # cnn_model.test_new(arch='mn_r') # mn, mn_r
 
+    # trg = TrainGan()
+    # trg.create_seq_model()
+
     trainer = Train(use_tf_record=False,
                     dataset_name=DatasetName.ibug,
-                    custom_loss=True,
-                    arch='hg',
-                    inception_mode=True,
-                    num_output_layers=4,
+                    custom_loss=False,
+                    arch='mb_mn',
+                    inception_mode=False,
+                    num_output_layers=3,
                     weight=None)
 
 

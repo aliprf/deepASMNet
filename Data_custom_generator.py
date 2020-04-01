@@ -4,12 +4,13 @@ import numpy as np
 import tensorflow as tf
 import keras
 from skimage.transform import resize
-from tf_record_utility import  TFRecordUtility
+from tf_record_utility import TFRecordUtility
 from configuration import DatasetName, DatasetType, \
     AffectnetConf, IbugConf, W300Conf, InputDataSize, LearningConfig
 from numpy import save, load, asarray
 
-class Custom_Heatmap_Generator(keras.utils.Sequence):
+
+class CustomHeatmapGenerator(keras.utils.Sequence):
 
     def __init__(self, image_filenames, label_filenames, batch_size, n_outputs):
         self.image_filenames = image_filenames
@@ -37,7 +38,10 @@ class Custom_Heatmap_Generator(keras.utils.Sequence):
         lbl_batch_97 = np.array([load(tr_path_97 + file_name) for file_name in batch_y])
         lbl_batch = np.array([load(tr_path + file_name) for file_name in batch_y])
 
-        lbl_out_array = [lbl_batch_85, lbl_batch_90, lbl_batch_97, lbl_batch]
+        lbl_out_array = [lbl_batch_85, lbl_batch_90, lbl_batch_97]
+        # lbl_out_array = [lbl_batch_85, lbl_batch_90, lbl_batch_97, lbl_batch]
+        # lbl_out_array = [lbl_batch]
+
         # lbl_out_array = []
         # for i in range(self.n_outputs):
         #     lbl_out_array.append(lbl_batch)

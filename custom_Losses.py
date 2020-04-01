@@ -4,7 +4,7 @@ from tf_record_utility import TFRecordUtility
 from cnn_model import CNNModel
 from pca_utility import PCAUtility
 from image_utility import ImageUtility
-from Data_custom_generator import Custom_Heatmap_Generator
+from Data_custom_generator import CustomHeatmapGenerator
 import tensorflow as tf
 import keras
 
@@ -23,6 +23,14 @@ import img_printer as imgpr
 
 
 class Custom_losses:
+
+    def asm_assisted_loss(self, hmp_85, hmp_90, hmp_95):
+        def loss(y_true, y_pred):
+            return K.mean(K.square(y_pred - y_true))
+
+        # Return a function
+        return loss
+
     def _calculate_mse(self, y_p, y_t):
         mse = (np.square(y_p - y_t)).mean(axis=None)
         # print('y_p: '+str(y_p.shape))

@@ -99,18 +99,19 @@ class CNNModel:
         mobilenet_model.layers.pop()
 
         inp = mobilenet_model.input
-        '''block_1 {  block_6_project_BN 14, 14, 46 '''
-        x = mobilenet_model.get_layer('block_6_project_BN').output  # 14, 14, 46
-        x = Deconvolution2D(filters=128, kernel_size=(2, 2), strides=(2, 2), padding='same', activation='relu',
-                            name='block_1_deconv_1', kernel_initializer='he_uniform')(x)  # 28, 28, 128
-        x = BatchNormalization(name='block_1_out_bn_1')(x)
 
-        x = Deconvolution2D(filters=128, kernel_size=(2, 2), strides=(2, 2), padding='same', activation='relu',
-                            name='block_1_deconv_2', kernel_initializer='he_uniform')(x)  # 56, 56, 128
-        x = BatchNormalization(name='block_1_out_bn_2')(x)
-
-        block_1_out = Conv2D(LearningConfig.landmark_len // 2, kernel_size=1, padding='same', name='block_1_out')(x)
-        '''block_1 }'''
+        # '''block_1 {  block_6_project_BN 14, 14, 46 '''
+        # x = mobilenet_model.get_layer('block_6_project_BN').output  # 14, 14, 46
+        # x = Deconvolution2D(filters=128, kernel_size=(2, 2), strides=(2, 2), padding='same', activation='relu',
+        #                     name='block_1_deconv_1', kernel_initializer='he_uniform')(x)  # 28, 28, 128
+        # x = BatchNormalization(name='block_1_out_bn_1')(x)
+        #
+        # x = Deconvolution2D(filters=128, kernel_size=(2, 2), strides=(2, 2), padding='same', activation='relu',
+        #                     name='block_1_deconv_2', kernel_initializer='he_uniform')(x)  # 56, 56, 128
+        # x = BatchNormalization(name='block_1_out_bn_2')(x)
+        #
+        # block_1_out = Conv2D(LearningConfig.landmark_len // 2, kernel_size=1, padding='same', name='block_1_out')(x)
+        # '''block_1 }'''
 
         '''block_2 {  block_10_project_BN 14, 14, 96 '''
         x = mobilenet_model.get_layer('block_10_project_BN').output  # 14, 14, 96
@@ -160,7 +161,10 @@ class CNNModel:
         out_heatmap = Conv2D(LearningConfig.landmark_len // 2, kernel_size=1, padding='same', name='out_heatmap')(x)
 
         revised_model = Model(inp, [
-            block_1_out, block_2_out, block_3_out, out_heatmap
+            # block_1_out,  # 85
+            # block_2_out,  # 90
+            # block_3_out,  # 97
+            out_heatmap   # 100
         ])
 
         revised_model.summary()
@@ -172,6 +176,57 @@ class CNNModel:
 
         return revised_model
 
+    def create_multi_branch_mn(self, inp_shape, num_branches):
+        branches = []
+        inputs = []
+        for i in range(num_branches):
+            inp_i, br_i = self.create_branch_mn(prefix=str(i), inp_shape=inp_shape)
+            inputs.append(inp_i)
+            branches.append(br_i)
+
+        revised_model = Model(inputs, branches,  name='multiBranchMN')
+
+        revised_model.summary()
+
+        model_json = revised_model.to_json()
+        with open("MultiBranchMN.json", "w") as json_file:
+            json_file.write(model_json)
+        return revised_model
+
+    def create_branch_mn(self, prefix, inp_shape):
+        mobilenet_model = mobilenet_v2.MobileNetV2(input_shape=inp_shape,
+                                                   alpha=1.0,
+                                                   include_top=True,
+                                                   weights=None,
+                                                   input_tensor=None,
+                                                   pooling=None)
+
+        mobilenet_model.layers.pop()
+
+        inp = mobilenet_model.input
+        '''heatmap can not be generated from activation layers, so we use out_relu'''
+        x = mobilenet_model.get_layer('out_relu').output  # 7, 7, 1280
+        x = Deconvolution2D(filters=128, kernel_size=(2, 2), strides=(2, 2), padding='same', activation='relu',
+                            name=prefix+'_deconv1', kernel_initializer='he_uniform')(x)  # 14, 14, 256
+        x = BatchNormalization(name='out_bn1')(x)
+
+        x = Deconvolution2D(filters=128, kernel_size=(2, 2), strides=(2, 2), padding='same', activation='relu',
+                            name=prefix+'_deconv2', kernel_initializer='he_uniform')(x)  # 28, 28, 256
+        x = BatchNormalization(name='out_bn2')(x)
+
+        x = Deconvolution2D(filters=128, kernel_size=(2, 2), strides=(2, 2), padding='same', activation='relu',
+                            name=prefix+'_deconv3', kernel_initializer='he_uniform')(x)  # 56, 56, 256
+        x = BatchNormalization(name=prefix+'out_bn3')(x)
+
+        out_heatmap = Conv2D(LearningConfig.point_len, kernel_size=1, padding='same', name=prefix+'_out_hm')(x)
+
+        model = Model(inp, out_heatmap)
+
+        for layer in model.layers:
+            layer.name = layer.name + str("_") + prefix
+
+        return model.input, model.output
+        # return inp, out_heatmap
 
     def mnv2_hm(self, tensor):
         mobilenet_model = mobilenet_v2.MobileNetV2(input_shape=None,
@@ -209,6 +264,32 @@ class CNNModel:
         model_json = revised_model.to_json()
 
         with open("mnv2_hm.json", "w") as json_file:
+            json_file.write(model_json)
+
+        return revised_model
+
+    def mobileNet_v2_main_discriminator(self, tensor, input_shape):
+        mobilenet_model = mobilenet_v2.MobileNetV2(input_shape=input_shape,
+                                                   alpha=1.0,
+                                                   include_top=True,
+                                                   weights=None,
+                                                   input_tensor=tensor,
+                                                   pooling=None)
+        # , classes=cnf.landmark_len)
+
+        mobilenet_model.layers.pop()
+
+        x = mobilenet_model.get_layer('global_average_pooling2d_2').output  # 1280
+        softmax = Dense(1, activation='sigmoid', name='out')(x)
+        inp = mobilenet_model.input
+
+        revised_model = Model(inp, softmax)
+
+        revised_model.summary()
+        # plot_model(revised_model, to_file='mobileNet_v2_main.png', show_shapes=True, show_layer_names=True)
+        model_json = revised_model.to_json()
+
+        with open("mobileNet_v2_main.json", "w") as json_file:
             json_file.write(model_json)
 
         return revised_model
