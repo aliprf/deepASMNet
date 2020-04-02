@@ -12,7 +12,7 @@ tf.logging.set_verbosity(tf.logging.ERROR)
 from keras.models import Model
 from keras.applications import mobilenet_v2, mobilenet, resnet50, densenet
 from keras.layers import Dense, MaxPooling2D, Conv2D, Flatten, \
-    BatchNormalization, Activation, GlobalAveragePooling2D, DepthwiseConv2D, Dropout, ReLU, Concatenate,\
+    BatchNormalization, Activation, GlobalAveragePooling2D, DepthwiseConv2D, Dropout, ReLU, Concatenate, \
     Deconvolution2D, Input
 
 from keras.callbacks import ModelCheckpoint
@@ -204,20 +204,39 @@ class CNNModel:
     #
 
     def create_multi_branch_mn(self, inp_shape, num_branches):
-        branches = []
-        inputs = []
+        # mobilenet_model = mobilenet_v2.MobileNetV2
+        mobilenet_model = mobilenet_v2.MobileNetV2_mb(3, input_shape=inp_shape,
+                                        alpha=1.0,
+                                        include_top=True,
+                                        weights=None,
+                                        input_tensor=None,
+                                        pooling=None)
+
+        mobilenet_model.layers.pop()
+        inp = mobilenet_model.input
+
+        outputs = []
         for i in range(num_branches):
-            inp_i, br_i = self.create_branch_mn(prefix=str(i), inp_shape=inp_shape)
-            inputs.append(inp_i)
-            branches.append(br_i)
+            prefix = str(i)
+            '''heatmap can not be generated from activation layers, so we use out_relu'''
+            x = mobilenet_model.get_layer('out_relu'+prefix).output  # 7, 7, 1280
 
-        model = Model(inputs, branches)
-        model.layers.pop(0)
+            x = Deconvolution2D(filters=256, kernel_size=(2, 2), strides=(2, 2), padding='same', activation='relu',
+                                name=prefix + '_deconv1', kernel_initializer='he_uniform')(x)  # 14, 14, 256
+            x = BatchNormalization(name=prefix + 'out_bn1')(x)
 
-        inp = Input(shape=inp_shape)
+            x = Deconvolution2D(filters=256, kernel_size=(2, 2), strides=(2, 2), padding='same', activation='relu',
+                                name=prefix + '_deconv2', kernel_initializer='he_uniform')(x)  # 28, 28, 256
+            x = BatchNormalization(name=prefix + 'out_bn2')(x)
 
-        newOutputs = model([inp, inp, inp])
-        revised_model = Model(inp, newOutputs)
+            x = Deconvolution2D(filters=256, kernel_size=(2, 2), strides=(2, 2), padding='same', activation='relu',
+                                name=prefix + '_deconv3', kernel_initializer='he_uniform')(x)  # 56, 56, 256
+            x = BatchNormalization(name=prefix + 'out_bn3')(x)
+
+            out_heatmap = Conv2D(LearningConfig.point_len, kernel_size=1, padding='same', name=prefix + '_out_hm')(x)
+            outputs.append(out_heatmap)
+
+        revised_model = Model(inp, outputs)
 
         revised_model.summary()
 
