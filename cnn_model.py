@@ -7,11 +7,13 @@ import keras
 from skimage.transform import resize
 
 from keras.regularizers import l2
+
 tf.logging.set_verbosity(tf.logging.ERROR)
 from keras.models import Model
 from keras.applications import mobilenet_v2, mobilenet, resnet50, densenet
 from keras.layers import Dense, MaxPooling2D, Conv2D, Flatten, \
-    BatchNormalization, Activation, GlobalAveragePooling2D, DepthwiseConv2D, Dropout, ReLU, Concatenate, Deconvolution2D
+    BatchNormalization, Activation, GlobalAveragePooling2D, DepthwiseConv2D, Dropout, ReLU, Concatenate,\
+    Deconvolution2D, Input
 
 from keras.callbacks import ModelCheckpoint
 from keras import backend as K
@@ -24,7 +26,7 @@ from keras.callbacks import CSVLogger
 from clr_callback import CyclicLR
 from datetime import datetime
 
-import  cv2
+import cv2
 import os.path
 from keras.utils.vis_utils import plot_model
 from scipy.spatial import distance
@@ -76,7 +78,7 @@ class CNNModel:
 
         out_heatmap = Conv2D(LearningConfig.landmark_len // 2, kernel_size=1, padding='same', name='out_heatmap')(x)
 
-        revised_model = Model(inp,  out_heatmap)
+        revised_model = Model(inp, out_heatmap)
 
         revised_model.summary()
         # plot_model(revised_model, to_file='mnv2_hm.png', show_shapes=True, show_layer_names=True)
@@ -164,7 +166,7 @@ class CNNModel:
             # block_1_out,  # 85
             # block_2_out,  # 90
             # block_3_out,  # 97
-            out_heatmap   # 100
+            out_heatmap  # 100
         ])
 
         revised_model.summary()
@@ -176,6 +178,31 @@ class CNNModel:
 
         return revised_model
 
+    # def create_multi_branch_mn(self, inp_shape, num_branches):
+    #     branches = []
+    #     inputs = []
+    #     for i in range(num_branches):
+    #         inp_i, br_i = self.create_branch_mn(prefix=str(i), inp_shape=inp_shape)
+    #         inputs.append(inp_i)
+    #         branches.append(br_i)
+    #
+    #     revised_model = Model(inputs[0], branches[0], name='multiBranchMN')
+    #     # revised_model = Model(inputs, branches, name='multiBranchMN')
+    #
+    #     revised_model.layers.pop(0)
+    #
+    #     new_input = Input(shape=inp_shape)
+    #
+    #     revised_model = Model(new_input, revised_model.outputs)
+    #
+    #     revised_model.summary()
+    #
+    #     model_json = revised_model.to_json()
+    #     with open("MultiBranchMN.json", "w") as json_file:
+    #         json_file.write(model_json)
+    #     return revised_model
+    #
+
     def create_multi_branch_mn(self, inp_shape, num_branches):
         branches = []
         inputs = []
@@ -184,7 +211,13 @@ class CNNModel:
             inputs.append(inp_i)
             branches.append(br_i)
 
-        revised_model = Model(inputs, branches,  name='multiBranchMN')
+        model = Model(inputs, branches)
+        model.layers.pop(0)
+
+        inp = Input(shape=inp_shape)
+
+        newOutputs = model([inp, inp, inp])
+        revised_model = Model(inp, newOutputs)
 
         revised_model.summary()
 
@@ -200,33 +233,74 @@ class CNNModel:
                                                    weights=None,
                                                    input_tensor=None,
                                                    pooling=None)
-
         mobilenet_model.layers.pop()
-
         inp = mobilenet_model.input
+
         '''heatmap can not be generated from activation layers, so we use out_relu'''
         x = mobilenet_model.get_layer('out_relu').output  # 7, 7, 1280
-        x = Deconvolution2D(filters=256, kernel_size=(2, 2), strides=(2, 2), padding='same', activation='relu',
-                            name=prefix+'_deconv1', kernel_initializer='he_uniform')(x)  # 14, 14, 256
-        x = BatchNormalization(name='out_bn1')(x)
 
         x = Deconvolution2D(filters=256, kernel_size=(2, 2), strides=(2, 2), padding='same', activation='relu',
-                            name=prefix+'_deconv2', kernel_initializer='he_uniform')(x)  # 28, 28, 256
-        x = BatchNormalization(name='out_bn2')(x)
+                            name=prefix + '_deconv1', kernel_initializer='he_uniform')(x)  # 14, 14, 256
+        x = BatchNormalization(name=prefix + 'out_bn1')(x)
 
         x = Deconvolution2D(filters=256, kernel_size=(2, 2), strides=(2, 2), padding='same', activation='relu',
-                            name=prefix+'_deconv3', kernel_initializer='he_uniform')(x)  # 56, 56, 256
-        x = BatchNormalization(name=prefix+'out_bn3')(x)
+                            name=prefix + '_deconv2', kernel_initializer='he_uniform')(x)  # 28, 28, 256
+        x = BatchNormalization(name=prefix + 'out_bn2')(x)
 
-        out_heatmap = Conv2D(LearningConfig.point_len, kernel_size=1, padding='same', name=prefix+'_out_hm')(x)
+        x = Deconvolution2D(filters=256, kernel_size=(2, 2), strides=(2, 2), padding='same', activation='relu',
+                            name=prefix + '_deconv3', kernel_initializer='he_uniform')(x)  # 56, 56, 256
+        x = BatchNormalization(name=prefix + 'out_bn3')(x)
 
-        model = Model(inp, out_heatmap)
+        out_heatmap = Conv2D(LearningConfig.point_len, kernel_size=1, padding='same', name=prefix + '_out_hm')(x)
 
-        for layer in model.layers:
-            layer.name = layer.name + str("_") + prefix
+        for layer in mobilenet_model.layers:
+            layer.name = layer.name + '_' + prefix
+        return inp, out_heatmap
 
-        return model.input, model.output
-        # return inp, out_heatmap
+    # def create_multi_branch_mn_one_input(self, inp_shape, num_branches):
+    #     mobilenet_model = mobilenet_v2.MobileNetV2(input_shape=inp_shape,
+    #                                                alpha=1.0,
+    #                                                include_top=True,
+    #                                                weights=None,
+    #                                                input_tensor=None,
+    #                                                pooling=None)
+    #     mobilenet_model.layers.pop()
+    #     inp = mobilenet_model.input
+    #     outputs = []
+    #     relu_name = 'out_relu'
+    #     for i in range(num_branches):
+    #         x = mobilenet_model.get_layer(relu_name).output  # 7, 7, 1280
+    #         prefix = str(i)
+    #         for layer in mobilenet_model.layers:
+    #             layer.name = layer.name + prefix
+    #
+    #         relu_name = relu_name + prefix
+    #
+    #         '''heatmap can not be generated from activation layers, so we use out_relu'''
+    #
+    #         x = Deconvolution2D(filters=256, kernel_size=(2, 2), strides=(2, 2), padding='same', activation='relu',
+    #                             name=prefix+'_deconv1', kernel_initializer='he_uniform')(x)  # 14, 14, 256
+    #         x = BatchNormalization(name=prefix + 'out_bn1')(x)
+    #
+    #         x = Deconvolution2D(filters=256, kernel_size=(2, 2), strides=(2, 2), padding='same', activation='relu',
+    #                             name=prefix+'_deconv2', kernel_initializer='he_uniform')(x)  # 28, 28, 256
+    #         x = BatchNormalization(name=prefix +'out_bn2')(x)
+    #
+    #         x = Deconvolution2D(filters=256, kernel_size=(2, 2), strides=(2, 2), padding='same', activation='relu',
+    #                             name=prefix+'_deconv3', kernel_initializer='he_uniform')(x)  # 56, 56, 256
+    #         x = BatchNormalization(name=prefix+'out_bn3')(x)
+    #
+    #         out_heatmap = Conv2D(LearningConfig.point_len, kernel_size=1, padding='same', name=prefix+'_out_hm')(x)
+    #         outputs.append(out_heatmap)
+    #
+    #     revised_model = Model(inp, outputs)
+    #
+    #     revised_model.summary()
+    #
+    #     model_json = revised_model.to_json()
+    #     with open("MultiBranchMN.json", "w") as json_file:
+    #         json_file.write(model_json)
+    #     return revised_model
 
     def mnv2_hm(self, tensor):
         mobilenet_model = mobilenet_v2.MobileNetV2(input_shape=None,
@@ -321,4 +395,3 @@ class CNNModel:
             json_file.write(model_json)
 
         return revised_model
-

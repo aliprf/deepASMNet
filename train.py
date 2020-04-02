@@ -174,6 +174,7 @@ class Train:
         cnn = CNNModel()
         if self.arch == 'mb_mn':
             model = cnn.create_multi_branch_mn(inp_shape=[224, 224, 3], num_branches=self.num_output_layers)
+            # model = cnn.create_multi_branch_mn_one_input(inp_shape=[224, 224, 3], num_branches=self.num_output_layers)
         if self.arch == 'mn_asm_0':
             model = cnn.mn_asm_v0(train_images)
         if self.arch == 'mn_asm_1':
