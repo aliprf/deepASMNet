@@ -8,7 +8,6 @@ from Data_custom_generator import CustomHeatmapGenerator
 import tensorflow as tf
 import keras
 
-
 print(tf.__version__)
 print(keras.__version__)
 
@@ -28,6 +27,8 @@ from numpy import save, load, asarray
 import os.path
 from keras import losses
 from keras import backend as K
+import csv
+from skimage.io import imread
 
 
 class Train:
@@ -65,9 +66,6 @@ class Train:
 
     def train_fit_on_batch(self):
         """"""
-        epochs = 10
-        steps_per_epoch = 100
-        batch_size = 10
 
         '''prepare callbacks'''
         callbacks_list = self._prepare_callback()
@@ -78,6 +76,7 @@ class Train:
         '''create asm_pre_trained net'''
         cnn = CNNModel()
         asm_model = cnn.create_multi_branch_mn(inp_shape=[224, 224, 3], num_branches=3)
+        # asm_model.load_weights('')
         '''creating model'''
         model = self._get_model(None)
 
@@ -92,18 +91,47 @@ class Train:
                       loss_weights=self._generate_loss_weights()
                       )
 
-        for epoch in range(epochs):
-            for batch in range(steps_per_epoch):
-                imgs, hm_g = self.get_batch_sample(batch_size)
+        '''create train, validation, test data iterator'''
+        x_train_filenames, x_val_filenames, y_train_filenames, y_val_filenames = self._create_generators()
 
+        '''save logs'''
+        log_file_name = 'log_' + datetime.now().strftime("%Y%m%d-%H%M%S")+".csv"
+        metrics_names = model.metrics_names
+        metrics_names.append('epoch')
+        self.write_loss_log(log_file_name, metrics_names)
+
+        ''''''
+        for epoch in range(self.EPOCHS):
+            loss = []
+            for batch in range(self.STEPS_PER_EPOCH):
+                imgs, hm_g = self.get_batch_sample(batch, x_train_filenames, y_train_filenames)
+                print(imgs.shape)
+                print(hm_g.shape)
                 hm_predicted = asm_model.predict_on_batch(imgs)
+                loss = model.train_on_batch(imgs, [hm_g, hm_predicted[0], hm_predicted[1], hm_predicted[2]])
+                print(f'Epoch: {epoch} \t\t moedl Loss: {loss}')
 
-                g_loss = model.train_on_batch(imgs, [hm_g, hm_predicted[0], hm_predicted[1], hm_predicted[2]])
+            loss.append(epoch)
+            self.write_loss_log(log_file_name, loss)
+            model.save_weights('weight_ep_'+str(epoch)+'.h5')
 
-                print(f'Epoch: {epoch} \t\t Generator Loss: {g_loss}')
+    def write_loss_log(self, file_name, row_data):
+        with open(file_name, 'w') as csvfile:
+            filewriter = csv.writer(csvfile, delimiter=',', quotechar='|', quoting=csv.QUOTE_MINIMAL)
+            filewriter.writerow(row_data)
 
-    def get_batch_sample(self, bath_size):
-        return np.zeros([bath_size, 224, 224, 3]), np.zeros([bath_size, 56, 56, 68])
+    def get_batch_sample(self, batch, x_train_filenames, y_train_filenames):
+        img_path = IbugConf.train_images_dir
+        tr_path = IbugConf.train_hm_dir
+
+        batch_x = x_train_filenames[batch * self.BATCH_SIZE:(batch + 1) * self.BATCH_SIZE]
+        batch_y = y_train_filenames[batch * self.BATCH_SIZE:(batch + 1) * self.BATCH_SIZE]
+
+        img_batch = np.array([imread(img_path + file_name) for file_name in batch_x])
+        lbl_batch = np.array([load(tr_path + file_name) for file_name in batch_y])
+
+        return img_batch, lbl_batch
+        # return np.zeros([self.BATCH_SIZE, 224, 224, 3]), np.zeros([self.BATCH_SIZE, 56, 56, 68])
 
     def train_fit_gen(self):
 
