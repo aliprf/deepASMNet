@@ -54,7 +54,7 @@ class LearningConfig:
     MIN_LR = 1e-7
     MAX_LR = 1e-2
     STEP_SIZE = 10
-    batch_size = 5
+    batch_size = 70
     steps_per_validation_epochs = 5
 
     epochs = 200
@@ -122,18 +122,18 @@ class W300Conf:
 class IbugConf:
 
     '''server_config'''
-    # train_images_dir = '/media/data2/alip/fala/train_images_pts_dir/'
-    # train_hm_dir = '/media/data2/alip/fala/train_hm_dir/'
-    # train_hm_dir_85 = '/media/data2/alip/fala/train_hm_dir_85/'
-    # train_hm_dir_90 = '/media/data2/alip/fala/train_hm_dir_90/'
-    # train_hm_dir_97 = '/media/data2/alip/fala/train_hm_dir_97/'
+    train_images_dir = '/media/data2/alip/fala/train_images_pts_dir/'
+    train_hm_dir = '/media/data2/alip/fala/train_hm_dir/'
+    train_hm_dir_85 = '/media/data2/alip/fala/train_hm_dir_85/'
+    train_hm_dir_90 = '/media/data2/alip/fala/train_hm_dir_90/'
+    train_hm_dir_97 = '/media/data2/alip/fala/train_hm_dir_97/'
 
     '''local'''
-    train_images_dir = '/media/ali/data/train_before_heatmap/'
-    train_hm_dir = '/media/ali/data/train_before_heatmap_npy/'
-    train_hm_dir_85 = '/media/ali/data/train_before_heatmap_npy_85/'
-    train_hm_dir_90 = '/media/ali/data/train_before_heatmap_npy_90/'
-    train_hm_dir_97 = '/media/ali/data/train_before_heatmap_npy_97/'
+    # train_images_dir = '/media/ali/data/train_before_heatmap/'
+    # train_hm_dir = '/media/ali/data/train_before_heatmap_npy/'
+    # train_hm_dir_85 = '/media/ali/data/train_before_heatmap_npy_85/'
+    # train_hm_dir_90 = '/media/ali/data/train_before_heatmap_npy_90/'
+    # train_hm_dir_97 = '/media/ali/data/train_before_heatmap_npy_97/'
 
 
     # images_dir = '/media/ali/extradata/facial_landmark_ds/from_ibug/train_set/train_before_heatmap/'
