@@ -52,10 +52,12 @@ if __name__ == '__main__':
     trainer = Train(use_tf_record=False,
                     dataset_name=DatasetName.ibug,
                     custom_loss=False,
-                    arch='mb_mn',
+                    arch='asmnet',
+                    # arch='mb_mn',
                     inception_mode=False,
-                    num_output_layers=3,
-                    weight=None)
+                    num_output_layers=4,
+                    weight=None,
+                    train_on_batch=True)
 
 
 

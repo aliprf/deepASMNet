@@ -204,7 +204,7 @@ class CNNModel:
     #
 
     def create_multi_branch_mn(self, inp_shape, num_branches):
-        # mobilenet_model = mobilenet_v2.MobileNetV2
+
         mobilenet_model = mobilenet_v2.MobileNetV2_mb(3, input_shape=inp_shape,
                                         alpha=1.0,
                                         include_top=True,
@@ -321,6 +321,52 @@ class CNNModel:
     #         json_file.write(model_json)
     #     return revised_model
 
+    def create_asmnet(self, inp_shape, num_branches):
+        mobilenet_model = mobilenet_v2.MobileNetV2(input_shape=inp_shape,
+                                                   alpha=1.0,
+                                                   include_top=True,
+                                                   weights=None,
+                                                   input_tensor=None,
+                                                   pooling=None)
+
+        mobilenet_model.layers.pop()
+        inp = mobilenet_model.input
+        outputs = []
+        relu_name = 'out_relu'
+        for i in range(num_branches):
+            x = mobilenet_model.get_layer(relu_name).output  # 7, 7, 1280
+            prefix = str(i)
+            for layer in mobilenet_model.layers:
+                layer.name = layer.name + prefix
+
+            relu_name = relu_name + prefix
+
+            '''heatmap can not be generated from activation layers, so we use out_relu'''
+
+            x = Deconvolution2D(filters=256, kernel_size=(2, 2), strides=(2, 2), padding='same', activation='relu',
+                                name=prefix+'_deconv1', kernel_initializer='he_uniform')(x)  # 14, 14, 256
+            x = BatchNormalization(name=prefix + 'out_bn1')(x)
+
+            x = Deconvolution2D(filters=256, kernel_size=(2, 2), strides=(2, 2), padding='same', activation='relu',
+                                name=prefix+'_deconv2', kernel_initializer='he_uniform')(x)  # 28, 28, 256
+            x = BatchNormalization(name=prefix +'out_bn2')(x)
+
+            x = Deconvolution2D(filters=256, kernel_size=(2, 2), strides=(2, 2), padding='same', activation='relu',
+                                name=prefix+'_deconv3', kernel_initializer='he_uniform')(x)  # 56, 56, 256
+            x = BatchNormalization(name=prefix+'out_bn3')(x)
+
+            out_heatmap = Conv2D(LearningConfig.point_len, kernel_size=1, padding='same', name=prefix+'_out_hm')(x)
+            outputs.append(out_heatmap)
+
+        revised_model = Model(inp, outputs)
+
+        revised_model.summary()
+
+        model_json = revised_model.to_json()
+        with open("asmnet.json", "w") as json_file:
+            json_file.write(model_json)
+        return revised_model
+
     def mnv2_hm(self, tensor):
         mobilenet_model = mobilenet_v2.MobileNetV2(input_shape=None,
                                                    alpha=1.0,
@@ -334,15 +380,15 @@ class CNNModel:
         inp = mobilenet_model.input
         '''heatmap can not be generated from activation layers, so we use out_relu'''
         x = mobilenet_model.get_layer('out_relu').output  # 7, 7, 1280
-        x = Deconvolution2D(filters=128, kernel_size=(2, 2), strides=(2, 2), padding='same', activation='relu',
+        x = Deconvolution2D(filters=256, kernel_size=(2, 2), strides=(2, 2), padding='same', activation='relu',
                             name='deconv1', kernel_initializer='he_uniform')(x)  # 14, 14, 256
         x = BatchNormalization(name='out_bn1')(x)
 
-        x = Deconvolution2D(filters=128, kernel_size=(2, 2), strides=(2, 2), padding='same', activation='relu',
+        x = Deconvolution2D(filters=256, kernel_size=(2, 2), strides=(2, 2), padding='same', activation='relu',
                             name='deconv2', kernel_initializer='he_uniform')(x)  # 28, 28, 256
         x = BatchNormalization(name='out_bn2')(x)
 
-        x = Deconvolution2D(filters=128, kernel_size=(2, 2), strides=(2, 2), padding='same', activation='relu',
+        x = Deconvolution2D(filters=256, kernel_size=(2, 2), strides=(2, 2), padding='same', activation='relu',
                             name='deconv3', kernel_initializer='he_uniform')(x)  # 56, 56, 256
         x = BatchNormalization(name='out_bn3')(x)
 

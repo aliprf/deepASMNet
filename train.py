@@ -31,7 +31,8 @@ from keras import backend as K
 
 
 class Train:
-    def __init__(self, use_tf_record, dataset_name, custom_loss, arch, inception_mode, num_output_layers, weight=None):
+    def __init__(self, use_tf_record, dataset_name, custom_loss, arch, inception_mode, num_output_layers,
+                 train_on_batch, weight=None):
         cnn = CNNModel()
         c_loss = Custom_losses()
 
@@ -55,12 +56,57 @@ class Train:
         self.weight = weight
         self.num_output_layers = num_output_layers
 
-        if use_tf_record:
+        if train_on_batch:
+            self.train_fit_on_batch()
+        elif use_tf_record:
             self.train_fit()
         else:
             self.train_fit_gen()
 
+    def train_fit_on_batch(self):
+        """"""
+        epochs = 10
+        steps_per_epoch = 100
+        batch_size = 10
+
+        '''prepare callbacks'''
+        callbacks_list = self._prepare_callback()
+
+        """define optimizers"""
+        optimizer = self._get_optimizer()
+
+        '''create asm_pre_trained net'''
+        cnn = CNNModel()
+        asm_model = cnn.create_multi_branch_mn(inp_shape=[224, 224, 3], num_branches=3)
+        '''creating model'''
+        model = self._get_model(None)
+
+        '''loading weights'''
+        if self.weight is not None:
+            model.load_weights(self.weight)
+
+        '''compiling model'''
+        model.compile(loss=self._generate_loss(),
+                      optimizer=optimizer,
+                      metrics=['mse', 'mae'],
+                      loss_weights=self._generate_loss_weights()
+                      )
+
+        for epoch in range(epochs):
+            for batch in range(steps_per_epoch):
+                imgs, hm_g = self.get_batch_sample(batch_size)
+
+                hm_predicted = asm_model.predict_on_batch(imgs)
+
+                g_loss = model.train_on_batch(imgs, [hm_g, hm_predicted[0], hm_predicted[1], hm_predicted[2]])
+
+                print(f'Epoch: {epoch} \t\t Generator Loss: {g_loss}')
+
+    def get_batch_sample(self, bath_size):
+        return np.zeros([bath_size, 224, 224, 3]), np.zeros([bath_size, 56, 56, 68])
+
     def train_fit_gen(self):
+
         """train_fit_gen"""
 
         '''prepare callbacks'''
@@ -72,10 +118,15 @@ class Train:
         '''create train, validation, test data iterator'''
         x_train_filenames, x_val_filenames, y_train_filenames, y_val_filenames = self._create_generators()
 
-        my_training_batch_generator = CustomHeatmapGenerator(x_train_filenames, y_train_filenames,
+        is_single = True
+        if self.num_output_layers > 1:
+            is_single = False
+
+        my_training_batch_generator = CustomHeatmapGenerator(is_single, x_train_filenames, y_train_filenames,
                                                              self.BATCH_SIZE, self.num_output_layers)
-        my_validation_batch_generator = CustomHeatmapGenerator(x_val_filenames, y_val_filenames,
+        my_validation_batch_generator = CustomHeatmapGenerator(is_single, x_val_filenames, y_val_filenames,
                                                                self.BATCH_SIZE, self.num_output_layers)
+
 
         '''creating model'''
         model = self._get_model(None)
@@ -163,15 +214,15 @@ class Train:
         return tensors
 
     def _generate_loss_weights(self):
-
-        wights = [1, 1, 1]
-        # wights = []
-        # for i in range(self.num_output_layers):
-        #     wights.append(1)
+        wights = []
+        for i in range(self.num_output_layers):
+            wights.append(1)
         return wights
 
     def _get_model(self, train_images):
         cnn = CNNModel()
+        if self.arch == 'asmnet':
+            model = cnn.create_asmnet(inp_shape=[224, 224, 3], num_branches=self.num_output_layers)
         if self.arch == 'mb_mn':
             model = cnn.create_multi_branch_mn(inp_shape=[224, 224, 3], num_branches=self.num_output_layers)
             # model = cnn.create_multi_branch_mn_one_input(inp_shape=[224, 224, 3], num_branches=self.num_output_layers)
