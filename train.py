@@ -67,9 +67,6 @@ class Train:
     def train_fit_on_batch(self):
         """"""
 
-        '''prepare callbacks'''
-        callbacks_list = self._prepare_callback()
-
         """define optimizers"""
         optimizer = self._get_optimizer()
 
@@ -105,15 +102,15 @@ class Train:
             loss = []
             for batch in range(self.STEPS_PER_EPOCH):
                 imgs, hm_g = self.get_batch_sample(batch, x_train_filenames, y_train_filenames)
-                print(imgs.shape)
-                print(hm_g.shape)
+                # print(imgs.shape)
+                # print(hm_g.shape)
                 hm_predicted = asm_model.predict_on_batch(imgs)
                 loss = model.train_on_batch(imgs, [hm_g, hm_predicted[0], hm_predicted[1], hm_predicted[2]])
                 print(f'Epoch: {epoch} \t\t moedl Loss: {loss}')
 
             loss.append(epoch)
             self.write_loss_log(log_file_name, loss)
-            model.save_weights('weight_ep_'+str(epoch)+'.h5')
+            model.save_weights('weight_ep_'+str(epoch)+'_los_'+str(loss)+'.h5')
 
     def write_loss_log(self, file_name, row_data):
         with open(file_name, 'w') as csvfile:
@@ -242,9 +239,13 @@ class Train:
         return tensors
 
     def _generate_loss_weights(self):
-        wights = []
-        for i in range(self.num_output_layers):
-            wights.append(1)
+        wights = [0.7*3*1,  # main labels
+                  0.3*0.5,  # asm 85 labels
+                  0.3*0.7,  # asm 90 labels
+                  0.3*0.9   # asm 97 labels
+                  ]
+        # for i in range(self.num_output_layers):
+        #     wights.append(1)
         return wights
 
     def _get_model(self, train_images):

@@ -56,7 +56,7 @@ if __name__ == '__main__':
                     # arch='mb_mn',
                     inception_mode=False,
                     num_output_layers=4,
-                    weight=None,
+                    weight='',
                     train_on_batch=True)
 
 
