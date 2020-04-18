@@ -56,7 +56,7 @@ if __name__ == '__main__':
                     # arch='mb_mn',
                     inception_mode=False,
                     num_output_layers=4,
-                    weight='',
+                    weight='weights-101-0.00021_asm_model.h5',
                     train_on_batch=True)
 
 

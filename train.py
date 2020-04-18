@@ -79,7 +79,8 @@ class Train:
 
         '''loading weights'''
         if self.weight is not None:
-            model.load_weights(self.weight)
+            model.load_weights('weights-101-0.00021_asm_model.h5')
+            # model.load_weights(self.weight)
 
         '''compiling model'''
         model.compile(loss=self._generate_loss(),
