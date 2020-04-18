@@ -107,7 +107,7 @@ class Train:
                 # print(hm_g.shape)
                 hm_predicted = asm_model.predict_on_batch(imgs)
                 loss = model.train_on_batch(imgs, [hm_g, hm_predicted[0], hm_predicted[1], hm_predicted[2]])
-                print(f'Epoch: {epoch} \t\t moedl Loss: {loss}')
+                print(f'Epoch: {epoch} \t batch:{batch} \t\n  moedl Loss: {loss}')
 
             loss.append(epoch)
             self.write_loss_log(log_file_name, loss)
