@@ -99,16 +99,21 @@ class Train:
         self.write_loss_log(log_file_name, metrics_names)
 
         ''''''
+        self.STEPS_PER_EPOCH = len(x_train_filenames) // self.BATCH_SIZE
+
         for epoch in range(self.EPOCHS):
             loss = []
             for batch in range(self.STEPS_PER_EPOCH):
-                imgs, hm_g = self.get_batch_sample(batch, x_train_filenames, y_train_filenames)
-                # print(imgs.shape)
-                # print(hm_g.shape)
-                hm_predicted = asm_model.predict_on_batch(imgs)
-                loss = model.train_on_batch(imgs, [hm_g, hm_predicted[0], hm_predicted[1], hm_predicted[2]])
-                print(f'Epoch: {epoch} \t batch:{batch} of {self.STEPS_PER_EPOCH}\t\n  moedl Loss: {loss}')
+                try:
+                    imgs, hm_g = self.get_batch_sample(batch, x_train_filenames, y_train_filenames)
+                    # print(imgs.shape)
+                    # print(hm_g.shape)
 
+                    hm_predicted = asm_model.predict_on_batch(imgs)
+                    loss = model.train_on_batch(imgs, [hm_g, hm_predicted[0], hm_predicted[1], hm_predicted[2]])
+                    print(f'Epoch: {epoch} \t batch:{batch} of {self.STEPS_PER_EPOCH}\t\n  moedl Loss: {loss}')
+                except:
+                    print('catch')
             loss.append(epoch)
             self.write_loss_log(log_file_name, loss)
             model.save_weights('weight_ep_'+str(epoch)+'_los_'+str(loss)+'.h5')
