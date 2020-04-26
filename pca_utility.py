@@ -13,9 +13,9 @@ from PIL import Image
 
 
 class PCAUtility:
-    _eigenvalues_prefix = "_eigenvalues_"
-    _eigenvectors_prefix = "_eigenvectors_"
-    _meanvector_prefix = "_meanvector_"
+    eigenvalues_prefix = "_eigenvalues_"
+    eigenvectors_prefix = "_eigenvectors_"
+    meanvector_prefix = "_meanvector_"
 
     def create_pca_from_points(self, dataset_name, pca_postfix):
         lbl_arr = []
@@ -55,16 +55,16 @@ class PCAUtility:
         # self.__save_obj(eigenvectors, dataset_name + self.__eigenvectors_prefix + str(pca_postfix))
         # self.__save_obj(mean_lbl_arr, dataset_name + self.__meanvector_prefix + str(pca_postfix))
         #
-        save('pca_obj/' + dataset_name + self._eigenvalues_prefix + str(pca_postfix), eigenvalues)
-        save('pca_obj/' + dataset_name + self._eigenvectors_prefix + str(pca_postfix), eigenvectors)
-        save('pca_obj/' + dataset_name + self._meanvector_prefix + str(pca_postfix), mean_lbl_arr)
+        save('pca_obj/' + dataset_name + self.eigenvalues_prefix + str(pca_postfix), eigenvalues)
+        save('pca_obj/' + dataset_name + self.eigenvectors_prefix + str(pca_postfix), eigenvectors)
+        save('pca_obj/' + dataset_name + self.meanvector_prefix + str(pca_postfix), mean_lbl_arr)
 
     def test_pca_validity(self, dataset_name, pca_postfix):
         image_utility = ImageUtility()
 
-        eigenvalues = load('pca_obj/' + dataset_name + self._eigenvalues_prefix + str(pca_postfix)+".npy")
-        eigenvectors = load('pca_obj/' + dataset_name + self._eigenvectors_prefix + str(pca_postfix)+".npy")
-        meanvector = load('pca_obj/' + dataset_name + self._meanvector_prefix + str(pca_postfix)+".npy")
+        eigenvalues = load('pca_obj/' + dataset_name + self.eigenvalues_prefix + str(pca_postfix)+".npy")
+        eigenvectors = load('pca_obj/' + dataset_name + self.eigenvectors_prefix + str(pca_postfix)+".npy")
+        meanvector = load('pca_obj/' + dataset_name + self.meanvector_prefix + str(pca_postfix)+".npy")
 
         '''load data: '''
         lbl_arr = []
@@ -149,9 +149,9 @@ class PCAUtility:
         mean_lbl_arr = np.mean(lbl_arr, axis=0)
         eigenvectors = eigenvectors.T
 
-        self.__save_obj(eigenvalues, dataset_name + self.__eigenvalues_prefix + str(pca_postfix))
-        self.__save_obj(eigenvectors, dataset_name + self.__eigenvectors_prefix + str(pca_postfix))
-        self.__save_obj(mean_lbl_arr, dataset_name + self.__meanvector_prefix + str(pca_postfix))
+        self.__save_obj(eigenvalues, dataset_name + self.eigenvalues_prefix + str(pca_postfix))
+        self.__save_obj(eigenvectors, dataset_name + self.eigenvectors_prefix + str(pca_postfix))
+        self.__save_obj(mean_lbl_arr, dataset_name + self.meanvector_prefix + str(pca_postfix))
 
         '''calculate pose min max'''
         p_1_arr = []
@@ -207,11 +207,11 @@ class PCAUtility:
 
 
     def load_pca_obj(self, dataset_name, pca_postfix=97):
-        with open('obj/' + dataset_name + self.__eigenvalues_prefix + str(pca_postfix) + '.pkl', 'rb') as f:
+        with open('obj/' + dataset_name + self.eigenvalues_prefix + str(pca_postfix) + '.pkl', 'rb') as f:
             eigenvalues = pickle.load(f)
-        with open('obj/' + dataset_name + self.__eigenvectors_prefix + str(pca_postfix) + '.pkl', 'rb') as f:
+        with open('obj/' + dataset_name + self.eigenvectors_prefix + str(pca_postfix) + '.pkl', 'rb') as f:
             eigenvectors = pickle.load(f)
-        with open('obj/' + dataset_name + self.__meanvector_prefix + str(pca_postfix) + '.pkl', 'rb') as f:
+        with open('obj/' + dataset_name + self.meanvector_prefix + str(pca_postfix) + '.pkl', 'rb') as f:
             meanvector = pickle.load(f)
         return eigenvalues, eigenvectors, meanvector
 

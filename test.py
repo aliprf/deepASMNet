@@ -3,19 +3,13 @@ from configuration import DatasetName, DatasetType, \
 from tf_record_utility import TFRecordUtility
 from pca_utility import PCAUtility
 from image_utility import ImageUtility
-from pose_detection.code.PoseDetector import PoseDetector
-from pose_detection.code import datasets, hopenet, hopelessnet, utils
 from hg_Class import HourglassNet
 
 import tensorflow as tf
 import keras
 from skimage.transform import resize
 
-print(tf.__version__)
-print(keras.__version__)
-
 from keras.regularizers import l2
-tf.logging.set_verbosity(tf.logging.ERROR)
 from keras.models import Model
 from keras.applications import mobilenet_v2, mobilenet, resnet50, densenet
 from keras.layers import Dense, MaxPooling2D, Conv2D, Flatten, \
@@ -30,18 +24,22 @@ import math
 from keras.callbacks import CSVLogger
 from datetime import datetime
 
-import  cv2
+import cv2
 import os.path
 from keras.utils.vis_utils import plot_model
 from scipy.spatial import distance
 import scipy.io as sio
 from keras.preprocessing.image import ImageDataGenerator
 from clr_callback import CyclicLR
+from cnn_model import CNNModel
+import img_printer as imgpr
+
 
 class Test:
-    def test_new(self, arch):
-        # detect = PoseDetector()
-        detect = 0
+    def __init__(self, arch, num_output_layers, weight_fname):
+        cnn = CNNModel()
+        model = cnn.get_model(None, arch, num_output_layers)
+        model.load_weights(weight_fname)
 
         tf_record_utility = TFRecordUtility()
         image_utility = ImageUtility()
@@ -53,9 +51,10 @@ class Test:
             tfrecord_filename=W300Conf.tf_common,
             number_of_records=W300Conf.number_of_all_sample_common,
             only_label=False)
-        lbl_arr_full, img_arr_full = tf_record_utility.retrieve_tf_record_test_set(tfrecord_filename=W300Conf.tf_full,
-                                                                                   number_of_records=W300Conf.number_of_all_sample_full,
-                                                                                   only_label=False)
+        lbl_arr_full, img_arr_full = tf_record_utility.retrieve_tf_record_test_set(
+            tfrecord_filename=W300Conf.tf_full,
+            number_of_records=W300Conf.number_of_all_sample_full,
+            only_label=False)
 
         lbl_arr_challenging = np.array(lbl_arr_challenging)
         img_arr_challenging = np.array(img_arr_challenging)
@@ -66,41 +65,19 @@ class Test:
         lbl_arr_full = np.array(lbl_arr_full)
         img_arr_full = np.array(img_arr_full)
 
-        if arch == 'mn':  # main mobileNet
-            model = self.mnv2_hm(tensor=None)
-        elif arch == 'mn_r':  # reduced mobileNet
-            model = self.mnv2_hm_r_v2(tensor=None, inception_mode= False)
-
-        model.load_weights("weights-02-0.00021.h5")  # no:   ** asm:
-
         ########
 
         loss_challenging = 0
-
-        loss_yaw_ch = 0
-        loss_yaw_c = 0
-        loss_yaw_f = 0
-        loss_pitch_ch = 0
-        loss_pitch_c = 0
-        loss_pitch_f = 0
-        loss_roll_ch = 0
-        loss_roll_c = 0
-        loss_roll_f = 0
-
         loss_common = 0
         loss_full = 0
+
         # multitask = True
         all_true = []
         all_pridicted  = []
         for i in range(W300Conf.number_of_all_sample_challenging):
-            loss_challenging_, mae_yaw, mae_pitch, mae_roll, lt, lp = self._test_result_per_image(i, model,
-                                                                                         img_arr_challenging[i],
-                                                                                         lbl_arr_challenging[i],
-                                                                                         detect)
+            loss_challenging_, lt, lp = self.\
+                _test_result_per_image(i, model, img_arr_challenging[i], lbl_arr_challenging[i])
             loss_challenging += loss_challenging_
-            loss_yaw_ch += mae_yaw
-            loss_pitch_ch += mae_pitch
-            loss_roll_ch += mae_roll
 
             all_true.append(lt)
             all_pridicted.append(lp)
@@ -110,54 +87,31 @@ class Test:
         print('LOSS challenging: ')
 
         print(loss_challenging * 100 / W300Conf.number_of_all_sample_challenging)
-        print(loss_yaw_ch / W300Conf.number_of_all_sample_challenging)
-        print(loss_pitch_ch / W300Conf.number_of_all_sample_challenging)
-        print(loss_roll_ch / W300Conf.number_of_all_sample_challenging)
 
         for i in range(W300Conf.number_of_all_sample_common):
-            loss_common_, mae_yaw, mae_pitch, mae_roll, _,_ = self._test_result_per_image(i, model, img_arr_common[i],
-                                                                                    lbl_arr_common[i], detect)
+            loss_common_, _, _ = self._test_result_per_image(i, model, img_arr_common[i], lbl_arr_common[i])
             loss_common += loss_common_
-            loss_yaw_c += mae_yaw
-            loss_pitch_c += mae_pitch
-            loss_roll_c += mae_roll
 
         print('LOSS common: ')
         print(loss_common * 100 / W300Conf.number_of_all_sample_common)
-        print(loss_yaw_c / W300Conf.number_of_all_sample_common)
-        print(loss_pitch_c / W300Conf.number_of_all_sample_common)
-        print(loss_roll_c / W300Conf.number_of_all_sample_common)
 
         for i in range(W300Conf.number_of_all_sample_full):
-            loss_full_, mae_yaw, mae_pitch, mae_roll, _,_ = self._test_result_per_image(i, model, img_arr_full[i],
-                                                                                  lbl_arr_full[i], detect)
+            loss_full_, _, _ = self._test_result_per_image(i, model, img_arr_full[i], lbl_arr_full[i])
             loss_full += loss_full_
-            loss_yaw_f += mae_yaw
-            loss_pitch_f += mae_pitch
-            loss_roll_f += mae_roll
 
         print('LOSS full: ')
         print(loss_full * 100 / W300Conf.number_of_all_sample_full)
-        print(loss_yaw_f / W300Conf.number_of_all_sample_full)
-        print(loss_pitch_f / W300Conf.number_of_all_sample_full)
-        print(loss_roll_f / W300Conf.number_of_all_sample_full)
 
-    def _test_result_per_image(self, counter, model, img, labels_true, detect):
+    def _test_result_per_image(self, counter, model, img, labels_true):
         tf_utility = TFRecordUtility()
         image_utility = ImageUtility()
 
-        pose_predicted = []
         image = np.expand_dims(img, axis=0)
 
         predict = model.predict(image)
 
-        heatmap_main = predict[0]
-        # heatmap_main = predict[0][0]
-
-        # heatmap_main_all = predict[1][0]
-        # labels_predicted = np.swapaxes(predict[2], 0, 1)
-        # pose_predicted = predict[3][0]
-
+        # heatmap_main = predict[0]
+        heatmap_main = predict[0][0]
 
         # print("labels_true: " + str(labels_true))
         # print("labels_predicted :" + str(labels_predicted))
@@ -216,13 +170,13 @@ class Test:
         # imgpr.print_image_arr(counter+1, heatmap_main_all, np.array(landmark_arr_x_t)/4, np.array(landmark_arr_y_t)/4)
         # imgpr.print_image_arr(counter+1, heatmap_main_all, np.array(x_h_p)/4, np.array(y_h_p)/4)
 
-        # imgpr.print_image_arr((counter+1)*100, img, x_h_p, y_h_p)
+        imgpr.print_image_arr((counter+1)*100, img, x_h_p, y_h_p)
 
         # imgpr.print_image_arr(counter+1, img, landmark_arr_x_p_asm, landmark_arr_y_p_asm)
 
         # imgpr.print_image_arr((counter+1)*1000, img, landmark_arr_x_p, landmark_arr_y_p)
 
-        # imgpr.print_image_arr_heat(counter+1, heatmap_main, print_single=False)
+        imgpr.print_image_arr_heat(counter+1, heatmap_main, print_single=False)
         #
         # imgpr.print_image_arr((counter+1)*100000, img, landmark_arr_x_t, landmark_arr_y_t)
 
@@ -266,7 +220,7 @@ class Test:
         # print(lt)
         # print('---------------')
 
-        return normalized_mean_error, 0, 0, 0, lt, lp
+        return normalized_mean_error, lt, lp
 
         '''pose estimation vs hopeNet'''
         img_cp_1 = np.array(img) * 255.0

@@ -34,6 +34,21 @@ import scipy.io as sio
 
 
 class CNNModel:
+    def get_model(self, train_images, arch, num_output_layers):
+        if arch == 'asmnet':
+            model = self.create_asmnet(inp_shape=[224, 224, 3], num_branches=num_output_layers)
+        elif arch == 'mb_mn':
+            model = self.create_multi_branch_mn(inp_shape=[224, 224, 3], num_branches=num_output_layers)
+            # model = cnn.create_multi_branch_mn_one_input(inp_shape=[224, 224, 3], num_branches=self.num_output_layers)
+        elif arch == 'mn_asm_0':
+            model = self.mn_asm_v0(train_images)
+        elif arch == 'mn_asm_1':
+            model = self.mn_asm_v1(train_images)
+        elif arch == 'hg':
+            model = self.hour_glass_network(num_stacks=num_output_layers)
+        elif arch == 'mn_r':
+            model = self.mnv2_hm(tensor=train_images)
+        return model
 
     def hour_glass_network(self, num_classes=68, num_stacks=4, num_filters=256,
                            in_shape=(224, 224), out_shape=(56, 56)):

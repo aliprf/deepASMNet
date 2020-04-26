@@ -5,7 +5,10 @@ from pca_utility import PCAUtility
 from image_utility import ImageUtility
 import numpy as np
 from train import Train
+from test import Test
+
 from Train_Gan import TrainGan
+
 if __name__ == '__main__':
     tf_record_util = TFRecordUtility()
     pca_utility = PCAUtility()
@@ -19,6 +22,9 @@ if __name__ == '__main__':
     # pca_utility.create_pca_from_points(DatasetName.ibug, 90)
     # pca_utility.create_pca_from_points(DatasetName.ibug, 97)
     # tf_record_util.generate_hm_and_save(dataset_name=DatasetName.ibug)
+
+    tf_record_util.load_hm_and_test(dataset_name=DatasetName.ibug)
+
     # tf_record_util.generate_hm_and_save(dataset_name=DatasetName.ibug, pca_percentage=85)
     # tf_record_util.generate_hm_and_save(dataset_name=DatasetName.ibug, pca_percentage=90)
     # tf_record_util.generate_hm_and_save(dataset_name=DatasetName.ibug, pca_percentage=97)
@@ -49,17 +55,19 @@ if __name__ == '__main__':
     # trg = TrainGan()
     # trg.create_seq_model()
 
-    trainer = Train(use_tf_record=False,
-                    dataset_name=DatasetName.ibug,
-                    custom_loss=False,
-                    arch='asmnet',
-                    # arch='mb_mn',
-                    inception_mode=False,
-                    num_output_layers=4,
-                    weight='weights-101-0.00021_asm_model.h5',
-                    train_on_batch=True)
+    # test = Test(arch='mb_mn', num_output_layers=3, weight_fname='weights-101-0.00021_asm_model.h5')
 
-
+    # trainer = Train(use_tf_record=False,
+    #                 dataset_name=DatasetName.ibug,
+    #                 custom_loss=False,
+    #                 arch='asmnet',
+    #                 # arch='mb_mn',
+    #                 inception_mode=False,
+    #                 num_output_layers=4,
+    #                 weight='weights-101-0.00021_asm_model.h5',
+    #                 train_on_batch=True)
+    #
+    #
 
 
 

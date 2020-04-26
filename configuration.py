@@ -106,9 +106,9 @@ class Multipie:
 
 
 class W300Conf:
-    tf_common = '/media/ali/extradata/facial_landmark_ds/from_ibug/test_set/test_common.tfrecords'
-    tf_challenging = '/media/ali/extradata/facial_landmark_ds/from_ibug/test_set/test_challenging.tfrecords'
-    tf_full = '/media/ali/extradata/facial_landmark_ds/from_ibug/test_set/test_full.tfrecords'
+    tf_common = '/media/ali/data/test_common.tfrecords'
+    tf_challenging = '/media/ali/data/test_challenging.tfrecords'
+    tf_full = '/media/ali/data/test_full.tfrecords'
 
     img_path_prefix_common = '/media/ali/extradata/facial_landmark_ds/from_ibug/test_set/common/'
     img_path_prefix_challenging = '/media/ali/extradata/facial_landmark_ds/from_ibug/test_set/challenging/'
@@ -131,9 +131,9 @@ class IbugConf:
     '''local'''
     # train_images_dir = '/media/ali/data/train_before_heatmap/'
     # train_hm_dir = '/media/ali/data/train_before_heatmap_npy/'
-    # train_hm_dir_85 = '/media/ali/data/train_before_heatmap_npy_85/'
-    # train_hm_dir_90 = '/media/ali/data/train_before_heatmap_npy_90/'
-    # train_hm_dir_97 = '/media/ali/data/train_before_heatmap_npy_97/'
+    # train_hm_dir_85 = '/media/ali/data/train_hm_dir_85/'
+    # train_hm_dir_90 = '/media/ali/data/train_hm_dir_90/'
+    # train_hm_dir_97 = '/media/ali/data/train_hm_dir_97/'
 
 
     # images_dir = '/media/ali/extradata/facial_landmark_ds/from_ibug/train_set/train_before_heatmap/'

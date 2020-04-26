@@ -34,7 +34,6 @@ from skimage.io import imread
 class Train:
     def __init__(self, use_tf_record, dataset_name, custom_loss, arch, inception_mode, num_output_layers,
                  train_on_batch, weight=None):
-        cnn = CNNModel()
         c_loss = Custom_losses()
 
         if dataset_name == DatasetName.ibug:
@@ -75,7 +74,7 @@ class Train:
         asm_model = cnn.create_multi_branch_mn(inp_shape=[224, 224, 3], num_branches=3)
         # asm_model.load_weights('')
         '''creating model'''
-        model = self._get_model(None)
+        model = cnn.get_model(None, self.arch, self.num_output_layers)
 
         '''loading weights'''
         if self.weight is not None:
@@ -160,7 +159,8 @@ class Train:
 
 
         '''creating model'''
-        model = self._get_model(None)
+        cnn = CNNModel()
+        model = cnn.get_model(None, self.arch, self.num_output_layers)
 
         '''loading weights'''
         if self.weight is not None:
@@ -204,7 +204,8 @@ class Train:
                                                   batch_size=self.BATCH_SIZE, reduced=True)
 
         '''creating model'''
-        model = self._get_model(train_images)
+        cnn = CNNModel()
+        model = cnn.get_model(train_images, self.arch, self.num_output_layers)
 
         if self.weight is not None:
             model.load_weights(self.weight)
@@ -253,25 +254,6 @@ class Train:
         # for i in range(self.num_output_layers):
         #     wights.append(1)
         return wights
-
-    def _get_model(self, train_images):
-        cnn = CNNModel()
-        if self.arch == 'asmnet':
-            model = cnn.create_asmnet(inp_shape=[224, 224, 3], num_branches=self.num_output_layers)
-        if self.arch == 'mb_mn':
-            model = cnn.create_multi_branch_mn(inp_shape=[224, 224, 3], num_branches=self.num_output_layers)
-            # model = cnn.create_multi_branch_mn_one_input(inp_shape=[224, 224, 3], num_branches=self.num_output_layers)
-        if self.arch == 'mn_asm_0':
-            model = cnn.mn_asm_v0(train_images)
-        if self.arch == 'mn_asm_1':
-            model = cnn.mn_asm_v1(train_images)
-        if self.arch == 'hg':
-            model = cnn.hour_glass_network(num_stacks=self.num_output_layers)
-        elif self.arch == 'mn_r':
-            model = cnn.mnv2_hm(tensor=train_images)
-        elif self.arch == '':
-            model = cnn.mnv2_hm_r_v2(tensor=train_images, inception_mode=self.inception_mode)
-        return model
 
     def _get_optimizer(self):
         return adam(lr=1e-2, beta_1=0.9, beta_2=0.999, decay=1e-5, amsgrad=False)

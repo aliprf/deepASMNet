@@ -444,13 +444,35 @@ class TFRecordUtility:
 
         return np.array(img_filenames), np.array(lbls_filenames)
 
+    def load_hm_and_test(self, dataset_name):
+
+        npy_dir_85 = IbugConf.train_hm_dir_85
+        npy_dir_90 = IbugConf.train_hm_dir_90
+        npy_dir_97 = IbugConf.train_hm_dir_97
+        arr_err = []
+        counter = 1
+        for file in tqdm(os.listdir(IbugConf.train_hm_dir_85)):
+            try:
+                hm_85 = load(npy_dir_85 + file)
+                hm_90 = load(npy_dir_90 + file)
+                hm_97 = load(npy_dir_97 + file)
+                # imgpr.print_image_arr_heat(counter, hm, print_single=False)
+                # counter += 1
+            except:
+                arr_err.append(file)
+                print('err: -->' + str(counter) + ' - f: --> ' + file)
+
+                counter += 1
+
+        return arr_err
+
     def generate_hm_and_save(self, dataset_name, pca_percentage=100):
         pca_util = PCAUtility()
 
         if pca_percentage != 100:
-            eigenvalues = load('pca_obj/' + dataset_name + pca_util._eigenvalues_prefix + str(pca_percentage) + ".npy")
-            eigenvectors = load('pca_obj/' + dataset_name + pca_util._eigenvectors_prefix + str(pca_percentage) + ".npy")
-            meanvector = load('pca_obj/' + dataset_name + pca_util._meanvector_prefix + str(pca_percentage) + ".npy")
+            eigenvalues = load('pca_obj/' + dataset_name + pca_util.eigenvalues_prefix + str(pca_percentage) + ".npy")
+            eigenvectors = load('pca_obj/' + dataset_name + pca_util.eigenvectors_prefix + str(pca_percentage) + ".npy")
+            meanvector = load('pca_obj/' + dataset_name + pca_util.meanvector_prefix + str(pca_percentage) + ".npy")
 
         images_dir = IbugConf.train_images_dir
         npy_dir = IbugConf.train_hm_dir
@@ -483,12 +505,11 @@ class TFRecordUtility:
                 if pca_percentage != 100:
                     b_vector_p = pca_util.calculate_b_vector(points_arr, True, eigenvalues, eigenvectors, meanvector)
                     points_arr_new = meanvector + np.dot(eigenvectors, b_vector_p)
-                    # points_arr_pca = points_arr_new.tolist()
                     points_arr = points_arr_new.tolist()
 
                 hm = self.generate_hm(56, 56, np.array(points_arr), 1, False)
-                # hm_pca = self.generate_hm(56, 56, np.array(points_arr_pca), 1, False)
                 hm_f = npy_dir + file_name_save
+
                 # imgpr.print_image_arr_heat(counter, hm, print_single=False)
                 # imgpr.print_image_arr_heat(counter*100, hm_pca, print_single=False)
 
