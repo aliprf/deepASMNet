@@ -1,11 +1,13 @@
 # Byte-compiled / optimized / DLL files
 __pycache__/
 
+*.mat
 *.npy
 *.pyc
 *.tmp
 *.json
 *.pkl
+results_1/*
 data/*
 venv/*
 logs/*
