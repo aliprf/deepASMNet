@@ -66,7 +66,7 @@ if __name__ == '__main__':
                     num_output_layers=1,
                     weight=None,
                     train_on_batch=False,
-                    accuracy=97)
+                    accuracy=90)
 
 
 
