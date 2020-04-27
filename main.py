@@ -23,7 +23,7 @@ if __name__ == '__main__':
     # pca_utility.create_pca_from_points(DatasetName.ibug, 97)
     # tf_record_util.generate_hm_and_save(dataset_name=DatasetName.ibug)
 
-    tf_record_util.load_hm_and_test(dataset_name=DatasetName.ibug)
+    # tf_record_util.load_hm_and_test(dataset_name=DatasetName.ibug)
 
     # tf_record_util.generate_hm_and_save(dataset_name=DatasetName.ibug, pca_percentage=85)
     # tf_record_util.generate_hm_and_save(dataset_name=DatasetName.ibug, pca_percentage=90)
@@ -57,17 +57,18 @@ if __name__ == '__main__':
 
     # test = Test(arch='mb_mn', num_output_layers=3, weight_fname='weights-101-0.00021_asm_model.h5')
 
-    # trainer = Train(use_tf_record=False,
-    #                 dataset_name=DatasetName.ibug,
-    #                 custom_loss=False,
-    #                 arch='asmnet',
-    #                 # arch='mb_mn',
-    #                 inception_mode=False,
-    #                 num_output_layers=4,
-    #                 weight='weights-101-0.00021_asm_model.h5',
-    #                 train_on_batch=True)
-    #
-    #
+    trainer = Train(use_tf_record=False,
+                    dataset_name=DatasetName.ibug,
+                    custom_loss=False,
+                    arch='mn_asm_0',
+                    # arch='mb_mn',
+                    inception_mode=False,
+                    num_output_layers=1,
+                    weight=None,
+                    train_on_batch=False,
+                    accuracy=97)
+
+
 
 
 

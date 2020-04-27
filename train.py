@@ -33,7 +33,7 @@ from skimage.io import imread
 
 class Train:
     def __init__(self, use_tf_record, dataset_name, custom_loss, arch, inception_mode, num_output_layers,
-                 train_on_batch, weight=None):
+                 train_on_batch, weight=None, accuracy=100):
         c_loss = Custom_losses()
 
         if dataset_name == DatasetName.ibug:
@@ -55,6 +55,8 @@ class Train:
         self.inception_mode = inception_mode
         self.weight = weight
         self.num_output_layers = num_output_layers
+
+        self.accuracy = accuracy
 
         if train_on_batch:
             self.train_fit_on_batch()
@@ -153,10 +155,9 @@ class Train:
             is_single = False
 
         my_training_batch_generator = CustomHeatmapGenerator(is_single, x_train_filenames, y_train_filenames,
-                                                             self.BATCH_SIZE, self.num_output_layers)
+                                                             self.BATCH_SIZE, self.num_output_layers, self.accuracy)
         my_validation_batch_generator = CustomHeatmapGenerator(is_single, x_val_filenames, y_val_filenames,
-                                                               self.BATCH_SIZE, self.num_output_layers)
-
+                                                               self.BATCH_SIZE, self.num_output_layers, self.accuracy)
 
         '''creating model'''
         cnn = CNNModel()
@@ -246,11 +247,12 @@ class Train:
         return tensors
 
     def _generate_loss_weights(self):
-        wights = [0.7*3*1,  # main labels
-                  0.3*0.5,  # asm 85 labels
-                  0.3*0.7,  # asm 90 labels
-                  0.3*0.9   # asm 97 labels
-                  ]
+        wights = [1]
+        # wights = [0.7*3*1,  # main labels
+        #           0.3*0.5,  # asm 85 labels
+        #           0.3*0.7,  # asm 90 labels
+        #           0.3*0.9   # asm 97 labels
+        #           ]
         # for i in range(self.num_output_layers):
         #     wights.append(1)
         return wights
