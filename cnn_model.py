@@ -79,15 +79,15 @@ class CNNModel:
 
         '''heatmap can not be generated from activation layers, so we use out_relu'''
         x = mobilenet_model.get_layer('out_relu').output  # 7, 7, 1280
-        x = Deconvolution2D(filters=256, kernel_size=(4, 4), strides=(2, 2), padding='same', activation='relu',
+        x = Deconvolution2D(filters=128, kernel_size=(2, 2), strides=(2, 2), padding='same', activation='relu',
                             name='deconv1', kernel_initializer='he_uniform')(x)  # 14, 14, 256
         x = BatchNormalization(name='out_bn1')(x)
 
-        x = Deconvolution2D(filters=256, kernel_size=(4, 4), strides=(2, 2), padding='same', activation='relu',
+        x = Deconvolution2D(filters=128, kernel_size=(2, 2), strides=(2, 2), padding='same', activation='relu',
                             name='deconv2', kernel_initializer='he_uniform')(x)  # 28, 28, 256
         x = BatchNormalization(name='out_bn2')(x)
 
-        x = Deconvolution2D(filters=256, kernel_size=(4, 4), strides=(2, 2), padding='same', activation='relu',
+        x = Deconvolution2D(filters=128, kernel_size=(2, 2), strides=(2, 2), padding='same', activation='relu',
                             name='deconv3', kernel_initializer='he_uniform')(x)  # 56, 56, 256
         x = BatchNormalization(name='out_bn3')(x)
 

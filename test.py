@@ -140,7 +140,7 @@ class Test:
         #     x_y.append(xys[i+1])
         # imgpr.print_image_arr(counter+1, img, x_s, x_y)
 
-        x_h_p, y_h_p, xy_h_p = tf_utility.from_heatmap_to_point(heatmap_main, 1)
+        x_h_p, y_h_p, xy_h_p = tf_utility.from_heatmap_to_point(heatmap_main, 5)
 
         # mkps = tf_utility.get_predicted_kp_from_htmap(heatmap_main, (112, 112), 1, (56, 56)) # (68 * 3)
         # x_h_p = []
@@ -175,7 +175,7 @@ class Test:
 
         # imgpr.print_image_arr((counter+1)*1000, img, landmark_arr_x_p, landmark_arr_y_p)
 
-        # imgpr.print_image_arr_heat(counter+1, heatmap_main, print_single=False)
+        imgpr.print_image_arr_heat(counter+1, heatmap_main, print_single=False)
         #
         # imgpr.print_image_arr((counter+1)*100000, img, landmark_arr_x_t, landmark_arr_y_t)
 

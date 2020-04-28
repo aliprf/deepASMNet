@@ -26,7 +26,7 @@ def print_image_arr_heat(k, image, print_single=False):
             plt.clf()
 
     plt.figure()
-    plt.imshow(img, vmin=0, vmax=1)
+    plt.imshow(img, vmin=0, vmax=255)
     plt.axis('off')
     plt.savefig('heat_' + str(k) + '.png', bbox_inches='tight')
     plt.clf()
