@@ -510,7 +510,7 @@ class TFRecordUtility:
                 hm = self.generate_hm(56, 56, np.array(points_arr), 3, False)
                 hm_f = npy_dir + file_name_save
 
-                imgpr.print_image_arr_heat(counter, hm, print_single=True)
+                # imgpr.print_image_arr_heat(counter, hm, print_single=True)
 
                 save(hm_f, hm)
                 counter += 1
