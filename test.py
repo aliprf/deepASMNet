@@ -110,8 +110,8 @@ class Test:
 
         predict = model.predict(image)
 
-        # heatmap_main = predict[0]
-        heatmap_main = predict[0][0]
+        heatmap_main = predict[0]
+        # heatmap_main = predict[0][0]
 
         # print("labels_true: " + str(labels_true))
         # print("labels_predicted :" + str(labels_predicted))
@@ -140,7 +140,7 @@ class Test:
         #     x_y.append(xys[i+1])
         # imgpr.print_image_arr(counter+1, img, x_s, x_y)
 
-        x_h_p, y_h_p, xy_h_p = tf_utility.from_heatmap_to_point(heatmap_main, 5)
+        x_h_p, y_h_p, xy_h_p = tf_utility.from_heatmap_to_point(heatmap_main, 1)
 
         # mkps = tf_utility.get_predicted_kp_from_htmap(heatmap_main, (112, 112), 1, (56, 56)) # (68 * 3)
         # x_h_p = []
@@ -171,12 +171,11 @@ class Test:
         # imgpr.print_image_arr(counter+1, heatmap_main_all, np.array(x_h_p)/4, np.array(y_h_p)/4)
 
         imgpr.print_image_arr((counter+1)*100, img, x_h_p, y_h_p)
-
         # imgpr.print_image_arr(counter+1, img, landmark_arr_x_p_asm, landmark_arr_y_p_asm)
 
         # imgpr.print_image_arr((counter+1)*1000, img, landmark_arr_x_p, landmark_arr_y_p)
 
-        imgpr.print_image_arr_heat(counter+1, heatmap_main, print_single=False)
+        # imgpr.print_image_arr_heat(counter+1, heatmap_main, print_single=False)
         #
         # imgpr.print_image_arr((counter+1)*100000, img, landmark_arr_x_t, landmark_arr_y_t)
 

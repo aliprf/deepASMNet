@@ -20,14 +20,13 @@ def print_image_arr_heat(k, image, print_single=False):
         if print_single:
             plt.figure()
             plt.imshow(image[:, :, i])
-            implot = plt.imshow(image[:, :, i])
+            # implot = plt.imshow(image[:, :, i])
             plt.axis('off')
             plt.savefig('single_heat_' + str(i+(k*100)) + '.png', bbox_inches='tight')
             plt.clf()
 
     plt.figure()
-    plt.imshow(img)
-    implot = plt.imshow(img)
+    plt.imshow(img, vmin=0, vmax=1)
     plt.axis('off')
     plt.savefig('heat_' + str(k) + '.png', bbox_inches='tight')
     plt.clf()
