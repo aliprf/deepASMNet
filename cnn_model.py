@@ -50,13 +50,13 @@ class CNNModel:
             model = self.mnv2_hm(tensor=train_images)
         return model
 
-    def hour_glass_network(self, num_classes=68, num_stacks=4, num_filters=256,
+    def hour_glass_network(self, num_classes=68, num_stacks=10, num_filters=256,
                            in_shape=(224, 224), out_shape=(56, 56)):
         hg_net = HourglassNet(num_classes=num_classes, num_stacks=num_stacks,
                               num_filters=num_filters,
                               in_shape=in_shape,
                               out_shape=out_shape)
-        model = hg_net.build_model()
+        model = hg_net.build_model(mobile=True)
         return model
 
     def mn_asm_v0(self, tensor):

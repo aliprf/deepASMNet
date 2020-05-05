@@ -43,15 +43,15 @@ if __name__ == '__main__':
     # trg = TrainGan()
     # trg.create_seq_model()
 
-    test = Test(arch='mn_asm_0', num_output_layers=1, weight_fname='weights-01-0.10221.h5')
+    test = Test(arch='mn_asm_0', num_output_layers=1, weight_fname='weights-61-0.00010.h5')
 
     # trainer = Train(use_tf_record=False,
     #                 dataset_name=DatasetName.ibug,
     #                 custom_loss=False,
-    #                 arch='mn_asm_0',
+    #                 arch='hg',
     #                 # arch='mb_mn',
     #                 inception_mode=False,
-    #                 num_output_layers=1,
+    #                 num_output_layers=5,
     #                 weight=None,
     #                 train_on_batch=False,
     #                 accuracy=97)
