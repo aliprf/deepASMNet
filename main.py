@@ -25,10 +25,10 @@ if __name__ == '__main__':
     # pca_utility.create_pca_from_points(DatasetName.ibug, 97)
 
     '''generate heatmap with different accuracy'''
-    # tf_record_util.generate_hm_and_save(dataset_name=DatasetName.ibug)
-    # tf_record_util.generate_hm_and_save(dataset_name=DatasetName.ibug, pca_percentage=85)
-    # tf_record_util.generate_hm_and_save(dataset_name=DatasetName.ibug, pca_percentage=90)
-    # tf_record_util.generate_hm_and_save(dataset_name=DatasetName.ibug, pca_percentage=97)
+    tf_record_util.generate_hm_and_save(dataset_name=DatasetName.ibug)
+    tf_record_util.generate_hm_and_save(dataset_name=DatasetName.ibug, pca_percentage=85)
+    tf_record_util.generate_hm_and_save(dataset_name=DatasetName.ibug, pca_percentage=90)
+    tf_record_util.generate_hm_and_save(dataset_name=DatasetName.ibug, pca_percentage=97)
 
     '''test heatmaps after creation'''
     # tf_record_util.load_hm_and_test(dataset_name=DatasetName.ibug)
@@ -43,7 +43,7 @@ if __name__ == '__main__':
     # trg = TrainGan()
     # trg.create_seq_model()
 
-    test = Test(arch='mn_asm_0', num_output_layers=1, weight_fname='weights-61-0.00010.h5')
+    # test = Test(arch='mn_asm_0', num_output_layers=1, weight_fname='weights-141-0.00009.h5')
 
     # trainer = Train(use_tf_record=False,
     #                 dataset_name=DatasetName.ibug,

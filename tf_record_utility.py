@@ -507,16 +507,16 @@ class TFRecordUtility:
                     points_arr_new = meanvector + np.dot(eigenvectors, b_vector_p)
                     points_arr = points_arr_new.tolist()
 
-                hm = self.generate_hm(56, 56, np.array(points_arr), 2, False)
+                hm = self.generate_hm(56, 56, np.array(points_arr), 2.0, False)
                 hm_f = npy_dir + file_name_save
 
-                # imgpr.print_image_arr_heat(counter, hm, print_single=True)
+                # imgpr.print_image_arr_heat(counter, hm, print_single=False)
 
                 save(hm_f, hm)
                 counter += 1
         print('generate_hm_and_save COMPLETED!!!')
 
-    def generate_hm(self, height, width, landmarks, s=2.5, upsample=True):
+    def generate_hm(self, height, width, landmarks, s=2.0, upsample=True):
         """ Generate a full Heap Map for every landmarks in an array
         Args:
             height    : The height of Heat Map (the height of target output)
