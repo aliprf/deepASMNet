@@ -154,11 +154,6 @@ class Train:
         if self.num_output_layers > 1:
             is_single = False
 
-        my_training_batch_generator = CustomHeatmapGenerator(is_single, x_train_filenames, y_train_filenames,
-                                                             self.BATCH_SIZE, self.num_output_layers, self.accuracy)
-        my_validation_batch_generator = CustomHeatmapGenerator(is_single, x_val_filenames, y_val_filenames,
-                                                               self.BATCH_SIZE, self.num_output_layers, self.accuracy)
-
         '''creating model'''
         cnn = CNNModel()
         model = cnn.get_model(None, self.arch, self.num_output_layers)
@@ -166,6 +161,11 @@ class Train:
         '''loading weights'''
         if self.weight is not None:
             model.load_weights(self.weight)
+
+        my_training_batch_generator = CustomHeatmapGenerator(is_single, x_train_filenames, y_train_filenames,
+                                                             self.BATCH_SIZE, self.num_output_layers, self.accuracy)
+        my_validation_batch_generator = CustomHeatmapGenerator(is_single, x_val_filenames, y_val_filenames,
+                                                               self.BATCH_SIZE, self.num_output_layers, self.accuracy)
 
         '''compiling model'''
         model.compile(loss=self._generate_loss(),
@@ -183,8 +183,8 @@ class Train:
                             steps_per_epoch=self.STEPS_PER_EPOCH,
                             callbacks=callbacks_list,
                             use_multiprocessing=True,
-                            workers=10,
-                            max_queue_size=20
+                            workers=16,
+                            max_queue_size=32
                             )
 
     def train_fit(self):

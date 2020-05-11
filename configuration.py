@@ -57,7 +57,7 @@ class LearningConfig:
     batch_size = 70
     steps_per_validation_epochs = 5
 
-    epochs = 200
+    epochs = 500
     landmark_len = 136
     point_len = 68
 
