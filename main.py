@@ -55,7 +55,7 @@ if __name__ == '__main__':
                     weight='pre-weights-141-0.00009.h5',
                     # weight=None,
                     train_on_batch=False,
-                    accuracy=100)
+                    accuracy=90)
 
 
 
