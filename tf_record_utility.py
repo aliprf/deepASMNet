@@ -507,7 +507,7 @@ class TFRecordUtility:
                     points_arr_new = meanvector + np.dot(eigenvectors, b_vector_p)
                     points_arr = points_arr_new.tolist()
 
-                hm = self.generate_hm(56, 56, np.array(points_arr), 2.0, False)
+                hm = self.generate_hm(56, 56, np.array(points_arr), 3.0, False)
                 hm_f = npy_dir + file_name_save
 
                 # imgpr.print_image_arr_heat(counter, hm, print_single=False)

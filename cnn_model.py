@@ -40,6 +40,9 @@ class CNNModel:
         elif arch == 'mb_mn':
             model = self.create_multi_branch_mn(inp_shape=[224, 224, 3], num_branches=num_output_layers)
             # model = cnn.create_multi_branch_mn_one_input(inp_shape=[224, 224, 3], num_branches=self.num_output_layers)
+        elif arch == 'mnv2_hm_r_v2':
+            model = self.mnv2_hm_r_v2(inp_shape=[224, 224, 3])
+            # model = cnn.create_multi_branch_mn_one_input(inp_shape=[224, 224, 3], num_branches=self.num_output_layers)
         elif arch == 'mn_asm_0':
             model = self.mn_asm_v0(train_images)
         elif arch == 'mn_asm_1':
@@ -189,6 +192,84 @@ class CNNModel:
         model_json = revised_model.to_json()
 
         with open("mn_asm_v1.json", "w") as json_file:
+            json_file.write(model_json)
+
+        return revised_model
+
+    def mnv2_hm_r_v2(self, inp_shape):
+        mobilenet_model = mobilenet_v2.MobileNetV2(input_shape=inp_shape,
+                                                   alpha=1.0,
+                                                   include_top=True,
+                                                   weights=None,
+                                                   input_tensor=None,
+                                                   pooling=None)
+
+        mobilenet_model.layers.pop()
+
+        inp = mobilenet_model.input
+        '''heatmap can not be generated from activation layers, so we use out_relu'''
+        x = mobilenet_model.get_layer('out_relu').output  # 7, 7, 1280
+        x = Deconvolution2D(filters=256, kernel_size=(4, 4), strides=(2, 2), padding='same',
+                            kernel_initializer='he_uniform')(x)  # 14, 14, 256
+        x = BatchNormalization()(x)
+        x = ReLU()(x)
+
+        x = Deconvolution2D(filters=256, kernel_size=(4, 4), strides=(2, 2), padding='same',
+                            kernel_initializer='he_uniform')(x)  # 28, 28, 256
+        x = BatchNormalization()(x)
+        x = ReLU()(x)
+
+        x = Deconvolution2D(filters=256, kernel_size=(4, 4), strides=(2, 2), padding='same',
+                            kernel_initializer='he_uniform')(x)  # 56, 56, 256
+        bn_0 = BatchNormalization(name='bn_0')(x)
+        x = ReLU()(bn_0)
+
+        '''reduce to  7'''
+        x = Conv2D(256, kernel_size=(3, 3), strides=(2, 2), padding='same', kernel_initializer='he_uniform')(
+            x)  # 28, 28, 256
+        bn_1 = BatchNormalization(name='bn_1')(x)  # 28, 28, 256
+        x = ReLU()(bn_1)
+
+        x = Conv2D(256, kernel_size=(3, 3), strides=(2, 2), padding='same', kernel_initializer='he_uniform')(
+            x)  # 14, 14, 256
+        bn_2 = BatchNormalization(name='bn_2')(x)  # 14, 14, 256
+        x = ReLU()(bn_2)
+
+        x = Conv2D(256, kernel_size=(3, 3), strides=(2, 2), padding='same', kernel_initializer='he_uniform')(
+            x)  # 7, 7 , 256
+        bn_3 = BatchNormalization(name='bn_3')(x)  # 7, 7 , 256
+        x = ReLU()(bn_3)
+
+        '''increase to  56'''
+        x = Deconvolution2D(filters=256, kernel_size=(4, 4), strides=(2, 2), padding='same',
+                            name='deconv1', kernel_initializer='he_uniform')(x)  # 14, 14, 256
+        x = BatchNormalization()(x)
+        x = keras.layers.add([x, bn_2])  # 14, 14, 256
+        x = ReLU()(x)
+
+        x = Deconvolution2D(filters=256, kernel_size=(4, 4), strides=(2, 2), padding='same',
+                            name='deconv2', kernel_initializer='he_uniform')(x)  # 28, 28, 256
+        x = BatchNormalization()(x)
+        x = keras.layers.add([x, bn_1])  # 28, 28, 256
+        x = ReLU()(x)
+
+        x = Deconvolution2D(filters=256, kernel_size=(4, 4), strides=(2, 2), padding='same',
+                            name='deconv3', kernel_initializer='he_uniform')(x)  # 56, 56, 256
+        x = BatchNormalization()(x)
+        x = keras.layers.add([x, bn_0])  # 56, 56, 256
+
+        '''out_conv_layer'''
+        out_heatmap = Conv2D(LearningConfig.landmark_len // 2, kernel_size=1, padding='same', name='out_heatmap')(x)
+
+        revised_model = Model(inp, [
+            out_heatmap,
+        ])
+
+        revised_model.summary()
+        # plot_model(revised_model, to_file='mnv2_hm.png', show_shapes=True, show_layer_names=True)
+        model_json = revised_model.to_json()
+
+        with open("mnv2_hm_r_v2.json", "w") as json_file:
             json_file.write(model_json)
 
         return revised_model

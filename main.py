@@ -43,17 +43,17 @@ if __name__ == '__main__':
     # trg = TrainGan()
     # trg.create_seq_model()
 
-    # test = Test(arch='mn_asm_0', num_output_layers=1, weight_fname='weights-141-0.00009.h5')
+    # test = Test(arch='mnv2_hm_r_v2', num_output_layers=1, weight_fname='weights-145-0.00011.h5')
 
     trainer = Train(use_tf_record=False,
                     dataset_name=DatasetName.ibug,
                     custom_loss=False,
-                    arch='mn_asm_0',
+                    arch='mnv2_hm_r_v2',
                     # arch='mb_mn',
                     inception_mode=False,
                     num_output_layers=1,
-                    weight='pre-weights-141-0.00009.h5',
-                    # weight=None,
+                    # weight='weights-145-0.00011.h5',
+                    weight=None,
                     train_on_batch=False,
                     accuracy=90)
 

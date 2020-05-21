@@ -147,13 +147,6 @@ class Train:
         """define optimizers"""
         optimizer = self._get_optimizer()
 
-        '''create train, validation, test data iterator'''
-        x_train_filenames, x_val_filenames, y_train_filenames, y_val_filenames = self._create_generators()
-
-        is_single = True
-        if self.num_output_layers > 1:
-            is_single = False
-
         '''creating model'''
         cnn = CNNModel()
         model = cnn.get_model(None, self.arch, self.num_output_layers)
@@ -161,6 +154,13 @@ class Train:
         '''loading weights'''
         if self.weight is not None:
             model.load_weights(self.weight)
+
+        '''create train, validation, test data iterator'''
+        x_train_filenames, x_val_filenames, y_train_filenames, y_val_filenames = self._create_generators()
+
+        is_single = True
+        if self.num_output_layers > 1:
+            is_single = False
 
         my_training_batch_generator = CustomHeatmapGenerator(is_single, x_train_filenames, y_train_filenames,
                                                              self.BATCH_SIZE, self.num_output_layers, self.accuracy)
