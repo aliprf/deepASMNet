@@ -17,6 +17,39 @@ class PCAUtility:
     eigenvectors_prefix = "_eigenvectors_"
     meanvector_prefix = "_meanvector_"
 
+    def create_pca_from_npy(self, dataset_name, pca_postfix):
+        lbl_arr = []
+        path = None
+        if dataset_name == DatasetName.ibug:
+            path = IbugConf.normalized_point  # normalized
+        # elif dataset_name == DatasetName.cofw:
+        #     path = CofwConf.normalized_points_npy_dir  # normalized
+        # elif dataset_name == DatasetName.wflw:
+        #     path = WflwConf.normalized_points_npy_dir  # normalized
+
+        lbl_arr = []
+        for file in tqdm(os.listdir(path)):
+            if file.endswith(".npy"):
+                npy_file = os.path.join(path, file)
+                lbl_arr.append(load(npy_file))
+
+        lbl_arr = np.array(lbl_arr)
+
+        print('PCA calculation started')
+
+        ''' no normalization is needed, since we want to generate hm'''
+        reduced_lbl_arr, eigenvalues, eigenvectors = self._func_PCA(lbl_arr, pca_postfix)
+        mean_lbl_arr = np.mean(lbl_arr, axis=0)
+        eigenvectors = eigenvectors.T
+        #
+        # self.__save_obj(eigenvalues, dataset_name + self.__eigenvalues_prefix + str(pca_postfix))
+        # self.__save_obj(eigenvectors, dataset_name + self.__eigenvectors_prefix + str(pca_postfix))
+        # self.__save_obj(mean_lbl_arr, dataset_name + self.__meanvector_prefix + str(pca_postfix))
+        #
+        save('pca_obj/' + dataset_name + self.eigenvalues_prefix + str(pca_postfix), eigenvalues)
+        save('pca_obj/' + dataset_name + self.eigenvectors_prefix + str(pca_postfix), eigenvectors)
+        save('pca_obj/' + dataset_name + self.meanvector_prefix + str(pca_postfix), mean_lbl_arr)
+
     def create_pca_from_points(self, dataset_name, pca_postfix):
         lbl_arr = []
         path = None
@@ -215,7 +248,7 @@ class PCAUtility:
             meanvector = pickle.load(f)
         return eigenvalues, eigenvectors, meanvector
 
-    def __func_PCA(self, input_data, pca_postfix):
+    def _func_PCA(self, input_data, pca_postfix):
         input_data = np.array(input_data)
         pca = PCA(n_components=pca_postfix/100)
         # pca = PCA(n_components=0.98)

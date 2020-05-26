@@ -1,3 +1,4 @@
+
 from tf_record_utility import TFRecordUtility
 from configuration import DatasetName, DatasetType, AffectnetConf, IbugConf, W300Conf, InputDataSize
 from cnn_model import CNNModel
@@ -6,7 +7,6 @@ from image_utility import ImageUtility
 import numpy as np
 from train import Train
 from test import Test
-
 from Train_Gan import TrainGan
 
 if __name__ == '__main__':
@@ -20,9 +20,19 @@ if __name__ == '__main__':
     # tf_record_util.create_adv_att_img_hm()
 
     '''create and save PCA objects'''
+    pca_utility.create_pca_from_npy(DatasetName.ibug, 85)
+    pca_utility.create_pca_from_npy(DatasetName.ibug, 90)
+    pca_utility.create_pca_from_npy(DatasetName.ibug, 95)
+    pca_utility.create_pca_from_npy(DatasetName.ibug, 97)
+
     # pca_utility.create_pca_from_points(DatasetName.ibug, 85)
-    # pca_utility.create_pca_from_points(DatasetName.ibug, 90)
-    # pca_utility.create_pca_from_points(DatasetName.ibug, 97)
+
+    '''generate points with different accuracy'''
+    # tf_record_util.normalize_points_and_save(dataset_name=DatasetName.ibug)
+    tf_record_util.normalize_points_and_save(dataset_name=DatasetName.ibug, pca_percentage=85)
+    tf_record_util.normalize_points_and_save(dataset_name=DatasetName.ibug, pca_percentage=90)
+    tf_record_util.normalize_points_and_save(dataset_name=DatasetName.ibug, pca_percentage=97)
+
 
     '''generate heatmap with different accuracy'''
     # tf_record_util.generate_hm_and_save(dataset_name=DatasetName.ibug)
@@ -33,7 +43,6 @@ if __name__ == '__main__':
     '''test heatmaps after creation'''
     # tf_record_util.load_hm_and_test(dataset_name=DatasetName.ibug)
     # pca_utility.test_pca_validity(DatasetName.ibug, 90)
-    # tf_record_util.retrive_hm_and_test()
 
     # mat = np.random.randint(0, 10, size=10)
     # cnn_model.generate_distance_matrix(mat)
@@ -43,19 +52,22 @@ if __name__ == '__main__':
     # trg = TrainGan()
     # trg.create_seq_model()
 
-    # test = Test(arch='mnv2_hm_r_v2', num_output_layers=1, weight_fname='weights-145-0.00011.h5')
+    # test = Test(arch='mnv2_hm_r_v2', num_output_layers=1, weight_fname='weights-07-0.00077.h5')
+    # 
 
     trainer = Train(use_tf_record=False,
                     dataset_name=DatasetName.ibug,
                     custom_loss=False,
-                    arch='mnv2_hm_r_v2',
+                    arch='efficientNet',
+                    # arch='mnv2_hm_r_v2',
                     # arch='mb_mn',
                     inception_mode=False,
                     num_output_layers=1,
                     # weight='weights-145-0.00011.h5',
                     weight=None,
                     train_on_batch=False,
-                    accuracy=100)
+                    accuracy=100,
+                    on_point=True)
 
 
 

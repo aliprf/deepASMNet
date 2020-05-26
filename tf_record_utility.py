@@ -451,12 +451,12 @@ class TFRecordUtility:
         npy_dir_97 = IbugConf.train_hm_dir_97
         arr_err = []
         counter = 1
-        for file in tqdm(os.listdir(IbugConf.train_hm_dir_85)):
+        for file in tqdm(os.listdir(IbugConf.train_hm_dir_90)):
             try:
                 hm_85 = load(npy_dir_85 + file)
                 hm_90 = load(npy_dir_90 + file)
                 hm_97 = load(npy_dir_97 + file)
-                imgpr.print_image_arr_heat(counter, hm_85, print_single=False)
+                imgpr.print_image_arr_heat(counter, hm_90, print_single=False)
                 counter += 1
             except:
                 arr_err.append(file)
@@ -465,6 +465,55 @@ class TFRecordUtility:
                 counter += 1
 
         return arr_err
+
+    def normalize_points_and_save(self, dataset_name, pca_percentage=100):
+        pca_util = PCAUtility()
+
+        if pca_percentage != 100:
+            eigenvalues = load('pca_obj/' + dataset_name + pca_util.eigenvalues_prefix + str(pca_percentage) + ".npy")
+            eigenvectors = load('pca_obj/' + dataset_name + pca_util.eigenvectors_prefix + str(pca_percentage) + ".npy")
+            meanvector = load('pca_obj/' + dataset_name + pca_util.meanvector_prefix + str(pca_percentage) + ".npy")
+
+        images_dir = IbugConf.train_images_dir
+        npy_dir = IbugConf.normalized_point
+
+        if pca_percentage == 85:
+            npy_dir = IbugConf.normalized_point_85
+        if pca_percentage == 90:
+            npy_dir = IbugConf.normalized_point_90
+        if pca_percentage == 95:
+            npy_dir = IbugConf.normalized_point_95
+        if pca_percentage == 97:
+            npy_dir = IbugConf.normalized_point_97
+
+        counter = 1
+        for file in tqdm(os.listdir(images_dir)):
+            if file.endswith(".pts"):
+                points_arr = []
+                file_name = os.path.join(images_dir, file)
+                file_name_save = str(file)[:-3] + "npy"
+                with open(file_name) as fp:
+                    line = fp.readline()
+                    cnt = 1
+                    while line:
+                        if 3 < cnt < 72:
+                            x_y_pnt = line.strip()
+                            x = float(x_y_pnt.split(" ")[0])
+                            y = float(x_y_pnt.split(" ")[1])
+                            points_arr.append(x)
+                            points_arr.append(y)
+                        line = fp.readline()
+                        cnt += 1
+                if pca_percentage != 100:
+                    b_vector_p = pca_util.calculate_b_vector(points_arr, True, eigenvalues, eigenvectors, meanvector)
+                    points_arr_new = meanvector + np.dot(eigenvectors, b_vector_p)
+                    points_arr = points_arr_new.tolist()
+
+                points_arr = np.array(points_arr)
+                hm_f = npy_dir + file_name_save
+                save(hm_f, points_arr)
+                counter += 1
+        print('normalize_points_and_save COMPLETED!!!')
 
     def generate_hm_and_save(self, dataset_name, pca_percentage=100):
         pca_util = PCAUtility()
@@ -510,7 +559,7 @@ class TFRecordUtility:
                 hm = self.generate_hm(56, 56, np.array(points_arr), 3.0, False)
                 hm_f = npy_dir + file_name_save
 
-                # imgpr.print_image_arr_heat(counter, hm, print_single=False)
+                imgpr.print_image_arr_heat(counter, hm, print_single=False)
 
                 save(hm_f, hm)
                 counter += 1

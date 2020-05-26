@@ -11,6 +11,7 @@ from keras.regularizers import l2
 tf.logging.set_verbosity(tf.logging.ERROR)
 from keras.models import Model
 from keras.applications import mobilenet_v2, mobilenet, resnet50, densenet
+
 from keras.layers import Dense, MaxPooling2D, Conv2D, Flatten, \
     BatchNormalization, Activation, GlobalAveragePooling2D, DepthwiseConv2D, Dropout, ReLU, Concatenate, \
     Deconvolution2D, Input
@@ -32,11 +33,16 @@ from keras.utils.vis_utils import plot_model
 from scipy.spatial import distance
 import scipy.io as sio
 
+import efficientnet.keras as efn
+
+
 
 class CNNModel:
     def get_model(self, train_images, arch, num_output_layers):
         if arch == 'asmnet':
             model = self.create_asmnet(inp_shape=[224, 224, 3], num_branches=num_output_layers)
+        elif arch == 'efficientNet':
+            model = self.create_efficientNet(inp_shape=[224, 224, 3], classes=136)
         elif arch == 'mb_mn':
             model = self.create_multi_branch_mn(inp_shape=[224, 224, 3], num_branches=num_output_layers)
             # model = cnn.create_multi_branch_mn_one_input(inp_shape=[224, 224, 3], num_branches=self.num_output_layers)
@@ -416,6 +422,49 @@ class CNNModel:
     #     with open("MultiBranchMN.json", "w") as json_file:
     #         json_file.write(model_json)
     #     return revised_model
+
+    def create_efficientNet(self, inp_shape, classes):
+        # eff_net = efficientnet.EfficientNetB4(include_top=True,
+        #                                       weights=None,
+        #                                       input_tensor=None,
+        #                                       input_shape=inp_shape,
+        #                                       pooling=None,
+        #                                       classes=136
+        #                                       )
+        eff_net = efn.EfficientNetB6(include_top=True,
+                                     weights=None,
+                                     input_tensor=None,
+                                     input_shape=inp_shape,
+                                     pooling=None,
+                                     classes=classes)  # or weights='noisy-student'
+
+        eff_net.layers.pop()
+        inp = eff_net.input
+
+        x = eff_net.get_layer('top_activation').output
+        x = GlobalAveragePooling2D()(x)
+        x = keras.layers.Dropout(rate=0.3)(x)
+        output = Dense(classes, activation='linear', name='out')(x)
+
+        eff_net = Model(inp, output)
+
+        eff_net.summary()
+
+        # plot_model(eff_net, to_file='eff_net.png', show_shapes=True, show_layer_names=True)
+
+        # tf.keras.utils.plot_model(
+        #     eff_net,
+        #     to_file="eff_net.png",
+        #     show_shapes=False,
+        #     show_layer_names=True,
+        #     rankdir="TB"
+        # )
+
+        # model_json = eff_net.to_json()
+        # with open("eff_net.json", "w") as json_file:
+        #     json_file.write(model_json)
+        return eff_net
+
 
     def create_asmnet(self, inp_shape, num_branches):
         mobilenet_model = mobilenet_v2.MobileNetV2(input_shape=inp_shape,

@@ -54,7 +54,7 @@ class LearningConfig:
     MIN_LR = 1e-7
     MAX_LR = 1e-2
     STEP_SIZE = 10
-    batch_size = 50
+    batch_size = 60
     steps_per_validation_epochs = 5
 
     epochs = 500
@@ -128,12 +128,25 @@ class IbugConf:
     train_hm_dir_90 = '/media/data2/alip/fala/train_hm_dir_90/'
     train_hm_dir_97 = '/media/data2/alip/fala/train_hm_dir_97/'
 
+    normalized_point = '/media/data2/alip/fala/normalized_points_npy_dir/'
+    normalized_point_85 = '/media/data2/alip/fala/normalized_point_npy_dir_85/'
+    normalized_point_90 = '/media/data2/alip/fala/normalized_point_npy_dir_90/'
+    normalized_point_95 = '/media/data2/alip/fala/normalized_point_npy_dir_95/'
+    normalized_point_97 = '/media/data2/alip/fala/normalized_point_npy_dir_97/'
+
+
     '''local'''
     # train_images_dir = '/media/ali/data/train_before_heatmap/'
     # train_hm_dir = '/media/ali/data/train_before_heatmap_npy/'
     # train_hm_dir_85 = '/media/ali/data/train_hm_dir_85/'
     # train_hm_dir_90 = '/media/ali/data/train_hm_dir_90/'
     # train_hm_dir_97 = '/media/ali/data/train_hm_dir_97/'
+    #
+    # normalized_point = '/media/ali/data/normalized_points_npy_dir/'
+    # normalized_point_85 = '/media/ali/data/normalized_point_npy_dir_85/'
+    # normalized_point_90 = '/media/ali/data/normalized_point_npy_dir_90/'
+    # normalized_point_95 = '/media/ali/data/normalized_point_npy_dir_95/'
+    # normalized_point_97 = '/media/ali/data/normalized_point_npy_dir_97/'
 
 
     # images_dir = '/media/ali/extradata/facial_landmark_ds/from_ibug/train_set/train_before_heatmap/'

@@ -5,6 +5,7 @@ from clr_callback import CyclicLR
 from cnn_model import CNNModel
 from custom_Losses import Custom_losses
 from Data_custom_generator import CustomHeatmapGenerator
+from PW_Data_custom_generator import PWCustomHeatmapGenerator
 import tensorflow as tf
 import keras
 
@@ -33,7 +34,7 @@ from skimage.io import imread
 
 class Train:
     def __init__(self, use_tf_record, dataset_name, custom_loss, arch, inception_mode, num_output_layers,
-                 train_on_batch, weight=None, accuracy=100):
+                 train_on_batch, on_point, weight=None, accuracy=100):
         c_loss = Custom_losses()
 
         if dataset_name == DatasetName.ibug:
@@ -63,7 +64,7 @@ class Train:
         elif use_tf_record:
             self.train_fit()
         else:
-            self.train_fit_gen()
+            self.train_fit_gen(on_point)
 
     def train_fit_on_batch(self):
         """"""
@@ -137,7 +138,7 @@ class Train:
         return img_batch, lbl_batch
         # return np.zeros([self.BATCH_SIZE, 224, 224, 3]), np.zeros([self.BATCH_SIZE, 56, 56, 68])
 
-    def train_fit_gen(self):
+    def train_fit_gen(self, on_point):
 
         """train_fit_gen"""
 
@@ -162,11 +163,18 @@ class Train:
         if self.num_output_layers > 1:
             is_single = False
 
-        my_training_batch_generator = CustomHeatmapGenerator(is_single, x_train_filenames, y_train_filenames,
-                                                             self.BATCH_SIZE, self.num_output_layers, self.accuracy)
-        my_validation_batch_generator = CustomHeatmapGenerator(is_single, x_val_filenames, y_val_filenames,
-                                                               self.BATCH_SIZE, self.num_output_layers, self.accuracy)
-
+        if not on_point:
+            my_training_batch_generator = CustomHeatmapGenerator(is_single, x_train_filenames, y_train_filenames,
+                                                                 self.BATCH_SIZE, self.num_output_layers, self.accuracy)
+            my_validation_batch_generator = CustomHeatmapGenerator(is_single, x_val_filenames, y_val_filenames,
+                                                                   self.BATCH_SIZE, self.num_output_layers, self.accuracy)
+        else:
+            my_training_batch_generator = PWCustomHeatmapGenerator(is_single, x_train_filenames, y_train_filenames,
+                                                                   self.BATCH_SIZE, self.num_output_layers,
+                                                                   self.accuracy)
+            my_validation_batch_generator = PWCustomHeatmapGenerator(is_single, x_val_filenames, y_val_filenames,
+                                                                     self.BATCH_SIZE, self.num_output_layers,
+                                                                     self.accuracy)
         '''compiling model'''
         model.compile(loss=self._generate_loss(),
                       optimizer=optimizer,
