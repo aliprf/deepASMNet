@@ -65,7 +65,7 @@ if __name__ == '__main__':
                     # weight='weights-145-0.00011.h5',
                     weight=None,
                     train_on_batch=False,
-                    accuracy=100,
+                    accuracy=90,
                     on_point=True)
 
 
