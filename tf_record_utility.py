@@ -504,16 +504,43 @@ class TFRecordUtility:
                             points_arr.append(y)
                         line = fp.readline()
                         cnt += 1
+                '''normalizing points'''
+                normalized_points = self.generate_normalized_points(np.array(points_arr),
+                                                                    InputDataSize.image_input_size,
+                                                                    InputDataSize.image_input_size)
+                np_path = npy_dir + file_name_save
+                ''''''
                 if pca_percentage != 100:
-                    b_vector_p = pca_util.calculate_b_vector(points_arr, True, eigenvalues, eigenvectors, meanvector)
+                    b_vector_p = pca_util.calculate_b_vector(normalized_points, True, eigenvalues, eigenvectors, meanvector)
                     points_arr_new = meanvector + np.dot(eigenvectors, b_vector_p)
-                    points_arr = points_arr_new.tolist()
+                    normalized_points = points_arr_new.tolist()
+                    normalized_points = np.array(normalized_points)
 
-                points_arr = np.array(points_arr)
-                hm_f = npy_dir + file_name_save
-                save(hm_f, points_arr)
+                '''these are for test'''
+                # image_utility = ImageUtility()
+                # landmark_arr_flat_n, landmark_arr_x_n, landmark_arr_y_n = image_utility.\
+                #     create_landmarks_from_normalized(normalized_points,
+                #                                      InputDataSize.image_input_size,
+                #                                      InputDataSize.image_input_size,
+                #                                      InputDataSize.image_input_size/2,
+                #                                      InputDataSize.image_input_size/2
+                #                                      )
+                # imgpr.print_image_arr(counter+1, np.zeros([224, 224]), landmark_arr_x_n, landmark_arr_y_n)
+                ''''''
+                save(np_path, normalized_points)
                 counter += 1
         print('normalize_points_and_save COMPLETED!!!')
+
+    def generate_normalized_points(self, points_arr, width, height):
+        """normalize landmarks based on hyperface method"""
+
+        x_center = width / 2
+        y_center = height / 2
+        landmark_arr_flat_normalized = []
+        for p in range(0, len(points_arr), 2):
+            landmark_arr_flat_normalized.append((x_center - points_arr[p]) / width)
+            landmark_arr_flat_normalized.append((y_center - points_arr[p + 1]) / height)
+        return landmark_arr_flat_normalized
 
     def generate_hm_and_save(self, dataset_name, pca_percentage=100):
         pca_util = PCAUtility()

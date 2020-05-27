@@ -129,10 +129,10 @@ class IbugConf:
     train_hm_dir_97 = '/media/data2/alip/fala/train_hm_dir_97/'
 
     normalized_point = '/media/data2/alip/fala/normalized_points_npy_dir/'
-    normalized_point_85 = '/media/data2/alip/fala/normalized_point_npy_dir_85/'
-    normalized_point_90 = '/media/data2/alip/fala/normalized_point_npy_dir_90/'
-    normalized_point_95 = '/media/data2/alip/fala/normalized_point_npy_dir_95/'
-    normalized_point_97 = '/media/data2/alip/fala/normalized_point_npy_dir_97/'
+    normalized_point_85 = '/media/data2/alip/fala/normalized_points_npy_dir_85/'
+    normalized_point_90 = '/media/data2/alip/fala/normalized_points_npy_dir_90/'
+    normalized_point_95 = '/media/data2/alip/fala/normalized_points_npy_dir_95/'
+    normalized_point_97 = '/media/data2/alip/fala/normalized_points_npy_dir_97/'
 
 
     '''local'''

@@ -20,10 +20,10 @@ if __name__ == '__main__':
     # tf_record_util.create_adv_att_img_hm()
 
     '''create and save PCA objects'''
-    pca_utility.create_pca_from_npy(DatasetName.ibug, 85)
-    pca_utility.create_pca_from_npy(DatasetName.ibug, 90)
-    pca_utility.create_pca_from_npy(DatasetName.ibug, 95)
-    pca_utility.create_pca_from_npy(DatasetName.ibug, 97)
+    # pca_utility.create_pca_from_npy(DatasetName.ibug, 85)
+    # pca_utility.create_pca_from_npy(DatasetName.ibug, 90)
+    # pca_utility.create_pca_from_npy(DatasetName.ibug, 95)
+    # pca_utility.create_pca_from_npy(DatasetName.ibug, 97)
 
     # pca_utility.create_pca_from_points(DatasetName.ibug, 85)
 
@@ -32,7 +32,6 @@ if __name__ == '__main__':
     tf_record_util.normalize_points_and_save(dataset_name=DatasetName.ibug, pca_percentage=85)
     tf_record_util.normalize_points_and_save(dataset_name=DatasetName.ibug, pca_percentage=90)
     tf_record_util.normalize_points_and_save(dataset_name=DatasetName.ibug, pca_percentage=97)
-
 
     '''generate heatmap with different accuracy'''
     # tf_record_util.generate_hm_and_save(dataset_name=DatasetName.ibug)
