@@ -29,9 +29,9 @@ if __name__ == '__main__':
 
     '''generate points with different accuracy'''
     # tf_record_util.normalize_points_and_save(dataset_name=DatasetName.ibug)
-    tf_record_util.normalize_points_and_save(dataset_name=DatasetName.ibug, pca_percentage=85)
-    tf_record_util.normalize_points_and_save(dataset_name=DatasetName.ibug, pca_percentage=90)
-    tf_record_util.normalize_points_and_save(dataset_name=DatasetName.ibug, pca_percentage=97)
+    # tf_record_util.normalize_points_and_save(dataset_name=DatasetName.ibug, pca_percentage=85)
+    # tf_record_util.normalize_points_and_save(dataset_name=DatasetName.ibug, pca_percentage=90)
+    # tf_record_util.normalize_points_and_save(dataset_name=DatasetName.ibug, pca_percentage=97)
 
     '''generate heatmap with different accuracy'''
     # tf_record_util.generate_hm_and_save(dataset_name=DatasetName.ibug)
