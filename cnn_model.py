@@ -431,7 +431,7 @@ class CNNModel:
         #                                       pooling=None,
         #                                       classes=136
         #                                       )
-        eff_net = efn.EfficientNetB6(include_top=True,
+        eff_net = efn.EfficientNetB3(include_top=True,
                                      weights=None,
                                      input_tensor=None,
                                      input_shape=inp_shape,

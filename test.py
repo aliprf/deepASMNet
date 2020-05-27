@@ -36,7 +36,7 @@ import img_printer as imgpr
 
 
 class Test:
-    def __init__(self, arch, num_output_layers, weight_fname):
+    def __init__(self, arch, num_output_layers, weight_fname, point):
         cnn = CNNModel()
         model = cnn.get_model(None, arch, num_output_layers)
         model.load_weights(weight_fname)
@@ -76,7 +76,7 @@ class Test:
         all_pridicted  = []
         for i in range(W300Conf.number_of_all_sample_challenging):
             loss_challenging_, lt, lp = self.\
-                _test_result_per_image(i, model, img_arr_challenging[i], lbl_arr_challenging[i])
+                _test_result_per_image(i, model, img_arr_challenging[i], lbl_arr_challenging[i], point)
             loss_challenging += loss_challenging_
 
             all_true.append(lt)
@@ -89,20 +89,20 @@ class Test:
         print(loss_challenging * 100 / W300Conf.number_of_all_sample_challenging)
 
         for i in range(W300Conf.number_of_all_sample_common):
-            loss_common_, _, _ = self._test_result_per_image(i, model, img_arr_common[i], lbl_arr_common[i])
+            loss_common_, _, _ = self._test_result_per_image(i, model, img_arr_common[i], lbl_arr_common[i], point)
             loss_common += loss_common_
 
         print('LOSS common: ')
         print(loss_common * 100 / W300Conf.number_of_all_sample_common)
 
         for i in range(W300Conf.number_of_all_sample_full):
-            loss_full_, _, _ = self._test_result_per_image(i, model, img_arr_full[i], lbl_arr_full[i])
+            loss_full_, _, _ = self._test_result_per_image(i, model, img_arr_full[i], lbl_arr_full[i], point)
             loss_full += loss_full_
 
         print('LOSS full: ')
         print(loss_full * 100 / W300Conf.number_of_all_sample_full)
 
-    def _test_result_per_image(self, counter, model, img, labels_true):
+    def _test_result_per_image(self, counter, model, img, labels_true, point_wise):
         tf_utility = TFRecordUtility()
         image_utility = ImageUtility()
 
@@ -110,9 +110,15 @@ class Test:
 
         predict = model.predict(image)
 
-        heatmap_main = predict[0]
-        # heatmap_main = predict[0][0]
-
+        if point_wise:
+            pre_points = predict[0]
+            xy_h_p, x_h_p, y_h_p = \
+                image_utility.create_landmarks_from_normalized(pre_points, 224, 224, 112, 112)
+            # heatmap_main = predict[0][0]
+        else:
+            heatmap_main = predict[0]
+            x_h_p, y_h_p, xy_h_p = tf_utility.from_heatmap_to_point(heatmap_main, 5)
+            # heatmap_main = predict[0][0]
         # print("labels_true: " + str(labels_true))
         # print("labels_predicted :" + str(labels_predicted))
 
@@ -140,7 +146,7 @@ class Test:
         #     x_y.append(xys[i+1])
         # imgpr.print_image_arr(counter+1, img, x_s, x_y)
 
-        x_h_p, y_h_p, xy_h_p = tf_utility.from_heatmap_to_point(heatmap_main, 5)
+
 
         # mkps = tf_utility.get_predicted_kp_from_htmap(heatmap_main, (112, 112), 1, (56, 56)) # (68 * 3)
         # x_h_p = []
@@ -175,7 +181,9 @@ class Test:
 
         # imgpr.print_image_arr((counter+1)*1000, img, landmark_arr_x_p, landmark_arr_y_p)
 
-        imgpr.print_image_arr_heat(counter+1, heatmap_main, print_single=False)
+        if not point_wise:
+            imgpr.print_image_arr_heat(counter+1, heatmap_main, print_single=False)
+
         #
         # imgpr.print_image_arr((counter+1)*100000, img, landmark_arr_x_t, landmark_arr_y_t)
 
