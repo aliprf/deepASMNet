@@ -122,61 +122,54 @@ class W300Conf:
 class IbugConf:
 
     '''server_config'''
-    train_images_dir = '/media/data2/alip/fala/train_images_pts_dir/'
-    train_hm_dir = '/media/data2/alip/fala/train_hm_dir/'
-    train_hm_dir_85 = '/media/data2/alip/fala/train_hm_dir_85/'
-    train_hm_dir_90 = '/media/data2/alip/fala/train_hm_dir_90/'
-    train_hm_dir_97 = '/media/data2/alip/fala/train_hm_dir_97/'
+    # _Ibug_prefix_path = '/media/data3/ali/FL/ibug/'  # --> Zeus
+    _Ibug_prefix_path = '/media/data2/ali/FL/ibug/'  # --> Atlas
+    # _Ibug_prefix_path = '/media/ali/data/ibug/'  # --> local
 
-    normalized_point = '/media/data2/alip/fala/normalized_points_npy_dir/'
-    normalized_point_85 = '/media/data2/alip/fala/normalized_points_npy_dir_85/'
-    normalized_point_90 = '/media/data2/alip/fala/normalized_points_npy_dir_90/'
-    normalized_point_95 = '/media/data2/alip/fala/normalized_points_npy_dir_95/'
-    normalized_point_97 = '/media/data2/alip/fala/normalized_points_npy_dir_97/'
+    img_path_prefix = _Ibug_prefix_path + 'all/'
+    rotated_img_path_prefix = _Ibug_prefix_path + '0_rotated/'
+    train_images_dir = _Ibug_prefix_path + '1_train_images_pts_dir/'
+    normalized_points_npy_dir = _Ibug_prefix_path + '2_normalized_npy_dir/'
+    # normalized_pose_npy_dir = _Ibug_prefix_path + '3_normalized_pose_npy_dir/'
+    pose_npy_dir = _Ibug_prefix_path + '4_pose_npy_dir/'
+    tf_train_path = _Ibug_prefix_path + 'train.tfrecords'
+    tf_test_path = _Ibug_prefix_path + 'test.tfrecords'
+    tf_evaluation_path = _Ibug_prefix_path + 'evaluation.tfrecords'
 
+    # train_hm_dir = '/media/data2/alip/fala/ibug/train_hm_dir/'
+    # train_hm_dir_85 = '/media/data2/alip/fala/ibug/train_hm_dir_85/'
+    # train_hm_dir_90 = '/media/data2/alip/fala/ibug/train_hm_dir_90/'
+    # train_hm_dir_97 = '/media/data2/alip/fala/ibug/train_hm_dir_97/'
 
     '''local'''
-    # train_images_dir = '/media/ali/data/train_before_heatmap/'
+    # img_path_prefix = '/media/ali/data/train_set/'
+    # rotated_img_path_prefix = '/media/ali/data/rotated/'
+    # train_images_dir = '/media/ali/data/train_images_dir/'
+    # normalized_points_npy_dir = '/media/ali/data/normalized_points_npy_dir/'
+    # pose_npy_dir = '/media/ali/data/train_before_heatmap_pose/'
     # train_hm_dir = '/media/ali/data/train_before_heatmap_npy/'
     # train_hm_dir_85 = '/media/ali/data/train_hm_dir_85/'
     # train_hm_dir_90 = '/media/ali/data/train_hm_dir_90/'
     # train_hm_dir_97 = '/media/ali/data/train_hm_dir_97/'
-    #
-    # normalized_point = '/media/ali/data/normalized_points_npy_dir/'
-    # normalized_point_85 = '/media/ali/data/normalized_point_npy_dir_85/'
-    # normalized_point_90 = '/media/ali/data/normalized_point_npy_dir_90/'
-    # normalized_point_95 = '/media/ali/data/normalized_point_npy_dir_95/'
-    # normalized_point_97 = '/media/ali/data/normalized_point_npy_dir_97/'
+    # tf_train_path = '/media/ali/data/train.tfrecords'
+    # tf_test_path = '/media/ali/data/test.tfrecords'
+    # tf_evaluation_path = '/media/ali/data/evaluation.tfrecords'
 
-
-    # images_dir = '/media/ali/extradata/facial_landmark_ds/from_ibug/train_set/train_before_heatmap/'
-    # lbls_dir = '/media/ali/extradata/facial_landmark_ds/from_ibug/train_set/train_before_heatmap_npy/'
-
-    tf_train_path = '/media/ali/extradata/facial_landmark_ds/from_ibug/train_set/train.tfrecords'
-    tf_test_path = '/media/ali/extradata/facial_landmark_ds/from_ibug/train_set/test.tfrecords'
-    tf_evaluation_path = '/media/ali/extradata/facial_landmark_ds/from_ibug/train_set/evaluation.tfrecords'
-
-    tf_train_path_heatmap = '/media/ali/extradata/facial_landmark_ds/from_ibug/train_set/train_heatmap.tfrecords'
-    tf_test_path_heatmap = '/media/ali/extradata/facial_landmark_ds/from_ibug/train_set/test_heatmap.tfrecords'
-    tf_evaluation_path_heatmap = '/media/ali/extradata/facial_landmark_ds/from_ibug/train_set/evaluation_heatmap.tfrecords'
 
     # origin_number_of_all_sample = 3148  # afw, train_helen, train_lfpw
     # origin_number_of_train_sample = 2834  # 95 % for train
     # origin_number_of_evaluation_sample = 314  # 5% for evaluation
 
-    origin_number_of_all_sample = 33672  # afw, train_helen, train_lfpw
-    origin_number_of_train_sample = 31989  # 95 % for train
-    origin_number_of_evaluation_sample = 1683  # 5% for evaluation
+    orig_number_of_training = 3148
+    orig_number_of_test_full = 689
+    orig_number_of_test_common = 554
+    orig_number_of_test_challenging = 135
 
-    augmentation_factor = 3  # create . image from 1
+    '''after augmentation'''
+    number_of_all_sample = 134688   # afw, train_helen, train_lfpw
+    number_of_train_sample = number_of_all_sample * 0.95  # 95 % for train
+    number_of_evaluation_sample = number_of_all_sample * 0.05  # 5% for evaluation
+
+    augmentation_factor = 4  # create . image from 1
     augmentation_factor_rotate = 20  # create . image from 1
-
-    sum_of_train_samples = origin_number_of_train_sample * augmentation_factor
-    sum_of_validation_samples = origin_number_of_evaluation_sample * augmentation_factor
-
-    img_path_prefix = '/media/ali/extradata/facial_landmark_ds/from_ibug/train_set/all/'
-
-    rotated_img_path_prefix = '/media/data2/alip/fala/train_rotated/'
-    # rotated_img_path_prefix = '/media/ali/data/train_before_heatmap/'
-
-    before_heatmap_img_path_prefix = '/media/ali/extradata/facial_landmark_ds/from_ibug/train_set/train_before_heatmap/'
+    num_of_landmarks = 68

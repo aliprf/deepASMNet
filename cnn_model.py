@@ -38,16 +38,16 @@ import efficientnet.keras as efn
 
 
 class CNNModel:
-    def get_model(self, train_images, arch, num_output_layers):
+    def get_model(self, train_images, arch, num_output_layers, input_tensor, inp_shape=[224, 224, 3]):
         if arch == 'asmnet':
-            model = self.create_asmnet(inp_shape=[224, 224, 3], num_branches=num_output_layers)
+            model = self.create_asmnet(inp_shape=inp_shape, num_branches=num_output_layers)
         elif arch == 'efficientNet':
-            model = self.create_efficientNet(inp_shape=[224, 224, 3], classes=136)
+            model = self.create_efficientNet(inp_shape=inp_shape, input_tensor=input_tensor, classes=136)
         elif arch == 'mb_mn':
-            model = self.create_multi_branch_mn(inp_shape=[224, 224, 3], num_branches=num_output_layers)
+            model = self.create_multi_branch_mn(inp_shape=inp_shape, num_branches=num_output_layers)
             # model = cnn.create_multi_branch_mn_one_input(inp_shape=[224, 224, 3], num_branches=self.num_output_layers)
         elif arch == 'mnv2_hm_r_v2':
-            model = self.mnv2_hm_r_v2(inp_shape=[224, 224, 3])
+            model = self.mnv2_hm_r_v2(inp_shape=inp_shape)
             # model = cnn.create_multi_branch_mn_one_input(inp_shape=[224, 224, 3], num_branches=self.num_output_layers)
         elif arch == 'mn_asm_0':
             model = self.mn_asm_v0(train_images)
@@ -423,7 +423,7 @@ class CNNModel:
     #         json_file.write(model_json)
     #     return revised_model
 
-    def create_efficientNet(self, inp_shape, classes):
+    def create_efficientNet(self, inp_shape, input_tensor, classes, is_teacher = True):
         # eff_net = efficientnet.EfficientNetB4(include_top=True,
         #                                       weights=None,
         #                                       input_tensor=None,
@@ -431,12 +431,20 @@ class CNNModel:
         #                                       pooling=None,
         #                                       classes=136
         #                                       )
-        eff_net = efn.EfficientNetB3(include_top=True,
-                                     weights=None,
-                                     input_tensor=None,
-                                     input_shape=inp_shape,
-                                     pooling=None,
-                                     classes=classes)  # or weights='noisy-student'
+        if is_teacher:  # for teacher we use a heavier network
+            eff_net = efn.EfficientNetB3(include_top=True,
+                                         weights=None,
+                                         input_tensor=input_tensor,
+                                         input_shape=inp_shape,
+                                         pooling=None,
+                                         classes=classes)
+        else:  # for student we use the small network
+            eff_net = efn.EfficientNetB0(include_top=True,
+                                         weights=None,
+                                         input_tensor=input_tensor,
+                                         input_shape=inp_shape,
+                                         pooling=None,
+                                         classes=classes)  # or weights='noisy-student'
 
         eff_net.layers.pop()
         inp = eff_net.input

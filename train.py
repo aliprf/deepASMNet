@@ -205,16 +205,16 @@ class Train:
         optimizer = self._get_optimizer()
 
         '''create train, validation, test data iterator'''
-        train_images, _, _, _, _, _, _, train_heatmap, _ = \
-            tf_record_util.create_training_tensor(tfrecord_filename=IbugConf.tf_train_path_heatmap,
-                                                  batch_size=self.BATCH_SIZE, reduced=True)
-        validation_images, _, _, _, _, _, _, validation_heatmap, _ = \
-            tf_record_util.create_training_tensor(tfrecord_filename=IbugConf.tf_evaluation_path_heatmap,
-                                                  batch_size=self.BATCH_SIZE, reduced=True)
+        train_images, train_landmarks = tf_record_util.create_training_tensor_points(tfrecord_filename=
+                                                                                        IbugConf.tf_train_path,
+                                                                                        batch_size=self.BATCH_SIZE)
+        validation_images, validation_landmarks = \
+            tf_record_util.create_training_tensor_points(tfrecord_filename=IbugConf.tf_evaluation_path,
+                                                         batch_size=self.BATCH_SIZE)
 
         '''creating model'''
         cnn = CNNModel()
-        model = cnn.get_model(train_images, self.arch, self.num_output_layers)
+        model = cnn.get_model(train_images, self.arch, self.num_output_layers, input_tensor=train_images, inp_shape=None)
 
         if self.weight is not None:
             model.load_weights(self.weight)
@@ -223,7 +223,7 @@ class Train:
         model.compile(loss=self._generate_loss(),
                       optimizer=optimizer,
                       metrics=['mse', 'mae'],
-                      target_tensors=self._generate_target_tensors(train_heatmap),
+                      target_tensors=self._generate_target_tensors(train_landmarks),
                       loss_weights=self._generate_loss_weights()
                       )
 
@@ -231,15 +231,12 @@ class Train:
         print('< ========== Start Training ============= >')
 
         history = model.fit(train_images,
-                            train_heatmap,
+                            train_landmarks,
                             epochs=self.EPOCHS,
                             steps_per_epoch=self.STEPS_PER_EPOCH,
-                            validation_data=(validation_images, validation_heatmap),
+                            validation_data=(validation_images, validation_landmarks),
                             validation_steps=self.STEPS_PER_VALIDATION_EPOCH,
-                            verbose=1, callbacks=callbacks_list,
-                            use_multiprocessing=True,
-                            workers=16,
-                            max_queue_size=32
+                            verbose=1, callbacks=callbacks_list
                             )
 
     def _generate_loss(self):
@@ -288,26 +285,26 @@ class Train:
     def _create_generators(self):
         tf_utils = TFRecordUtility()
 
-        if os.path.isfile('x_train_filenames.npy') and \
-                os.path.isfile('x_val_filenames.npy') and \
-                os.path.isfile('y_train_filenames.npy') and \
-                os.path.isfile('y_val_filenames.npy'):
-            x_train_filenames = load('x_train_filenames.npy')
-            x_val_filenames = load('x_val_filenames.npy')
-            y_train = load('y_train_filenames.npy')
-            y_val = load('y_val_filenames.npy')
-        else:
-            filenames, labels = tf_utils.create_image_and_labels_name()
+        # if os.path.isfile('x_train_filenames.npy') and \
+        #         os.path.isfile('x_val_filenames.npy') and \
+        #         os.path.isfile('y_train_filenames.npy') and \
+        #         os.path.isfile('y_val_filenames.npy'):
+        #     x_train_filenames = load('x_train_filenames.npy')
+        #     x_val_filenames = load('x_val_filenames.npy')
+        #     y_train = load('y_train_filenames.npy')
+        #     y_val = load('y_val_filenames.npy')
+        # else:
+        filenames, labels = tf_utils.create_image_and_labels_name()
 
-            filenames_shuffled, y_labels_shuffled = shuffle(filenames, labels)
+        filenames_shuffled, y_labels_shuffled = shuffle(filenames, labels)
 
-            x_train_filenames, x_val_filenames, y_train, y_val = train_test_split(
-                filenames_shuffled, y_labels_shuffled, test_size=0.1, random_state=1)
+        x_train_filenames, x_val_filenames, y_train, y_val = train_test_split(
+            filenames_shuffled, y_labels_shuffled, test_size=0.1, random_state=1)
 
-            save('x_train_filenames.npy', x_train_filenames)
-            save('x_val_filenames.npy', x_val_filenames)
-            save('y_train_filenames.npy', y_train)
-            save('y_val_filenames.npy', y_val)
+        save('x_train_filenames.npy', x_train_filenames)
+        save('x_val_filenames.npy', x_val_filenames)
+        save('y_train_filenames.npy', y_train)
+        save('y_val_filenames.npy', y_val)
 
         return x_train_filenames, x_val_filenames, y_train, y_val
 

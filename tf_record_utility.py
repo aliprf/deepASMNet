@@ -290,6 +290,33 @@ class TFRecordUtility:
             """ the output image is x y x y array"""
             return lbl_arr, img_arr
 
+    def create_training_tensor_points(sefl, tfrecord_filename, batch_size):
+        SHUFFLE_BUFFER = 100
+        BATCH_SIZE = batch_size
+
+        dataset = tf.data.TFRecordDataset(tfrecord_filename)
+
+        # Maps the parser on every file path in the array. You can set the number of parallel loaders here
+
+        dataset = dataset.map(sefl.__parse_function_points, num_parallel_calls=16)
+
+        # This dataset will go on forever
+        dataset = dataset.repeat()
+
+        # Set the number of data points you want to load and shuffle
+        dataset = dataset.shuffle(SHUFFLE_BUFFER)
+
+        # Set the batch size
+        dataset = dataset.batch(BATCH_SIZE)
+
+        # Create an iterator
+        iterator = dataset.make_one_shot_iterator()
+
+        # Create your tf representation of the iterator
+
+        images, landmarks = iterator.get_next()
+        return images, landmarks
+
     def create_training_tensor(sefl, tfrecord_filename, batch_size, reduced=False):
         SHUFFLE_BUFFER = 100
         BATCH_SIZE = batch_size
@@ -620,6 +647,17 @@ class TFRecordUtility:
             hm[:, :, j] = self.__gaussian_k(x, y, s, height, width)
             j += 1
         return hm
+
+    def __parse_function_points(self, proto):
+        keys_to_features = {'landmarks': tf.FixedLenFeature([InputDataSize.landmark_len], tf.float32),
+                            'image_raw': tf.FixedLenFeature([InputDataSize.image_input_size,
+                                                             InputDataSize.image_input_size, 3], tf.float32)}
+
+        parsed_features = tf.parse_single_example(proto, keys_to_features)
+        _images = parsed_features['image_raw']
+        _landmarks = parsed_features["landmarks"]
+
+        return _images, _landmarks
 
     def __parse_function_reduced(self, proto):
         keys_to_features = {'landmarks': tf.FixedLenFeature([InputDataSize.landmark_len], tf.float32),

@@ -51,11 +51,11 @@ if __name__ == '__main__':
     # trg = TrainGan()
     # trg.create_seq_model()
 
-    # test = Test(arch='efficientNet', num_output_layers=1, weight_fname='weights-04-0.01070.h5', point=True)
+    # test = Test(arch='efficientNet', num_output_layers=1, weight_fname='1000p-weights-200-0.00014.h5', point=True)
     # test = Test(arch='mnv2_hm_r_v2', num_output_layers=1, weight_fname='weights-04-0.00995.h5', point=False)
     #
 
-    trainer = Train(use_tf_record=False,
+    trainer = Train(use_tf_record=True,
                     dataset_name=DatasetName.ibug,
                     custom_loss=False,
                     arch='efficientNet',
