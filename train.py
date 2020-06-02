@@ -38,7 +38,7 @@ class Train:
         c_loss = Custom_losses()
 
         if dataset_name == DatasetName.ibug:
-            self.SUM_OF_ALL_TRAIN_SAMPLES = IbugConf.sum_of_train_samples
+            self.SUM_OF_ALL_TRAIN_SAMPLES = IbugConf.number_of_all_sample
         elif dataset_name == DatasetName.affectnet:
             self.SUM_OF_ALL_TRAIN_SAMPLES = AffectnetConf.sum_of_train_samples
 
