@@ -1,5 +1,5 @@
 from configuration import DatasetName, DatasetType, \
-    AffectnetConf, IbugConf, W300Conf, InputDataSize, LearningConfig
+    AffectnetConf, IbugConf, W300Conf, InputDataSize, LearningConfig, CofwConf, WflwConf
 from tf_record_utility import TFRecordUtility
 from pca_utility import PCAUtility
 from image_utility import ImageUtility
@@ -36,12 +36,29 @@ import img_printer as imgpr
 
 
 class Test:
-    def __init__(self, arch, num_output_layers, weight_fname, point):
+    def __init__(self, arch, num_output_layers, weight_fname, dataset_name, point):
+
+        if dataset_name == DatasetName.ibug:
+            self.SUM_OF_ALL_TRAIN_SAMPLES = IbugConf.number_of_all_sample
+            self.tf_train_path = IbugConf.tf_train_path
+            self.tf_eval_path = IbugConf.tf_evaluation_path
+            self.output_len = IbugConf.num_of_landmarks * 2
+        elif dataset_name == DatasetName.cofw:
+            self.SUM_OF_ALL_TRAIN_SAMPLES = CofwConf.number_of_all_sample
+            self.tf_train_path = CofwConf.tf_train_path
+            self.tf_eval_path = CofwConf.tf_evaluation_path
+            self.output_len = CofwConf.num_of_landmarks * 2
+        elif dataset_name == DatasetName.wflw:
+            self.SUM_OF_ALL_TRAIN_SAMPLES = WflwConf.number_of_all_sample
+            self.tf_train_path = WflwConf.tf_train_path
+            self.tf_eval_path = WflwConf.tf_evaluation_path
+            self.output_len = WflwConf.num_of_landmarks * 2
+
         cnn = CNNModel()
-        model = cnn.get_model(None, arch, num_output_layers)
+        model = cnn.get_model(train_images=None, arch=arch, num_output_layers=num_output_layers, input_tensor=None)
         model.load_weights(weight_fname)
 
-        tf_record_utility = TFRecordUtility()
+        tf_record_utility = TFRecordUtility(self.output_len)
         image_utility = ImageUtility()
         lbl_arr_challenging, img_arr_challenging = tf_record_utility.retrieve_tf_record_test_set(
             tfrecord_filename=W300Conf.tf_challenging,
@@ -103,7 +120,7 @@ class Test:
         print(loss_full * 100 / W300Conf.number_of_all_sample_full)
 
     def _test_result_per_image(self, counter, model, img, labels_true, point_wise):
-        tf_utility = TFRecordUtility()
+        tf_utility = TFRecordUtility(self.output_len)
         image_utility = ImageUtility()
 
         image = np.expand_dims(img, axis=0)
@@ -146,8 +163,6 @@ class Test:
         #     x_y.append(xys[i+1])
         # imgpr.print_image_arr(counter+1, img, x_s, x_y)
 
-
-
         # mkps = tf_utility.get_predicted_kp_from_htmap(heatmap_main, (112, 112), 1, (56, 56)) # (68 * 3)
         # x_h_p = []
         # y_h_p = []
@@ -175,8 +190,9 @@ class Test:
         # print(heatmap_main_all.shape)
         # imgpr.print_image_arr(counter+1, heatmap_main_all, np.array(landmark_arr_x_t)/4, np.array(landmark_arr_y_t)/4)
         # imgpr.print_image_arr(counter+1, heatmap_main_all, np.array(x_h_p)/4, np.array(y_h_p)/4)
+        '''use for print pointwise'''
+        # imgpr.print_image_arr((counter+1)*100, img, x_h_p, y_h_p)
 
-        imgpr.print_image_arr((counter+1)*100, img, x_h_p, y_h_p)
         # imgpr.print_image_arr(counter+1, img, landmark_arr_x_p_asm, landmark_arr_y_p_asm)
 
         # imgpr.print_image_arr((counter+1)*1000, img, landmark_arr_x_p, landmark_arr_y_p)
@@ -216,7 +232,7 @@ class Test:
             error = math.sqrt(((x_point_predicted - x_point_true) ** 2) + ((y_point_predicted - y_point_true) ** 2))
             sum_errors += error
 
-        normalized_mean_error = sum_errors / (interpupil_distance * (LearningConfig.landmark_len/2))
+        normalized_mean_error = sum_errors / (interpupil_distance * (self.output_len/2))
         # print(normalized_mean_error)
         # print('=====')
 

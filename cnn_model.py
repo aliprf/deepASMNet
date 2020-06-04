@@ -38,7 +38,7 @@ import efficientnet.keras as efn
 
 
 class CNNModel:
-    def get_model(self, train_images, arch, num_output_layers, input_tensor, inp_shape=[224, 224, 3]):
+    def get_model(self, train_images, arch, num_output_layers, input_tensor, output_len, inp_shape=[224, 224, 3]):
         if arch == 'asmnet':
             model = self.create_asmnet(inp_shape=inp_shape, num_branches=num_output_layers)
         elif arch == 'efficientNet':

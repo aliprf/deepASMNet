@@ -28,6 +28,9 @@ from pca_utility import PCAUtility
 
 class TFRecordUtility:
 
+    def __init__(self, number_of_landmark):
+        self.number_of_landmark = number_of_landmark
+
     def test_hm_accuracy(self):
         images_dir = IbugConf.images_dir
 
@@ -298,7 +301,7 @@ class TFRecordUtility:
 
         # Maps the parser on every file path in the array. You can set the number of parallel loaders here
 
-        dataset = dataset.map(sefl.__parse_function_points, num_parallel_calls=16)
+        dataset = dataset.map(sefl.__parse_function_points, num_parallel_calls=32)
 
         # This dataset will go on forever
         dataset = dataset.repeat()
@@ -649,7 +652,7 @@ class TFRecordUtility:
         return hm
 
     def __parse_function_points(self, proto):
-        keys_to_features = {'landmarks': tf.FixedLenFeature([InputDataSize.landmark_len], tf.float32),
+        keys_to_features = {'landmarks': tf.FixedLenFeature([self.number_of_landmark], tf.float32),
                             'image_raw': tf.FixedLenFeature([InputDataSize.image_input_size,
                                                              InputDataSize.image_input_size, 3], tf.float32)}
 
@@ -1430,7 +1433,7 @@ class TFRecordUtility:
 
         features = tf.parse_single_example(serialized_example,
                                            features={
-                                               'landmarks': tf.FixedLenFeature([InputDataSize.landmark_len],
+                                               'landmarks': tf.FixedLenFeature([self.number_of_landmark],
                                                                                tf.float32),
                                                'image_raw': tf.FixedLenFeature(
                                                    [InputDataSize.image_input_size *

@@ -4,6 +4,8 @@ class DatasetName:
     ibug = 'ibug'
     aflw = 'aflw'
     aflw2000 = 'aflw2000'
+    cofw = 'cofw'
+    wflw = 'wflw'
 
 
 
@@ -54,24 +56,21 @@ class LearningConfig:
     MIN_LR = 1e-7
     MAX_LR = 1e-2
     STEP_SIZE = 10
-    batch_size = 40
+    batch_size = 70
     steps_per_validation_epochs = 5
 
     epochs = 200
-    landmark_len = 136
-    point_len = 68
+    # landmark_len = 136
+    # point_len = 68
+    pose_len = 3
 
-    reg_term_face = 1.0  # 0.9
-    reg_term_mouth = 10.0  # 0.9
-    reg_term_nose = 10.0  # 0.9
-    reg_term_leye = 10.0  # 0.9
-    reg_term_reye = 10.0  # 0.9
+    reg_term_ASM = 0.8
 
 
 
 class InputDataSize:
     image_input_size = 224
-    landmark_len = 136
+    # landmark_len = 136
     landmark_face_len = 54
     landmark_nose_len = 18
     landmark_eys_len = 24
@@ -119,12 +118,66 @@ class W300Conf:
     number_of_all_sample_full = 689
 
 
+class WflwConf:
+    Wflw_prefix_path = '/media/data3/ali/FL/wflw/'  # --> Zeus
+    # Wflw_prefix_path = '/media/data2/alip/FL/wflw/'  # --> Atlas
+
+    img_path_prefix = Wflw_prefix_path + 'all/'
+    rotated_img_path_prefix = Wflw_prefix_path + '0_rotated/'
+    train_images_dir = Wflw_prefix_path + '1_train_images_pts_dir/'
+    normalized_points_npy_dir = Wflw_prefix_path + '2_normalized_npy_dir/'
+    pose_npy_dir = Wflw_prefix_path + '4_pose_npy_dir/'
+    tf_train_path = Wflw_prefix_path + 'train.tfrecords'
+    tf_test_path = Wflw_prefix_path + 'test.tfrecords'
+    tf_evaluation_path = Wflw_prefix_path + 'evaluation.tfrecords'
+    tf_train_path_90 = Wflw_prefix_path + 'train_90.tfrecords'
+    tf_evaluation_path_90 = Wflw_prefix_path + 'evaluation_90.tfrecords'
+
+    orig_number_of_training = 7500
+    orig_number_of_test = 2500
+
+    number_of_all_sample = 270956  # just images. dont count both img and lbls
+    number_of_train_sample = number_of_all_sample * 0.95  # 95 % for train
+    number_of_evaluation_sample = number_of_all_sample * 0.05  # 5% for evaluation
+
+    augmentation_factor = 4  # create . image from 1
+    augmentation_factor_rotate = 15  # create . image from 1
+    num_of_landmarks = 97
+
+class CofwConf:
+    # Cofw_prefix_path = '/media/data3/ali/FL/cofw/'  # --> Zeus
+    Cofw_prefix_path = '/media/data2/alip/FL/cofw/'  # --> Atlas
+
+    img_path_prefix = Cofw_prefix_path + 'all/'
+    rotated_img_path_prefix = Cofw_prefix_path + '0_rotated/'
+    train_images_dir = Cofw_prefix_path + '1_train_images_pts_dir/'
+    normalized_points_npy_dir = Cofw_prefix_path + '2_normalized_npy_dir/'
+    pose_npy_dir = Cofw_prefix_path + '4_pose_npy_dir/'
+
+    tf_train_path = Cofw_prefix_path + 'train.tfrecords'
+    tf_test_path = Cofw_prefix_path + 'test.tfrecords'
+    tf_evaluation_path = Cofw_prefix_path + 'evaluation.tfrecords'
+
+    tf_train_path_90 = Cofw_prefix_path + 'train_90.tfrecords'
+    tf_evaluation_path_90 = Cofw_prefix_path + 'evaluation_90.tfrecords'
+
+    orig_number_of_training = 1345
+    orig_number_of_test = 507
+
+    number_of_all_sample = 108820  # afw, train_helen, train_lfpw
+    number_of_train_sample = number_of_all_sample * 0.95  # 95 % for train
+    number_of_evaluation_sample = number_of_all_sample * 0.05  # 5% for evaluation
+
+    augmentation_factor = 5  # create . image from 1
+    augmentation_factor_rotate = 30  # create . image from 1
+    num_of_landmarks = 28
+
+
 class IbugConf:
 
     '''server_config'''
-    # _Ibug_prefix_path = '/media/data3/ali/FL/ibug/'  # --> Zeus
-    _Ibug_prefix_path = '/media/data2/alip/FL/ibug/'  # --> Atlas
-    # _Ibug_prefix_path = '/media/ali/data/ibug/'  # --> local
+    _Ibug_prefix_path = '/media/data3/ali/FL/ibug/'  # --> Zeus
+    # _Ibug_prefix_path = '/media/data2/alip/FL/'  # --> Atlas
 
     img_path_prefix = _Ibug_prefix_path + 'all/'
     rotated_img_path_prefix = _Ibug_prefix_path + '0_rotated/'
@@ -135,6 +188,8 @@ class IbugConf:
     tf_train_path = _Ibug_prefix_path + 'train.tfrecords'
     tf_test_path = _Ibug_prefix_path + 'test.tfrecords'
     tf_evaluation_path = _Ibug_prefix_path + 'evaluation.tfrecords'
+    tf_train_path_90 = _Ibug_prefix_path + 'train_90.tfrecords'
+    tf_evaluation_path_90 = _Ibug_prefix_path + 'evaluation_90.tfrecords'
 
     # train_hm_dir = '/media/data2/alip/fala/ibug/train_hm_dir/'
     # train_hm_dir_85 = '/media/data2/alip/fala/ibug/train_hm_dir_85/'
@@ -173,3 +228,4 @@ class IbugConf:
     augmentation_factor = 4  # create . image from 1
     augmentation_factor_rotate = 20  # create . image from 1
     num_of_landmarks = 68
+

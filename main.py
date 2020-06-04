@@ -10,7 +10,7 @@ from test import Test
 from Train_Gan import TrainGan
 
 if __name__ == '__main__':
-    tf_record_util = TFRecordUtility()
+    # tf_record_util = TFRecordUtility(136)
     pca_utility = PCAUtility()
     cnn_model = CNNModel()
     image_utility = ImageUtility()
@@ -29,9 +29,8 @@ if __name__ == '__main__':
 
     '''generate points with different accuracy'''
     # tf_record_util.normalize_points_and_save(dataset_name=DatasetName.ibug)
-    # tf_record_util.normalize_points_and_save(dataset_name=DatasetName.ibug, pca_percentage=85)
     # tf_record_util.normalize_points_and_save(dataset_name=DatasetName.ibug, pca_percentage=90)
-    # tf_record_util.normalize_points_and_save(dataset_name=DatasetName.ibug, pca_percentage=97)
+
 
     '''generate heatmap with different accuracy'''
     # tf_record_util.generate_hm_and_save(dataset_name=DatasetName.ibug)
@@ -51,12 +50,13 @@ if __name__ == '__main__':
     # trg = TrainGan()
     # trg.create_seq_model()
 
-    # test = Test(arch='efficientNet', num_output_layers=1, weight_fname='1000p-weights-200-0.00014.h5', point=True)
+    # test = Test(arch='efficientNet', num_output_layers=1, weight_fname='weights-09-0.00076.h5',
+    #             dataset_name=DatasetName.ibug, point=True)
     # test = Test(arch='mnv2_hm_r_v2', num_output_layers=1, weight_fname='weights-04-0.00995.h5', point=False)
     #
 
     trainer = Train(use_tf_record=True,
-                    dataset_name=DatasetName.ibug,
+                    dataset_name=DatasetName.cofw,
                     custom_loss=False,
                     arch='efficientNet',
                     # arch='mnv2_hm_r_v2',
