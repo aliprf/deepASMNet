@@ -40,9 +40,9 @@ import efficientnet.keras as efn
 class CNNModel:
     def get_model(self, train_images, arch, num_output_layers, input_tensor, output_len, inp_shape=[224, 224, 3]):
         if arch == 'asmnet':
-            model = self.create_asmnet(inp_shape=inp_shape, num_branches=num_output_layers)
+            model = self.create_asmnet(inp_shape=inp_shape, num_branches=num_output_layers, output_len=output_len)
         elif arch == 'efficientNet':
-            model = self.create_efficientNet(inp_shape=inp_shape, input_tensor=input_tensor, classes=136)
+            model = self.create_efficientNet(inp_shape=inp_shape, input_tensor=input_tensor, output_len=output_len)
         elif arch == 'mb_mn':
             model = self.create_multi_branch_mn(inp_shape=inp_shape, num_branches=num_output_layers)
             # model = cnn.create_multi_branch_mn_one_input(inp_shape=[224, 224, 3], num_branches=self.num_output_layers)
@@ -423,7 +423,7 @@ class CNNModel:
     #         json_file.write(model_json)
     #     return revised_model
 
-    def create_efficientNet(self, inp_shape, input_tensor, classes, is_teacher = True):
+    def create_efficientNet(self, inp_shape, input_tensor, output_len, is_teacher=True):
         # eff_net = efficientnet.EfficientNetB4(include_top=True,
         #                                       weights=None,
         #                                       input_tensor=None,
@@ -437,14 +437,14 @@ class CNNModel:
                                          input_tensor=input_tensor,
                                          input_shape=inp_shape,
                                          pooling=None,
-                                         classes=classes)
+                                         classes=output_len)
         else:  # for student we use the small network
             eff_net = efn.EfficientNetB0(include_top=True,
                                          weights=None,
                                          input_tensor=input_tensor,
                                          input_shape=inp_shape,
                                          pooling=None,
-                                         classes=classes)  # or weights='noisy-student'
+                                         classes=output_len)  # or weights='noisy-student'
 
         eff_net.layers.pop()
         inp = eff_net.input
@@ -452,7 +452,7 @@ class CNNModel:
         x = eff_net.get_layer('top_activation').output
         x = GlobalAveragePooling2D()(x)
         x = keras.layers.Dropout(rate=0.3)(x)
-        output = Dense(classes, activation='linear', name='out')(x)
+        output = Dense(output_len, activation='linear', name='out')(x)
 
         eff_net = Model(inp, output)
 
@@ -474,7 +474,7 @@ class CNNModel:
         return eff_net
 
 
-    def create_asmnet(self, inp_shape, num_branches):
+    def create_asmnet(self, inp_shape, num_branches,output_len):
         mobilenet_model = mobilenet_v2.MobileNetV2(input_shape=inp_shape,
                                                    alpha=1.0,
                                                    include_top=True,
@@ -508,7 +508,7 @@ class CNNModel:
                                 name=prefix+'_deconv3', kernel_initializer='he_uniform')(x)  # 56, 56, 256
             x = BatchNormalization(name=prefix+'out_bn3')(x)
 
-            out_heatmap = Conv2D(LearningConfig.point_len, kernel_size=1, padding='same', name=prefix+'_out_hm')(x)
+            out_heatmap = Conv2D(output_len, kernel_size=1, padding='same', name=prefix+'_out_hm')(x)
             outputs.append(out_heatmap)
 
         revised_model = Model(inp, outputs)
