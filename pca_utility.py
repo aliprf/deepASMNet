@@ -1,5 +1,5 @@
 from configuration import DatasetName, DatasetType,\
-    AffectnetConf, IbugConf, W300Conf, InputDataSize, LearningConfig
+    AffectnetConf, IbugConf, W300Conf, InputDataSize, LearningConfig, CofwConf, WflwConf
 from image_utility import ImageUtility
 from sklearn.decomposition import PCA, IncrementalPCA
 from sklearn.decomposition import TruncatedSVD
@@ -55,6 +55,13 @@ class PCAUtility:
         path = None
         if dataset_name == DatasetName.ibug:
             path = IbugConf.rotated_img_path_prefix  # rotated is ok, since advs_aug is the same as rotated
+            num_of_landmarks = IbugConf.num_of_landmarks
+        elif dataset_name == DatasetName.cofw:
+            path = CofwConf.rotated_img_path_prefix
+            num_of_landmarks = CofwConf.num_of_landmarks
+        elif dataset_name == DatasetName.wflw:
+            path = WflwConf.rotated_img_path_prefix
+            num_of_landmarks = WflwConf.num_of_landmarks
 
         for file in tqdm(os.listdir(path)):
             if file.endswith(".pts"):
@@ -65,7 +72,7 @@ class PCAUtility:
                     line = fp.readline()
                     cnt = 1
                     while line:
-                        if 3 < cnt < 72:
+                        if 3 < cnt <= num_of_landmarks+3:
                             x_y_pnt = line.strip()
                             x = float(x_y_pnt.split(" ")[0])
                             y = float(x_y_pnt.split(" ")[1])
@@ -80,7 +87,7 @@ class PCAUtility:
         print('PCA calculation started')
 
         ''' no normalization is needed, since we want to generate hm'''
-        reduced_lbl_arr, eigenvalues, eigenvectors = self.__func_PCA(lbl_arr, pca_postfix)
+        reduced_lbl_arr, eigenvalues, eigenvectors = self._func_PCA(lbl_arr, pca_postfix)
         mean_lbl_arr = np.mean(lbl_arr, axis=0)
         eigenvectors = eigenvectors.T
         #
@@ -103,8 +110,16 @@ class PCAUtility:
         lbl_arr = []
         img_arr = []
         path = None
+
         if dataset_name == DatasetName.ibug:
             path = IbugConf.rotated_img_path_prefix  # rotated is ok, since advs_aug is the same as rotated
+            num_of_landmarks = IbugConf.num_of_landmarks
+        elif dataset_name == DatasetName.cofw:
+            path = CofwConf.rotated_img_path_prefix
+            num_of_landmarks = CofwConf.num_of_landmarks
+        elif dataset_name == DatasetName.wflw:
+            path = WflwConf.rotated_img_path_prefix
+            num_of_landmarks = WflwConf.num_of_landmarks
 
         for file in tqdm(os.listdir(path)):
             if file.endswith(".pts"):
@@ -118,7 +133,7 @@ class PCAUtility:
                     line = fp.readline()
                     cnt = 1
                     while line:
-                        if 3 < cnt < 72:
+                        if 3 < cnt <= num_of_landmarks+3:
                             x_y_pnt = line.strip()
                             x = float(x_y_pnt.split(" ")[0])
                             y = float(x_y_pnt.split(" ")[1])
@@ -129,7 +144,7 @@ class PCAUtility:
                 lbl_arr.append(points_arr)
                 img_arr.append(Image.open(img_file))
 
-        for i in range(20):
+        for i in range(30):
             b_vector_p = self.calculate_b_vector(lbl_arr[i], True, eigenvalues, eigenvectors, meanvector)
             lbl_new = meanvector + np.dot(eigenvectors, b_vector_p)
             lbl_new = lbl_new.tolist()

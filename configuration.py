@@ -56,7 +56,7 @@ class LearningConfig:
     MIN_LR = 1e-7
     MAX_LR = 1e-2
     STEP_SIZE = 10
-    batch_size = 30
+    batch_size = 70
     steps_per_validation_epochs = 5
 
     epochs = 200
@@ -119,8 +119,9 @@ class W300Conf:
 
 
 class WflwConf:
-    Wflw_prefix_path = '/media/data3/ali/FL/wflw/'  # --> Zeus
-    # Wflw_prefix_path = '/media/data2/alip/FL/wflw/'  # --> Atlas
+    # Wflw_prefix_path = '/media/data3/ali/FL/wflw/'  # --> Zeus
+    Wflw_prefix_path = '/media/data2/alip/FL/wflw/'  # --> Atlas
+    # Wflw_prefix_path = '/media/ali/data/wflw/'  # --> local
 
     img_path_prefix = Wflw_prefix_path + 'all/'
     rotated_img_path_prefix = Wflw_prefix_path + '0_rotated/'
@@ -130,8 +131,8 @@ class WflwConf:
     tf_train_path = Wflw_prefix_path + 'train.tfrecords'
     tf_test_path = Wflw_prefix_path + 'test.tfrecords'
     tf_evaluation_path = Wflw_prefix_path + 'evaluation.tfrecords'
-    tf_train_path_90 = Wflw_prefix_path + 'train_90.tfrecords'
-    tf_evaluation_path_90 = Wflw_prefix_path + 'evaluation_90.tfrecords'
+    tf_train_path_95 = Wflw_prefix_path + 'train_95.tfrecords'
+    tf_evaluation_path_95 = Wflw_prefix_path + 'evaluation_95.tfrecords'
 
     orig_number_of_training = 7500
     orig_number_of_test = 2500
@@ -147,6 +148,7 @@ class WflwConf:
 class CofwConf:
     # Cofw_prefix_path = '/media/data3/ali/FL/cofw/'  # --> Zeus
     Cofw_prefix_path = '/media/data2/alip/FL/cofw/'  # --> Atlas
+    # Cofw_prefix_path = '/media/ali/data/cofw/'  # --> local
 
     img_path_prefix = Cofw_prefix_path + 'all/'
     rotated_img_path_prefix = Cofw_prefix_path + '0_rotated/'
@@ -158,8 +160,8 @@ class CofwConf:
     tf_test_path = Cofw_prefix_path + 'test.tfrecords'
     tf_evaluation_path = Cofw_prefix_path + 'evaluation.tfrecords'
 
-    tf_train_path_90 = Cofw_prefix_path + 'train_90.tfrecords'
-    tf_evaluation_path_90 = Cofw_prefix_path + 'evaluation_90.tfrecords'
+    tf_train_path_95 = Cofw_prefix_path + 'train_95.tfrecords'
+    tf_evaluation_path_95 = Cofw_prefix_path + 'evaluation_95.tfrecords'
 
     orig_number_of_training = 1345
     orig_number_of_test = 507
@@ -174,10 +176,9 @@ class CofwConf:
 
 
 class IbugConf:
-
-    '''server_config'''
-    _Ibug_prefix_path = '/media/data3/ali/FL/ibug/'  # --> Zeus
-    # _Ibug_prefix_path = '/media/data2/alip/FL/'  # --> Atlas
+    # _Ibug_prefix_path = '/media/data3/ali/FL/ibug/'  # --> Zeus
+    _Ibug_prefix_path = '/media/data2/alip/FL/'  # --> Atlas
+    # _Ibug_prefix_path = '/media/ali/data/ibug/'  # --> local
 
     img_path_prefix = _Ibug_prefix_path + 'all/'
     rotated_img_path_prefix = _Ibug_prefix_path + '0_rotated/'
@@ -188,8 +189,8 @@ class IbugConf:
     tf_train_path = _Ibug_prefix_path + 'train.tfrecords'
     tf_test_path = _Ibug_prefix_path + 'test.tfrecords'
     tf_evaluation_path = _Ibug_prefix_path + 'evaluation.tfrecords'
-    tf_train_path_90 = _Ibug_prefix_path + 'train_90.tfrecords'
-    tf_evaluation_path_90 = _Ibug_prefix_path + 'evaluation_90.tfrecords'
+    tf_train_path_95 = _Ibug_prefix_path + 'train_95.tfrecords'
+    tf_evaluation_path_95 = _Ibug_prefix_path + 'evaluation_95.tfrecords'
 
     # train_hm_dir = '/media/data2/alip/fala/ibug/train_hm_dir/'
     # train_hm_dir_85 = '/media/data2/alip/fala/ibug/train_hm_dir_85/'

@@ -25,7 +25,7 @@ if __name__ == '__main__':
     # pca_utility.create_pca_from_npy(DatasetName.ibug, 95)
     # pca_utility.create_pca_from_npy(DatasetName.ibug, 97)
 
-    # pca_utility.create_pca_from_points(DatasetName.ibug, 85)
+    # pca_utility.create_pca_from_points(DatasetName.cofw, 90)
 
     '''generate points with different accuracy'''
     # tf_record_util.normalize_points_and_save(dataset_name=DatasetName.ibug)
@@ -40,7 +40,7 @@ if __name__ == '__main__':
 
     '''test heatmaps after creation'''
     # tf_record_util.load_hm_and_test(dataset_name=DatasetName.ibug)
-    # pca_utility.test_pca_validity(DatasetName.ibug, 90)
+    # pca_utility.test_pca_validity(DatasetName.cofw, 90)
 
     # mat = np.random.randint(0, 10, size=10)
     # cnn_model.generate_distance_matrix(mat)
@@ -66,7 +66,7 @@ if __name__ == '__main__':
                     # weight='weights-145-0.00011.h5',
                     weight=None,
                     train_on_batch=False,
-                    accuracy=100,
+                    accuracy=95,
                     on_point=True)
 
 
