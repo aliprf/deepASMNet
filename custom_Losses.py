@@ -24,11 +24,24 @@ import img_printer as imgpr
 
 class Custom_losses:
 
+    def custom_teacher_student_loss(self, teacher_models, teachers_weight_loss, bath_size, num_points):
+
+        def loss(y_true, y_pred):
+
+            model = teacher_models[0]
+            weight = teachers_weight_loss[0]
+
+            y_true_n = tf.reshape(y_true, [bath_size, num_points], name=None)
+            y_pred_T1 = model.predict_on_batch(y_true_n)
+
+            mse_T1 = K.mean(K.square(y_pred_T1 - y_true))
+
+            return K.mean(K.square(y_pred - y_true))
+        return loss
+
     def asm_assisted_loss(self, hmp_85, hmp_90, hmp_95):
         def loss(y_true, y_pred):
             return K.mean(K.square(y_pred - y_true))
-
-        # Return a function
         return loss
 
     def _calculate_mse(self, y_p, y_t):

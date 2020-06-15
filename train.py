@@ -102,7 +102,7 @@ class Train:
         asm_model = cnn.create_multi_branch_mn(inp_shape=[224, 224, 3], num_branches=3)
         # asm_model.load_weights('')
         '''creating model'''
-        model = cnn.get_model(None, self.arch, self.num_output_layers)
+        model = cnn.get_model(None, self.arch, self.num_output_layers,)
 
         '''loading weights'''
         if self.weight is not None:

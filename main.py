@@ -1,11 +1,12 @@
 
 from tf_record_utility import TFRecordUtility
-from configuration import DatasetName, DatasetType, AffectnetConf, IbugConf, W300Conf, InputDataSize
+from configuration import DatasetName, DatasetType, AffectnetConf, IbugConf, W300Conf, InputDataSize, CofwConf, WflwConf
 from cnn_model import CNNModel
 from pca_utility import PCAUtility
 from image_utility import ImageUtility
 import numpy as np
 from train import Train
+from student_train import StudentTrainer
 from test import Test
 from Train_Gan import TrainGan
 
@@ -50,13 +51,14 @@ if __name__ == '__main__':
     # trg = TrainGan()
     # trg.create_seq_model()
 
-    # test = Test(arch='efficientNet', num_output_layers=1, weight_fname='weights-09-0.00076.h5',
+    # test = Test(arch='efficientNet', num_output_layers=1, weight_fname='weights-181-0.00012.h5',
     #             dataset_name=DatasetName.ibug, point=True)
+
     # test = Test(arch='mnv2_hm_r_v2', num_output_layers=1, weight_fname='weights-04-0.00995.h5', point=False)
     #
 
     trainer = Train(use_tf_record=True,
-                    dataset_name=DatasetName.cofw,
+                    dataset_name=DatasetName.wflw,
                     custom_loss=False,
                     arch='efficientNet',
                     # arch='mnv2_hm_r_v2',
@@ -66,10 +68,17 @@ if __name__ == '__main__':
                     # weight='weights-145-0.00011.h5',
                     weight=None,
                     train_on_batch=False,
-                    accuracy=95,
+                    accuracy=100,
                     on_point=True)
 
-
+    '''StudentTraining'''
+    # st_trainer = StudentTrainer(dataset_name=DatasetName.cofw, arch="mobileNetV2")
+    # st_trainer.train(teachers_arch=["efficientNet", "efficientNet"],
+    #                  teachers_weight_files=["weights-161-0.00010.h5", "weights-161-0.00010.h5"],
+    #                  teachers_weight_loss=["-0.5", "-0.8"],
+    #                  teachers_tf_train_paths=[CofwConf.tf_train_path, CofwConf.tf_train_path_95],
+    #                  student_weight_file=None)
+    #
 
 
 
