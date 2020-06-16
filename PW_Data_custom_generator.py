@@ -20,6 +20,12 @@ class PWCustomHeatmapGenerator(keras.utils.Sequence):
         self.is_single = is_single
         self.accuracy = accuracy
 
+    def on_epoch_end(self):
+        'Updates indexes after each epoch'
+        self.indexes = np.arange(len(self.list_IDs))
+        if self.shuffle == True:
+            np.random.shuffle(self.indexes)
+
     def __len__(self):
         _len = np.ceil(len(self.image_filenames) // float(self.batch_size))
         return int(_len)

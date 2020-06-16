@@ -124,7 +124,6 @@ class Train:
         metrics_names = model.metrics_names
         metrics_names.append('epoch')
         self.write_loss_log(log_file_name, metrics_names)
-
         ''''''
         self.STEPS_PER_EPOCH = len(x_train_filenames) // self.BATCH_SIZE
 

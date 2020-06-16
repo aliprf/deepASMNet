@@ -1,3 +1,5 @@
+from datetime import date
+
 from configuration import DatasetName, DatasetType, \
     AffectnetConf, IbugConf, W300Conf, InputDataSize, LearningConfig
 from tf_record_utility import TFRecordUtility
@@ -20,11 +22,11 @@ from keras.utils.vis_utils import plot_model
 from scipy.spatial import distance
 import scipy.io as sio
 import img_printer as imgpr
-
+from PIL import Image
 
 class Custom_losses:
 
-    def custom_teacher_student_loss(self, teacher_models, teachers_weight_loss, bath_size, num_points):
+    def custom_teacher_student_loss(self, lnd_img_map, img_path, teacher_models, teachers_weight_loss, bath_size, num_points):
 
         def loss(y_true, y_pred):
 
@@ -32,12 +34,31 @@ class Custom_losses:
             weight = teachers_weight_loss[0]
 
             y_true_n = tf.reshape(y_true, [bath_size, num_points], name=None)
-            y_pred_T1 = model.predict_on_batch(y_true_n)
 
-            mse_T1 = K.mean(K.square(y_pred_T1 - y_true))
+            imgs_address = self.get_y(y_true_n, lnd_img_map, img_path)
+            imgs_batch = [np.array(Image.open(img_file))/255.0 for img_file in imgs_address]
 
-            return K.mean(K.square(y_pred - y_true))
+            y_pred_T1 = np.array([model.predict(np.expand_dims(img, axis=0))[0] for img in imgs_batch])
+
+            y_pred_T1_ten = K.variable(y_pred_T1)
+            mse_te1 = K.mean(K.square(y_pred_T1_ten - y_true))
+            mse_main = K.mean(K.square(y_pred - y_true))
+            return mse_main + mse_te1
         return loss
+    
+    def get_y(self, y_true_n, lnd_img_map, img_path):
+        vec_mse = K.eval(y_true_n)
+        # print(vec_mse.shape)
+        imgs = []
+        for lnd in vec_mse:
+            key = self.get_hash_key(lnd)
+            key = -2014293974849691430
+            img_name = lnd_img_map[key]
+            imgs.append(img_path + img_name)
+        return np.array(imgs)
+
+    def get_hash_key(self, input):
+        return hash(str(input).replace("\n", "").replace(" ", ""))
 
     def asm_assisted_loss(self, hmp_85, hmp_90, hmp_95):
         def loss(y_true, y_pred):

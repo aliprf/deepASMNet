@@ -27,29 +27,33 @@ from keras import losses
 from keras import backend as K
 import csv
 from skimage.io import imread
-
+import pickle
 
 class StudentTrainer:
 
     def __init__(self, dataset_name, arch):
+        self.dataset_name = dataset_name
 
         if dataset_name == DatasetName.ibug:
             self.SUM_OF_ALL_TRAIN_SAMPLES = IbugConf.number_of_all_sample
             self.output_len = IbugConf.num_of_landmarks * 2
             self.tf_train_path = IbugConf.tf_train_path
             self.tf_eval_path = IbugConf.tf_evaluation_path
+            self.img_path = IbugConf.train_images_dir
 
         elif dataset_name == DatasetName.cofw:
             self.SUM_OF_ALL_TRAIN_SAMPLES = CofwConf.number_of_all_sample
             self.output_len = CofwConf.num_of_landmarks * 2
             self.tf_train_path = CofwConf.tf_train_path
             self.tf_eval_path = CofwConf.tf_evaluation_path
+            self.img_path = CofwConf.train_images_dir
 
         elif dataset_name == DatasetName.wflw:
             self.SUM_OF_ALL_TRAIN_SAMPLES = WflwConf.number_of_all_sample
             self.output_len = WflwConf.num_of_landmarks * 2
             self.tf_train_path = WflwConf.tf_train_path
             self.tf_eval_path = WflwConf.tf_evaluation_path
+            self.img_path = WflwConf.train_images_dir
 
         self.BATCH_SIZE = LearningConfig.batch_size
         self.STEPS_PER_VALIDATION_EPOCH = LearningConfig.steps_per_validation_epochs
@@ -57,6 +61,21 @@ class StudentTrainer:
         self.EPOCHS = LearningConfig.epochs
 
         self.arch = arch
+
+    def _create_generators(self):
+        tf_utils = TFRecordUtility(self.output_len)
+
+        filenames, labels = tf_utils.create_image_and_labels_name()
+        filenames_shuffled, y_labels_shuffled = shuffle(filenames, labels)
+        x_train_filenames, x_val_filenames, y_train, y_val = train_test_split(
+            filenames_shuffled, y_labels_shuffled, test_size=0.05, random_state=100, shuffle=True)
+
+        save('x_train_filenames.npy', x_train_filenames)
+        save('x_val_filenames.npy', x_val_filenames)
+        save('y_train_filenames.npy', y_train)
+        save('y_val_filenames.npy', y_val)
+
+        return x_train_filenames, x_val_filenames, y_train, y_val
 
     def train(self, teachers_arch, teachers_weight_files, teachers_weight_loss,
               teachers_tf_train_paths, student_weight_file):
@@ -81,7 +100,7 @@ class StudentTrainer:
             student_train_images, student_train_landmarks = tf_record_util.create_training_tensor_points(
                 tfrecord_filename=teachers_tf_train_paths[i], batch_size=self.BATCH_SIZE)
             model = cnn.get_model(train_images=student_train_images, arch=teachers_arch[i], num_output_layers=1,
-                                  output_len=self.output_len, input_tensor=None, inp_shape=None)
+                                  output_len=self.output_len, input_tensor=None)
 
             model.load_weights(teachers_weight_files[i])
             teacher_models.append(model)
@@ -108,7 +127,11 @@ class StudentTrainer:
         optimizer = adam(lr=1e-2, beta_1=0.9, beta_2=0.999, decay=1e-5, amsgrad=False)
 
         '''create loss'''
-        loss_func = c_loss.custom_teacher_student_loss(teacher_models=teacher_models,
+        file = open("map_" + self.dataset_name, 'rb')
+        landmark_img_map = pickle.load(file)
+        file.close()
+
+        loss_func = c_loss.custom_teacher_student_loss(img_path=self.img_path, lnd_img_map=landmark_img_map, teacher_models=teacher_models,
                                                        teachers_weight_loss=teachers_weight_loss,
                                                        bath_size=self.BATCH_SIZE,
                                                        num_points=self.output_len)
