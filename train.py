@@ -293,7 +293,7 @@ class Train:
 
     def _prepare_callback(self):
         early_stop = keras.callbacks.EarlyStopping(monitor='val_loss', min_delta=0, patience=50, verbose=1, mode='min')
-        file_path = "weights-{epoch:02d}-{loss:.5f}.h5"
+        file_path = "ac_" + str(self.accuracy) + "_weights-{epoch:02d}-{loss:.5f}.h5"
         checkpoint = ModelCheckpoint(file_path, monitor='loss', verbose=1, save_best_only=True, mode='min')
         csv_logger = CSVLogger('log.csv', append=True, separator=';')
 
