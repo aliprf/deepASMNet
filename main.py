@@ -65,8 +65,8 @@ if __name__ == '__main__':
                     # arch='mb_mn',
                     inception_mode=False,
                     num_output_layers=1,
-                    # weight='weights-145-0.00011.h5',
-                    weight=None,
+                    weight='ac_95_weights-18-0.00029.h5',
+                    # weight=None,
                     train_on_batch=False,
                     accuracy=95,
                     on_point=True)
