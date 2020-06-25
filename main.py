@@ -58,7 +58,7 @@ if __name__ == '__main__':
     #
 
     trainer = Train(use_tf_record=True,
-                    dataset_name=DatasetName.ibug,
+                    dataset_name=DatasetName.cofw,
                     custom_loss=False,
                     arch='efficientNet',
                     # arch='mnv2_hm_r_v2',
