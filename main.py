@@ -58,17 +58,17 @@ if __name__ == '__main__':
     #
 
     trainer = Train(use_tf_record=True,
-                    dataset_name=DatasetName.wflw,
+                    dataset_name=DatasetName.ibug,
                     custom_loss=False,
                     arch='efficientNet',
                     # arch='mnv2_hm_r_v2',
                     # arch='mb_mn',
                     inception_mode=False,
                     num_output_layers=1,
-                    weight='weights-60-0.00024.h5',
-                    # weight=None,
+                    # weight='weights-60-0.00024.h5',
+                    weight=None,
                     train_on_batch=False,
-                    accuracy=100,
+                    accuracy=95,
                     on_point=True)
 
     '''StudentTraining'''
