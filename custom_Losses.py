@@ -30,20 +30,26 @@ class Custom_losses:
 
         def loss(y_true, y_pred):
 
-            model = teacher_models[0]
-            weight = teachers_weight_loss[0]
+            t0_model = teacher_models[0]
+            t1_model = teacher_models[1]
+            l0_weight = teachers_weight_loss[0]
+            l1_weight = teachers_weight_loss[1]
 
             y_true_n = tf.reshape(y_true, [bath_size, num_points], name=None)
-
             imgs_address = self.get_y(y_true_n, lnd_img_map, img_path)
             imgs_batch = [np.array(Image.open(img_file))/255.0 for img_file in imgs_address]
 
-            y_pred_T1 = np.array([model.predict(np.expand_dims(img, axis=0))[0] for img in imgs_batch])
+            y_pred_T0 = np.array([t0_model.predict(np.expand_dims(img, axis=0))[0] for img in imgs_batch])
+            y_pred_T1 = np.array([t1_model.predict(np.expand_dims(img, axis=0))[0] for img in imgs_batch])
 
+            y_pred_T0_ten = K.variable(y_pred_T0)
             y_pred_T1_ten = K.variable(y_pred_T1)
+
+            mse_te0 = K.mean(K.square(y_pred_T0_ten - y_true))
             mse_te1 = K.mean(K.square(y_pred_T1_ten - y_true))
             mse_main = K.mean(K.square(y_pred - y_true))
-            return mse_main + mse_te1
+
+            return mse_main + l0_weight * mse_te0 + l1_weight* mse_te1
         return loss
     
     def get_y(self, y_true_n, lnd_img_map, img_path):
@@ -52,7 +58,6 @@ class Custom_losses:
         imgs = []
         for lnd in vec_mse:
             key = self.get_hash_key(lnd)
-            key = -2014293974849691430
             img_name = lnd_img_map[key]
             imgs.append(img_path + img_name)
         return np.array(imgs)
