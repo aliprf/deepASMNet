@@ -56,8 +56,8 @@ class LearningConfig:
     MIN_LR = 1e-7
     MAX_LR = 1e-2
     STEP_SIZE = 10
-    # batch_size = 40
-    batch_size = 30
+    batch_size = 70
+    # batch_size = 30
     steps_per_validation_epochs = 5
 
     epochs = 200
@@ -177,8 +177,8 @@ class CofwConf:
 
 
 class IbugConf:
-    # _Ibug_prefix_path = '/media/data3/ali/FL/ibug/'  # --> Zeus
-    _Ibug_prefix_path = '/media/data2/alip/FL/ibug/'  # --> Atlas
+    _Ibug_prefix_path = '/media/data3/ali/FL/ibug/'  # --> Zeus
+    # _Ibug_prefix_path = '/media/data2/alip/FL/ibug/'  # --> Atlas
     # _Ibug_prefix_path = '/media/ali/data/ibug/'  # --> local
 
     img_path_prefix = _Ibug_prefix_path + 'all/'

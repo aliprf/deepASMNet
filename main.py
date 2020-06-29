@@ -57,29 +57,30 @@ if __name__ == '__main__':
     # test = Test(arch='mnv2_hm_r_v2', num_output_layers=1, weight_fname='weights-04-0.00995.h5', point=False)
     #
 
-    trainer = Train(use_tf_record=True,
-                    dataset_name=DatasetName.cofw,
-                    custom_loss=False,
-                    arch='efficientNet',
-                    # arch='mnv2_hm_r_v2',
-                    # arch='mb_mn',
-                    inception_mode=False,
-                    num_output_layers=1,
-                    # weight='weights-60-0.00024.h5',
-                    weight=None,
-                    train_on_batch=False,
-                    accuracy=95,
-                    on_point=True)
+    # trainer = Train(use_tf_record=True,
+    #                 dataset_name=DatasetName.cofw,
+    #                 custom_loss=False,
+    #                 arch='efficientNet',
+    #                 # arch='mnv2_hm_r_v2',
+    #                 # arch='mb_mn',
+    #                 inception_mode=False,
+    #                 num_output_layers=1,
+    #                 # weight='weights-60-0.00024.h5',
+    #                 weight=None,
+    #                 train_on_batch=False,
+    #                 accuracy=95,
+    #                 on_point=True)
 
     '''StudentTraining'''
-    # st_trainer = StudentTrainer(dataset_name=DatasetName.cofw, arch="mobileNetV2")
-    # st_trainer.train(teachers_arch=["efficientNet", "efficientNet"],
-    #                  teachers_weight_files=["weights-161-0.00010.h5", "weights-161-0.00010.h5"],
-    #                  teachers_weight_loss=["-0.5", "-0.8"],
-    #                  teachers_tf_train_paths=[CofwConf.tf_train_path, CofwConf.tf_train_path_95],
-    #                  student_weight_file=None)
-    #
-    #
-    #
+    st_trainer = StudentTrainer(dataset_name=DatasetName.ibug, arch="mobileNetV2")
+    st_trainer.train(teachers_arch=["efficientNet", "efficientNet"],
+                     teachers_weight_files=["ds_ibug_ac_100_weights-181-0.00012.h5.h5",
+                                            "ds_ibug_ac_95_weights-121-0.00004.h5"],
+                     teachers_weight_loss=["-0.8", "-0.7"],
+                     teachers_tf_train_paths=[IbugConf.tf_train_path, IbugConf.tf_train_path_95],
+                     student_weight_file=None)
+
+
+
 
 
