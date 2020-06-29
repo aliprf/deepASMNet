@@ -57,6 +57,7 @@ class Custom_losses:
         # print(vec_mse.shape)
         imgs = []
         for lnd in vec_mse:
+            lnd = str(lnd).replace(" ", "")
             print(lnd)
             key = self.get_hash_key(lnd)
             img_name = lnd_img_map[key]
