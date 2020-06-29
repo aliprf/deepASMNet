@@ -49,7 +49,7 @@ class Custom_losses:
             mse_te1 = K.mean(K.square(y_pred_T1_ten - y_true))
             mse_main = K.mean(K.square(y_pred - y_true))
 
-            return mse_main + l0_weight * mse_te0 + l1_weight* mse_te1
+            return mse_main + (l0_weight * mse_te0) + (l1_weight * mse_te1)
         return loss
     
     def get_y(self, y_true_n, lnd_img_map, img_path):
@@ -57,6 +57,7 @@ class Custom_losses:
         # print(vec_mse.shape)
         imgs = []
         for lnd in vec_mse:
+            print(lnd)
             key = self.get_hash_key(lnd)
             img_name = lnd_img_map[key]
             imgs.append(img_path + img_name)
