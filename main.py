@@ -73,7 +73,7 @@ if __name__ == '__main__':
     '''StudentTraining'''
     st_trainer = StudentTrainer(dataset_name=DatasetName.ibug, arch="mobileNetV2")
     st_trainer.train(teachers_arch=["efficientNet", "efficientNet"],
-                     teachers_weight_files=["ds_ibug_ac_100_weights-181-0.00012.h5.h5",
+                     teachers_weight_files=["ds_ibug_ac_100_weights-181-0.00012.h5",
                                             "ds_ibug_ac_95_weights-121-0.00004.h5"],
                      teachers_weight_loss=["-0.8", "-0.7"],
                      teachers_tf_train_paths=[IbugConf.tf_train_path, IbugConf.tf_train_path_95],
