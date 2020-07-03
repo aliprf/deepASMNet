@@ -27,8 +27,9 @@ class Test:
             self.output_len = WflwConf.num_of_landmarks * 2
 
         cnn = CNNModel()
-        model = cnn.get_model(train_images=None, arch=arch,
-                              num_output_layers=num_output_layers, output_len=self.output_len)
+        model = cnn.get_model(train_images=None, arch=arch, num_output_layers=num_output_layers,
+                              input_tensor=None, output_len=self.output_len)
+
         model.load_weights(weight_fname)
 
         if dataset_name == DatasetName.ibug:
@@ -153,7 +154,7 @@ class Test:
         ''''''
 
         '''test print'''
-        # imgpr.print_image_arr((counter+1)*1000, img, landmark_arr_x_p, landmark_arr_y_p)
+        imgpr.print_image_arr((counter+1)*1000, img, landmark_arr_x_p, landmark_arr_y_p)
         # imgpr.print_image_arr((counter+1), img, landmark_arr_x_t, landmark_arr_y_t)
 
         # print("landmark_arr_x_t: " + str(landmark_arr_x_t))

@@ -29,6 +29,7 @@ class Custom_losses:
     def custom_teacher_student_loss(self, lnd_img_map, img_path, teacher_models, teachers_weight_loss, bath_size, num_points):
 
         def loss(y_true, y_pred):
+            image_utility = ImageUtility()
 
             t0_model = teacher_models[0]
             t1_model = teacher_models[1]
@@ -42,6 +43,14 @@ class Custom_losses:
             y_pred_T0 = np.array([t0_model.predict(np.expand_dims(img, axis=0))[0] for img in imgs_batch])
             y_pred_T1 = np.array([t1_model.predict(np.expand_dims(img, axis=0))[0] for img in imgs_batch])
 
+            '''test teacher Nets'''
+            # counter = 0
+            # for pre_points in y_pred_T1:
+            #     labels_predict_transformed, landmark_arr_x_p, landmark_arr_y_p = \
+            #         image_utility.create_landmarks_from_normalized(pre_points, 224, 224, 112, 112)
+            #     imgpr.print_image_arr((counter + 1) * 1000, imgs_batch[counter], landmark_arr_x_p, landmark_arr_y_p)
+            #     counter += 1
+
             y_pred_T0_ten = K.variable(y_pred_T0)
             y_pred_T1_ten = K.variable(y_pred_T1)
 
@@ -49,7 +58,7 @@ class Custom_losses:
             mse_te1 = K.mean(K.square(y_pred_T1_ten - y_true))
             mse_main = K.mean(K.square(y_pred - y_true))
 
-            return mse_main + (l0_weight * mse_te0) + (l1_weight * mse_te1)
+            return mse_main + -0.5 * (l0_weight * mse_te0 + l1_weight * mse_te1)
         return loss
     
     def get_y(self, y_true_n, lnd_img_map, img_path):

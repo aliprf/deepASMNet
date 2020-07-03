@@ -53,6 +53,9 @@ if __name__ == '__main__':
     # test = Test(arch='efficientNet', num_output_layers=1, weight_fname='weights-181-0.00012.h5',
     #             dataset_name=DatasetName.ibug, point=True)
 
+    # test = Test(arch='mobileNetV2', num_output_layers=1, weight_fname='weights-19--0.02211.h5',
+    #             dataset_name=DatasetName.ibug)
+
     # test = Test(arch='mnv2_hm_r_v2', num_output_layers=1, weight_fname='weights-04-0.00995.h5', point=False)
     #
 
@@ -72,12 +75,12 @@ if __name__ == '__main__':
 
     '''StudentTraining'''
 
-    st_trainer = StudentTrainer(dataset_name=DatasetName.ibug, arch="mobileNetV2")
+    st_trainer = StudentTrainer(dataset_name=DatasetName.wflw, arch="mobileNetV2")
     st_trainer.train(teachers_arch=["efficientNet", "efficientNet"],
-                     teachers_weight_files=["ds_ibug_ac_95_teacher.h5",
-                                            "ds_ibug_ac_100_teacher.h5"],
-                     teachers_weight_loss=[-0.8, -0.7],
-                     teachers_tf_train_paths=[IbugConf.tf_train_path, IbugConf.tf_train_path_95],
+                     teachers_weight_files=["ds_wflw_ac_100_teacher.h5",
+                                            "ds_wflw_ac_95_teacher.h5"],
+                     teachers_weight_loss=[0.6, 0.4],
+                     teachers_tf_train_paths=[WflwConf.tf_train_path, WflwConf.tf_train_path_95],
                      student_weight_file=None)
 
 
