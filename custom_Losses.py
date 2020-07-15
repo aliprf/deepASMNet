@@ -23,6 +23,7 @@ from scipy.spatial import distance
 import scipy.io as sio
 import img_printer as imgpr
 from PIL import Image
+print(tf.__version__)
 
 
 class Custom_losses:
