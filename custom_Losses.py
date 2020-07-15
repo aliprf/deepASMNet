@@ -16,7 +16,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import math
 
-import  cv2
+import cv2
 import os.path
 from keras.utils.vis_utils import plot_model
 from scipy.spatial import distance
@@ -24,9 +24,55 @@ import scipy.io as sio
 import img_printer as imgpr
 from PIL import Image
 
+
 class Custom_losses:
 
-    def custom_teacher_student_loss(self, lnd_img_map, img_path, teacher_models, teachers_weight_loss, bath_size, num_points):
+    def custom_teacher_student_loss_cos(self, lnd_img_map, img_path, teacher_models, teachers_weight_loss, bath_size,
+                                        num_points, cos_weight):
+        def loss(y_true, y_pred):
+            image_utility = ImageUtility()
+
+            t0_model = teacher_models[0]
+            l0_weight = teachers_weight_loss[0]
+
+            t1_model = teacher_models[1]
+            l1_weight = teachers_weight_loss[1]
+
+            y_true_n = tf.reshape(y_true, [bath_size, num_points], name=None)
+            imgs_address = self.get_y(y_true_n, lnd_img_map, img_path)
+            imgs_batch = [np.array(Image.open(img_file)) / 255.0 for img_file in imgs_address]
+
+            y_pred_T0 = np.array([t0_model.predict(np.expand_dims(img, axis=0))[0] for img in imgs_batch])
+            y_pred_T1 = np.array([t1_model.predict(np.expand_dims(img, axis=0))[0] for img in imgs_batch])
+
+            '''test teacher Nets'''
+            # counter = 0
+            # for pre_points in y_pred_T1:
+            #     labels_predict_transformed, landmark_arr_x_p, landmark_arr_y_p = \
+            #         image_utility.create_landmarks_from_normalized(pre_points, 224, 224, 112, 112)
+            #     imgpr.print_image_arr((counter + 1) * 1000, imgs_batch[counter], landmark_arr_x_p, landmark_arr_y_p)
+            #     counter += 1
+
+            y_pred_T0_ten = K.variable(y_pred_T0)
+            y_pred_T1_ten = K.variable(y_pred_T1)
+
+            mse_te0 = K.mean(K.square(y_pred_T0_ten - y_true))
+            mse_te0_cos = tf.keras.losses.cosine_similarity(y_pred_T0_ten, y_true, axis=1)
+
+            mse_te1 = K.mean(K.square(y_pred_T1_ten - y_true))
+            mse_te1_cos = tf.keras.losses.cosine_similarity(y_pred_T1_ten - y_true, axis=1)
+
+            mse_main = K.mean(K.square(y_pred - y_true))
+            mse_main_cos = tf.keras.losses.cosine_similarity(y_pred - y_true, axis=1)
+
+            return (mse_main + cos_weight * mse_main_cos) \
+                   + l0_weight * (mse_te0 + cos_weight * mse_te0_cos)\
+                   + l1_weight * (mse_te1 + cos_weight * mse_te1_cos)
+
+        return loss
+
+    def custom_teacher_student_loss(self, lnd_img_map, img_path, teacher_models, teachers_weight_loss, bath_size,
+                                    num_points):
 
         def loss(y_true, y_pred):
             image_utility = ImageUtility()
@@ -38,7 +84,7 @@ class Custom_losses:
 
             y_true_n = tf.reshape(y_true, [bath_size, num_points], name=None)
             imgs_address = self.get_y(y_true_n, lnd_img_map, img_path)
-            imgs_batch = [np.array(Image.open(img_file))/255.0 for img_file in imgs_address]
+            imgs_batch = [np.array(Image.open(img_file)) / 255.0 for img_file in imgs_address]
 
             y_pred_T0 = np.array([t0_model.predict(np.expand_dims(img, axis=0))[0] for img in imgs_batch])
             y_pred_T1 = np.array([t1_model.predict(np.expand_dims(img, axis=0))[0] for img in imgs_batch])
@@ -59,8 +105,9 @@ class Custom_losses:
             mse_main = K.mean(K.square(y_pred - y_true))
 
             return mse_main + -0.5 * (l0_weight * mse_te0 + l1_weight * mse_te1)
+
         return loss
-    
+
     def get_y(self, y_true_n, lnd_img_map, img_path):
         vec_mse = K.eval(y_true_n)
         # print(vec_mse.shape)
@@ -78,6 +125,7 @@ class Custom_losses:
     def asm_assisted_loss(self, hmp_85, hmp_90, hmp_95):
         def loss(y_true, y_pred):
             return K.mean(K.square(y_pred - y_true))
+
         return loss
 
     def _calculate_mse(self, y_p, y_t):
@@ -150,9 +198,8 @@ class Custom_losses:
         tensor_total_loss = tf.add(tensor_mean_square_error, tensor_indices_mean_square_error)
         return tensor_total_loss
 
-
     def custom_loss_hm_distance(self, ten_hm_t, ten_hm_p):
-        print(ten_hm_t.get_shape().as_list())  #  [None, 56, 56, 68]
+        print(ten_hm_t.get_shape().as_list())  # [None, 56, 56, 68]
         print(ten_hm_p.get_shape())
 
         tf_utility = TFRecordUtility()
@@ -240,7 +287,7 @@ class Custom_losses:
     def __inceptionLoss_3(self, yTrue, yPred):
         return self.__soft_MSE(yTrue, yPred, 5)
 
-    def __soft_MSE(self,  yTrue, yPred, boundary_count, radius=0.01):
+    def __soft_MSE(self, yTrue, yPred, boundary_count, radius=0.01):
         yTrue_vector_batch = K.eval(yTrue)
         yPred_vector_batch = K.eval(yPred)
 
@@ -248,7 +295,7 @@ class Custom_losses:
         for i in range(LearningConfig.batch_size):
             out_vector = []  # 136
             for j in range(LearningConfig.batch_size):
-                if abs(yTrue_vector_batch[i,j] - yPred_vector_batch[i,j]) <= boundary_count * radius:
+                if abs(yTrue_vector_batch[i, j] - yPred_vector_batch[i, j]) <= boundary_count * radius:
                     out_vector.append(0)
                 else:
                     out_vector.append(1)
@@ -371,7 +418,6 @@ class Custom_losses:
                 asm_loss += (truth_vector[j] - y_pre_asm[j]) ** 2
             asm_loss /= len(y_pre_asm)
 
-
             # asm_loss *= mse[i]
             # asm_loss *= LearningConfig.regularization_term
 
@@ -379,7 +425,7 @@ class Custom_losses:
 
             print('mse[i]' + str(mse[i]))
             print('asm_loss[i]' + str(asm_loss))
-            print('============' )
+            print('============')
 
         loss_array = np.array(loss_array)
         tensor_asm_loss = K.variable(loss_array)
@@ -614,7 +660,8 @@ class Custom_losses:
         tf_record_utility = TFRecordUtility()
         image_utility = ImageUtility()
 
-        eigenvalues, eigenvectors, meanvector = pca_utility.load_pca_obj(dataset_name=DatasetName.ibug, pca_postfix=pca_postfix)
+        eigenvalues, eigenvectors, meanvector = pca_utility.load_pca_obj(dataset_name=DatasetName.ibug,
+                                                                         pca_postfix=pca_postfix)
 
         lbl_arr, img_arr, pose_arr = tf_record_utility.retrieve_tf_record(tfrecord_filename=IbugConf.tf_train_path,
                                                                           number_of_records=30, only_label=False)
@@ -622,7 +669,7 @@ class Custom_losses:
             b_vector_p = self.calculate_b_vector(lbl_arr[i], True, eigenvalues, eigenvectors, meanvector)
             lbl_new = meanvector + np.dot(eigenvectors, b_vector_p)
 
-            labels_true_transformed, landmark_arr_x_t, landmark_arr_y_t = image_utility.\
+            labels_true_transformed, landmark_arr_x_t, landmark_arr_y_t = image_utility. \
                 create_landmarks_from_normalized(lbl_arr[i], 224, 224, 112, 112)
 
             labels_true_transformed_pca, landmark_arr_x_pca, landmark_arr_y_pca = image_utility. \
