@@ -31,7 +31,7 @@ class Custom_losses:
     def custom_teacher_student_loss_cos(self, lnd_img_map, img_path, teacher_models, teachers_weight_loss, bath_size,
                                         num_points, cos_weight):
         def loss(y_true, y_pred):
-            cosine_loss = tf.keras.losses.CosineSimilarity(axis=1)
+            cosine_loss = tf.keras.losses.cosine_similarity(axis=1)
             image_utility = ImageUtility()
 
             t0_model = teacher_models[0]
