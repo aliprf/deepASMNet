@@ -30,6 +30,7 @@ class Custom_losses:
     def custom_teacher_student_loss_cos(self, lnd_img_map, img_path, teacher_models, teachers_weight_loss, bath_size,
                                         num_points, cos_weight):
         def loss(y_true, y_pred):
+            cosine_loss = tf.keras.losses.CosineSimilarity(axis=1)
             image_utility = ImageUtility()
 
             t0_model = teacher_models[0]
@@ -57,13 +58,13 @@ class Custom_losses:
             y_pred_T1_ten = K.variable(y_pred_T1)
 
             mse_te0 = K.mean(K.square(y_pred_T0_ten - y_true))
-            mse_te0_cos = tf.keras.losses.cosine_similarity(y_pred_T0_ten, y_true, axis=1)
+            mse_te0_cos = cosine_loss(y_pred_T0_ten, y_true)
 
             mse_te1 = K.mean(K.square(y_pred_T1_ten - y_true))
-            mse_te1_cos = tf.keras.losses.cosine_similarity(y_pred_T1_ten - y_true, axis=1)
+            mse_te1_cos = cosine_loss(y_pred_T1_ten, y_true)
 
             mse_main = K.mean(K.square(y_pred - y_true))
-            mse_main_cos = tf.keras.losses.cosine_similarity(y_pred - y_true, axis=1)
+            mse_main_cos = cosine_loss(y_pred, y_true)
 
             return (mse_main + cos_weight * mse_main_cos) \
                    + l0_weight * (mse_te0 + cos_weight * mse_te0_cos)\
