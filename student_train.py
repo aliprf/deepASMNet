@@ -133,16 +133,16 @@ class StudentTrainer:
         landmark_img_map = pickle.load(file)
         file.close()
 
-        loss_func = c_loss.custom_teacher_student_loss_cos(img_path=self.img_path, lnd_img_map=landmark_img_map,
-                                                           teacher_models=teacher_models,
-                                                           teachers_weight_loss=teachers_weight_loss,
-                                                           bath_size=self.BATCH_SIZE,
-                                                           num_points=self.output_len, cos_weight=cos_weight)
+        # loss_func = c_loss.custom_teacher_student_loss_cos(img_path=self.img_path, lnd_img_map=landmark_img_map,
+        #                                                    teacher_models=teacher_models,
+        #                                                    teachers_weight_loss=teachers_weight_loss,
+        #                                                    bath_size=self.BATCH_SIZE,
+        #                                                    num_points=self.output_len, cos_weight=cos_weight)
 
-        # loss_func = c_loss.custom_teacher_student_loss(img_path=self.img_path, lnd_img_map=landmark_img_map, teacher_models=teacher_models,
-        #                                                        teachers_weight_loss=teachers_weight_loss,
-        #                                                        bath_size=self.BATCH_SIZE,
-        #                                                        num_points=self.output_len)
+        loss_func = c_loss.custom_teacher_student_loss(img_path=self.img_path, lnd_img_map=landmark_img_map, teacher_models=teacher_models,
+                                                               teachers_weight_loss=teachers_weight_loss,
+                                                               bath_size=self.BATCH_SIZE,
+                                                               num_points=self.output_len)
 
         '''compiling model'''
         student_model.compile(loss=loss_func,

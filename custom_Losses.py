@@ -106,7 +106,7 @@ class Custom_losses:
             mse_te1 = K.mean(K.square(y_pred_T1_ten - y_true))
             mse_main = K.mean(K.square(y_pred - y_true))
 
-            return mse_main + -0.5 * (l0_weight * mse_te0 + l1_weight * mse_te1)
+            return mse_main + (l0_weight * mse_te0) + (l1_weight * mse_te1)
 
         return loss
 
