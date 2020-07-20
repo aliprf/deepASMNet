@@ -75,12 +75,12 @@ if __name__ == '__main__':
 
     '''StudentTraining'''
 
-    st_trainer = StudentTrainer(dataset_name=DatasetName.ibug, arch="mobileNetV2")
+    st_trainer = StudentTrainer(dataset_name=DatasetName.cofw, arch="mobileNetV2")
     st_trainer.train(teachers_arch=["efficientNet", "efficientNet"],
-                     teachers_weight_files=["ds_ibug_ac_100_teacher.h5",
-                                            "ds_ibug_ac_95_teacher.h5"],
+                     teachers_weight_files=["ds_cofw_ac_100_teacher.h5",
+                                            "ds_cofw_ac_95_teacher.h5"],
                      teachers_weight_loss=[0.8, -1.5],
-                     teachers_tf_train_paths=[IbugConf.tf_train_path, IbugConf.tf_train_path_95],
+                     teachers_tf_train_paths=[CofwConf.tf_train_path, CofwConf.tf_train_path_95],
                      student_weight_file=None,
                      cos_weight=0.5
                      )
