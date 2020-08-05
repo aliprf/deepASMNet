@@ -144,7 +144,7 @@ class WflwConf:
 
     augmentation_factor = 4  # create . image from 1
     augmentation_factor_rotate = 15  # create . image from 1
-    num_of_landmarks = 97
+    num_of_landmarks = 98
 
 class CofwConf:
     Cofw_prefix_path = '/media/data3/ali/FL/cofw/'  # --> Zeus
