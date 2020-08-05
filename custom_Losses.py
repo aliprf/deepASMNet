@@ -112,7 +112,7 @@ class Custom_losses:
 
     def get_y(self, y_true_n, lnd_img_map, img_path):
         vec_mse = K.eval(y_true_n)
-        # print(vec_mse.shape)
+        print(vec_mse.shape)
         imgs = []
         for lnd in vec_mse:
             lnd = lnd.tostring()
