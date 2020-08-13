@@ -494,7 +494,7 @@ class CNNModel:
         return eff_net
 
     def _create_efficientNet_3deconv(self, inp_shape, input_tensor, output_len):
-        eff_net = efn.EfficientNetB7(include_top=True,
+        eff_net = efn.EfficientNetB5(include_top=True,
                                      weights=None,
                                      input_tensor=input_tensor,
                                      input_shape=[224, 224, 3],
