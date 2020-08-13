@@ -458,7 +458,7 @@ class CNNModel:
         #                                       classes=136
         #                                       )
         if is_teacher:  # for teacher we use a heavier network
-            eff_net = efn.EfficientNetB3(include_top=True,
+            eff_net = efn.EfficientNetB7(include_top=True,
                                          weights=None,
                                          input_tensor=input_tensor,
                                          input_shape=inp_shape,

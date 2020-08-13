@@ -154,7 +154,7 @@ class Test:
         ''''''
 
         '''test print'''
-        imgpr.print_image_arr((counter+1)*1000, img, landmark_arr_x_p, landmark_arr_y_p)
+        # imgpr.print_image_arr((counter+1)*1000, img, landmark_arr_x_p, landmark_arr_y_p)
         # imgpr.print_image_arr((counter+1), img, landmark_arr_x_t, landmark_arr_y_t)
 
         # print("landmark_arr_x_t: " + str(landmark_arr_x_t))

@@ -1,6 +1,10 @@
 import random
 import numpy as np
+
+import matplotlib
+matplotlib.use('agg')
 import matplotlib.pyplot as plt
+
 import math
 from skimage.transform import warp, AffineTransform
 import cv2

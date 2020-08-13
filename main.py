@@ -70,7 +70,7 @@ if __name__ == '__main__':
                     # weight='weights-60-0.00024.h5',
                     weight=None,
                     train_on_batch=False,
-                    accuracy=95,
+                    accuracy=100,
                     on_point=True)
 
     '''StudentTraining'''
