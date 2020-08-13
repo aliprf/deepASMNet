@@ -450,20 +450,14 @@ class CNNModel:
     #     return revised_model
 
     def create_efficientNet(self, inp_shape, input_tensor, output_len, is_teacher=True):
-        # eff_net = efficientnet.EfficientNetB4(include_top=True,
-        #                                       weights=None,
-        #                                       input_tensor=None,
-        #                                       input_shape=inp_shape,
-        #                                       pooling=None,
-        #                                       classes=136
-        #                                       )
         if is_teacher:  # for teacher we use a heavier network
-            eff_net = efn.EfficientNetB7(include_top=True,
-                                         weights=None,
-                                         input_tensor=input_tensor,
-                                         input_shape=inp_shape,
-                                         pooling=None,
-                                         classes=output_len)
+            # eff_net = efn.EfficientNetB7(include_top=True,
+            #                              weights=None,
+            #                              input_tensor=input_tensor,
+            #                              input_shape=inp_shape,
+            #                              pooling=None,
+            #                              classes=output_len)
+            return self._create_efficientNet_3deconv(inp_shape, input_tensor, output_len)
         else:  # for student we use the small network
             eff_net = efn.EfficientNetB0(include_top=True,
                                          weights=None,
@@ -499,6 +493,37 @@ class CNNModel:
         #     json_file.write(model_json)
         return eff_net
 
+    def _create_efficientNet_3deconv(self, inp_shape, input_tensor, output_len):
+        eff_net = efn.EfficientNetB7(include_top=True,
+                                     weights=None,
+                                     input_tensor=input_tensor,
+                                     input_shape=[224, 224, 3],
+                                     pooling=None,
+                                     classes=output_len)
+        eff_net.layers.pop()
+        inp = eff_net.input
+
+        x = eff_net.get_layer('top_bn').output
+
+        x = Deconvolution2D(filters=256, kernel_size=(4, 4), strides=(2, 2), padding='same', activation='relu',
+                            kernel_initializer='he_uniform')(x)  # 14, 14, 256
+        x = BatchNormalization()(x)
+
+        x = Deconvolution2D(filters=256, kernel_size=(4, 4), strides=(2, 2), padding='same', activation='relu',
+                            kernel_initializer='he_uniform')(x)  # 28, 28, 256
+        x = BatchNormalization()(x)
+
+        x = Deconvolution2D(filters=256, kernel_size=(4, 4), strides=(2, 2), padding='same', activation='relu',
+                            kernel_initializer='he_uniform')(x)  # 56, 56, 256
+        x = BatchNormalization()(x)
+
+        out_heatmap = Conv2D(output_len//2, kernel_size=1, padding='same')(x)
+
+        eff_net = Model(inp, out_heatmap)
+
+        eff_net.summary()
+
+        return eff_net
 
     def create_asmnet(self, inp_shape, num_branches,output_len):
         mobilenet_model = mobilenet_v2.MobileNetV2(input_shape=inp_shape,

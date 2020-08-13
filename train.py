@@ -34,7 +34,7 @@ from skimage.io import imread
 
 class Train:
     def __init__(self, use_tf_record, dataset_name, custom_loss, arch, inception_mode, num_output_layers,
-                 train_on_batch, on_point, weight=None, accuracy=100):
+                 train_on_batch, on_point, heatmap, weight=None, accuracy=100):
         c_loss = Custom_losses()
         self.dataset_name = dataset_name
 
@@ -87,6 +87,8 @@ class Train:
 
         if train_on_batch:
             self.train_fit_on_batch()
+        elif heatmap and use_tf_record:
+            self.train_fit_heatmap()
         elif use_tf_record:
             self.train_fit()
         else:
@@ -218,6 +220,51 @@ class Train:
                             use_multiprocessing=True,
                             workers=16,
                             max_queue_size=32
+                            )
+
+    def train_fit_heatmap(self):
+        tf_record_util = TFRecordUtility(self.output_len)
+
+        '''prepare callbacks'''
+        callbacks_list = self._prepare_callback()
+
+        ''' define optimizers'''
+        optimizer = self._get_optimizer()
+
+        '''create train, validation, test data iterator'''
+        train_images, train_landmarks, _, train_heatmaps, _ = tf_record_util.create_training_tensor(
+            tfrecord_filename=self.tf_train_path, batch_size=self.BATCH_SIZE)
+
+        validation_images, validation_landmarks, _, validation_heatmaps, _ = tf_record_util.create_training_tensor(
+            tfrecord_filename=self.tf_eval_path, batch_size=self.BATCH_SIZE)
+
+        '''creating model'''
+        cnn = CNNModel()
+        model = cnn.get_model(train_images=train_images, arch=self.arch, num_output_layers=self.num_output_layers,
+                              output_len=self.output_len,
+                              input_tensor=train_images, inp_shape=None)
+
+        if self.weight is not None:
+            model.load_weights(self.weight)
+
+        '''compiling model'''
+        model.compile(loss=self._generate_loss(),
+                      optimizer=optimizer,
+                      metrics=['mse', 'mae'],
+                      target_tensors=self._generate_target_tensors(train_heatmaps),
+                      loss_weights=self._generate_loss_weights()
+                      )
+
+        '''train Model '''
+        print('< ========== Start Training ============= >')
+
+        history = model.fit(train_images,
+                            train_heatmaps,
+                            epochs=self.EPOCHS,
+                            steps_per_epoch=self.STEPS_PER_EPOCH,
+                            validation_data=(validation_images, validation_heatmaps),
+                            validation_steps=self.STEPS_PER_VALIDATION_EPOCH,
+                            verbose=1, callbacks=callbacks_list
                             )
 
     def train_fit(self):

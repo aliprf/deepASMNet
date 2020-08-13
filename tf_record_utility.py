@@ -320,17 +320,15 @@ class TFRecordUtility:
         images, landmarks = iterator.get_next()
         return images, landmarks
 
-    def create_training_tensor(sefl, tfrecord_filename, batch_size, reduced=False):
+    def create_training_tensor(self, tfrecord_filename, batch_size, reduced=False):
         SHUFFLE_BUFFER = 100
         BATCH_SIZE = batch_size
 
         dataset = tf.data.TFRecordDataset(tfrecord_filename)
 
         # Maps the parser on every file path in the array. You can set the number of parallel loaders here
-        if reduced:
-            dataset = dataset.map(sefl.__parse_function_reduced, num_parallel_calls=8)
-        else:
-            dataset = dataset.map(sefl.__parse_function, num_parallel_calls=8)
+
+        dataset = dataset.map(self.__parse_function, num_parallel_calls=16)
 
         # This dataset will go on forever
         dataset = dataset.repeat()
@@ -345,12 +343,9 @@ class TFRecordUtility:
         iterator = dataset.make_one_shot_iterator()
 
         # Create your tf representation of the iterator
-        if reduced:
-            images, landmarks, _heatmap = iterator.get_next()
-            return images, landmarks, 0, 0, 0, 0, 0, _heatmap, 0
-        else:
-            images, landmarks, landmarks_face, landmarks_noise, landmarks_eyes, landmarks_mouth, _pose, _heatmap, _heatmap_all = iterator.get_next()
-            return images, landmarks, landmarks_face, landmarks_noise, landmarks_eyes, landmarks_mouth, _pose, _heatmap, _heatmap_all
+
+        image_raw, landmarks, pose, heatmap, image_name = iterator.get_next()
+        return image_raw, landmarks, pose, heatmap, image_name
 
     def __top_n_indexes_tensor(self, arr, n):
         shape = tf.shape(arr)
@@ -662,42 +657,23 @@ class TFRecordUtility:
 
         return _images, _landmarks
 
-    def __parse_function_reduced(self, proto):
-        keys_to_features = {'landmarks': tf.FixedLenFeature([InputDataSize.landmark_len], tf.float32),
-                            'heatmap': tf.FixedLenFeature([56, 56, 68], tf.float32),
-                            'image_raw': tf.FixedLenFeature([InputDataSize.image_input_size,
-                                                             InputDataSize.image_input_size, 3], tf.float32)}
-
-        parsed_features = tf.parse_single_example(proto, keys_to_features)
-        _images = parsed_features['image_raw']
-        _landmarks = parsed_features["landmarks"]
-        _heatmap = parsed_features["heatmap"]
-        return _images, _landmarks, _heatmap
-
     def __parse_function(self, proto):
-        keys_to_features = {'landmarks': tf.FixedLenFeature([InputDataSize.landmark_len], tf.float32),
-                            'face': tf.FixedLenFeature([InputDataSize.landmark_face_len], tf.float32),
-                            'eyes': tf.FixedLenFeature([InputDataSize.landmark_eys_len], tf.float32),
-                            'nose': tf.FixedLenFeature([InputDataSize.landmark_nose_len], tf.float32),
-                            'mouth': tf.FixedLenFeature([InputDataSize.landmark_mouth_len], tf.float32),
-                            'pose': tf.FixedLenFeature([InputDataSize.pose_len], tf.float32),
-                            'heatmap': tf.FixedLenFeature([56, 56, 68], tf.float32),
-                            'heatmap_all': tf.FixedLenFeature([56, 56, 1], tf.float32),
-                            'image_raw': tf.FixedLenFeature([InputDataSize.image_input_size,
-                                                             InputDataSize.image_input_size, 3], tf.float32)}
+        keys_to_features = {
+            'landmarks': tf.FixedLenFeature([self.number_of_landmark], tf.float32),
+            'pose': tf.FixedLenFeature([InputDataSize.pose_len], tf.float32),
+            'image_raw': tf.FixedLenFeature([InputDataSize.image_input_size , InputDataSize.image_input_size , 3], tf.float32),
+            'heatmap': tf.FixedLenFeature([56, 56, self.number_of_landmark // 2], tf.float32),
+            'image_name': tf.FixedLenFeature([], tf.string)
+        }
 
         parsed_features = tf.parse_single_example(proto, keys_to_features)
-        _images = parsed_features['image_raw']
-        _landmarks = parsed_features["landmarks"]
-        _landmarks_face = parsed_features["face"]
-        _landmarks_eyes = parsed_features["eyes"]
-        _landmarks_noise = parsed_features["nose"]
-        _landmarks_mouth = parsed_features["mouth"]
-        _pose = parsed_features["pose"]
-        _heatmap = parsed_features["heatmap"]
-        _heatmap_all = parsed_features["heatmap_all"]
-        return _images, _landmarks, _landmarks_face, _landmarks_noise, _landmarks_eyes, _landmarks_mouth, _pose, _heatmap, _heatmap_all
 
+        landmarks = parsed_features['landmarks']
+        pose = parsed_features['pose']
+        image_raw = parsed_features['image_raw']
+        heatmap = parsed_features['heatmap']
+        image_name = parsed_features['image_name']
+        return image_raw, landmarks, pose, heatmap, image_name
         # Change this paths according to your directories
 
     images_path = "/media/ali/extradata/facial_landmark_ds/aflw/aflw-images-0/aflw/data/flickr/"
