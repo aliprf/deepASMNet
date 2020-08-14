@@ -451,13 +451,13 @@ class CNNModel:
 
     def create_efficientNet(self, inp_shape, input_tensor, output_len, is_teacher=True):
         if is_teacher:  # for teacher we use a heavier network
-            # eff_net = efn.EfficientNetB7(include_top=True,
-            #                              weights=None,
-            #                              input_tensor=input_tensor,
-            #                              input_shape=inp_shape,
-            #                              pooling=None,
-            #                              classes=output_len)
-            return self._create_efficientNet_3deconv(inp_shape, input_tensor, output_len)
+            eff_net = efn.EfficientNetB3(include_top=True,
+                                         weights=None,
+                                         input_tensor=input_tensor,
+                                         input_shape=inp_shape,
+                                         pooling=None,
+                                         classes=output_len)
+            # return self._create_efficientNet_3deconv(inp_shape, input_tensor, output_len)
         else:  # for student we use the small network
             eff_net = efn.EfficientNetB0(include_top=True,
                                          weights=None,
