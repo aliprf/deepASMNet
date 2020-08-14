@@ -67,11 +67,11 @@ if __name__ == '__main__':
                     # arch='mb_mn',
                     inception_mode=False,
                     num_output_layers=1,
-                    # weight='weights-60-0.00024.h5',
-                    weight=None,
+                    weight='last.h5',
+                    # weight=None,
                     train_on_batch=False,
                     heatmap=True,
-                    accuracy=90,
+                    accuracy=100,
                     on_point=True)
 
     '''StudentTraining'''
