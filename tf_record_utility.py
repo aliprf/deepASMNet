@@ -328,7 +328,7 @@ class TFRecordUtility:
 
         # Maps the parser on every file path in the array. You can set the number of parallel loaders here
 
-        dataset = dataset.map(self.__parse_function, num_parallel_calls=16)
+        dataset = dataset.map(self.__parse_function, num_parallel_calls=80)
 
         # This dataset will go on forever
         dataset = dataset.repeat()
