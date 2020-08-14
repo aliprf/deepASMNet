@@ -120,8 +120,8 @@ class W300Conf:
 
 
 class WflwConf:
-    Wflw_prefix_path = '/media/data3/ali/FL/wflw/'  # --> Zeus
-    # Wflw_prefix_path = '/media/data2/alip/FL/wflw/'  # --> Atlas
+    # Wflw_prefix_path = '/media/data3/ali/FL/wflw/'  # --> Zeus
+    Wflw_prefix_path = '/media/data2/alip/FL/wflw/'  # --> Atlas
     # Wflw_prefix_path = '/media/ali/data/wflw/'  # --> local
 
     img_path_prefix = Wflw_prefix_path + 'all/'
