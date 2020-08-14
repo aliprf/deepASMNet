@@ -71,7 +71,7 @@ if __name__ == '__main__':
                     # weight=None,
                     train_on_batch=False,
                     heatmap=True,
-                    accuracy=100,
+                    accuracy=90,
                     on_point=True)
 
     '''StudentTraining'''
