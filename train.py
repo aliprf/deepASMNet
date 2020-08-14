@@ -44,7 +44,7 @@ class Train:
             if accuracy == 100:
                 self.tf_train_path = IbugConf.tf_train_path
                 self.tf_eval_path = IbugConf.tf_evaluation_path
-            elif accuracy == 95:
+            elif accuracy == 90:
                 self.tf_train_path = IbugConf.tf_train_path_95
                 self.tf_eval_path = IbugConf.tf_evaluation_path_95
 
@@ -54,7 +54,7 @@ class Train:
             if accuracy == 100:
                 self.tf_train_path = CofwConf.tf_train_path
                 self.tf_eval_path = CofwConf.tf_evaluation_path
-            elif accuracy == 95:
+            elif accuracy == 90:
                 self.tf_train_path = CofwConf.tf_train_path_95
                 self.tf_eval_path = CofwConf.tf_evaluation_path_95
 
@@ -64,7 +64,7 @@ class Train:
             if accuracy == 100:
                 self.tf_train_path = WflwConf.tf_train_path
                 self.tf_eval_path = WflwConf.tf_evaluation_path
-            elif accuracy == 95:
+            elif accuracy == 90:
                 self.tf_train_path = WflwConf.tf_train_path_95
                 self.tf_eval_path = WflwConf.tf_evaluation_path_95
 
