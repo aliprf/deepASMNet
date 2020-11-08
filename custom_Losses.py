@@ -2,6 +2,8 @@ import math
 
 import numpy as np
 import tensorflow as tf
+tf.compat.v1.disable_eager_execution()
+
 from PIL import Image
 from tensorflow.keras import backend as K
 from scipy.spatial import distance

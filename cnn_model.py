@@ -3,6 +3,8 @@ from configuration import DatasetName, DatasetType, \
 from hg_Class import HourglassNet
 
 import tensorflow as tf
+tf.compat.v1.disable_eager_execution()
+
 from tensorflow import keras
 from skimage.transform import resize
 from keras.regularizers import l2
