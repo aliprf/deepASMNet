@@ -454,7 +454,7 @@ class CNNModel:
             eff_net = efn.EfficientNetB3(include_top=True,
                                          weights=None,
                                          input_tensor=None,
-                                         input_shape=inp_shape,
+                                         input_shape=[InputDataSize.image_input_size,InputDataSize.image_input_size,3 ],
                                          pooling=None,
                                          classes=output_len)
             # return self._create_efficientNet_3deconv(inp_shape, input_tensor, output_len)
