@@ -50,16 +50,18 @@ class Train:
                 self.tf_eval_path = IbugConf.tf_evaluation_path_95
 
         elif dataset_name == DatasetName.cofw:
-            self.SUM_OF_ALL_TRAIN_SAMPLES = CofwConf.orig_number_of_training
+            '''we use AUGmented data for teacher'''
+            self.SUM_OF_ALL_TRAIN_SAMPLES = CofwConf.number_of_all_sample
             self.output_len = CofwConf.num_of_landmarks * 2
             if accuracy == 100:
-                self.tf_train_path = CofwConf.no_aug_train_tf_path+'train100.tfrecords'
-                self.tf_eval_path = CofwConf.no_aug_train_tf_path+'eval100.tfrecords'
+                self.tf_train_path = CofwConf.augmented_train_tf_path+'train100.tfrecords'
+                self.tf_eval_path = CofwConf.augmented_train_tf_path+'eval100.tfrecords'
             elif accuracy == 90:
-                self.tf_train_path = CofwConf.no_aug_train_tf_path+'train90.tfrecords'
-                self.tf_eval_path = CofwConf.no_aug_train_tf_path+'eval90.tfrecords'
+                self.tf_train_path = CofwConf.augmented_train_tf_path+'train90.tfrecords'
+                self.tf_eval_path = CofwConf.augmented_train_tf_path+'eval90.tfrecords'
 
         elif dataset_name == DatasetName.wflw:
+            '''we use original data for teacher'''
             self.SUM_OF_ALL_TRAIN_SAMPLES = WflwConf.orig_number_of_training
             self.output_len = WflwConf.num_of_landmarks * 2
             if accuracy == 100:
