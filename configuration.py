@@ -57,7 +57,7 @@ class LearningConfig:
     MAX_LR = 1e-2
     STEP_SIZE = 10
     # batch_size = 80
-    batch_size = 50
+    batch_size = 70
     steps_per_validation_epochs = 5
 
     epochs = 200
@@ -147,9 +147,9 @@ class WflwConf:
     num_of_landmarks = 98
 
 class CofwConf:
-    # Cofw_prefix_path = '/media/data3/ali/FL/cofw/'  # --> Zeus
-    # Cofw_prefix_path = '/media/data2/alip/FL/cofw/'  # --> Atlas
-    Cofw_prefix_path = '/media/ali/data/cofw/'  # --> local
+    # Cofw_prefix_path = '/media/data3/ali/FL/new_data/cofw/'  # --> zeus
+    # Cofw_prefix_path = '/media/data2/alip/FL/new_data/cofw/'  # --> atlas
+    Cofw_prefix_path = '/media/ali/data/new_data/cofw/'  # --> local
 
     img_path_prefix = Cofw_prefix_path + 'all/'
     rotated_img_path_prefix = Cofw_prefix_path + '0_rotated/'
@@ -157,9 +157,8 @@ class CofwConf:
     normalized_points_npy_dir = Cofw_prefix_path + '2_normalized_npy_dir/'
     pose_npy_dir = Cofw_prefix_path + '4_pose_npy_dir/'
 
-    tf_train_path = Cofw_prefix_path + 'train.tfrecords'
-    tf_test_path = Cofw_prefix_path + 'test.tfrecords'
-    tf_evaluation_path = Cofw_prefix_path + 'evaluation.tfrecords'
+    augmented_train_tf_path = Cofw_prefix_path + 'training_set/augmented/tf/'
+    no_aug_train_tf_path = Cofw_prefix_path + 'training_set/no_aug/tf/'
 
     tf_train_path_95 = Cofw_prefix_path + 'train_90.tfrecords'
     tf_evaluation_path_95 = Cofw_prefix_path + 'evaluation_90.tfrecords'
@@ -167,19 +166,20 @@ class CofwConf:
     orig_number_of_training = 1345
     orig_number_of_test = 507
 
-    number_of_all_sample = 108820  # afw, train_helen, train_lfpw
+    augmentation_factor = 10
+    number_of_all_sample = orig_number_of_training * augmentation_factor  # afw, train_helen, train_lfpw
     number_of_train_sample = number_of_all_sample * 0.95  # 95 % for train
     number_of_evaluation_sample = number_of_all_sample * 0.05  # 5% for evaluation
 
     augmentation_factor = 5  # create . image from 1
     augmentation_factor_rotate = 30  # create . image from 1
-    num_of_landmarks = 28
+    num_of_landmarks = 29
 
 
 class IbugConf:
     # _Ibug_prefix_path = '/media/data3/ali/FL/ibug/'  # --> Zeus
-    _Ibug_prefix_path = '/media/data2/alip/FL/ibug/'  # --> Atlas
-    # _Ibug_prefix_path = '/media/ali/data/ibug/'  # --> local
+    # _Ibug_prefix_path = '/media/data2/alip/FL/ibug/'  # --> Atlas
+    _Ibug_prefix_path = '/media/ali/data/ibug/'  # --> local
 
     img_path_prefix = _Ibug_prefix_path + 'all/'
     rotated_img_path_prefix = _Ibug_prefix_path + '0_rotated/'

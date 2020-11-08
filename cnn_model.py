@@ -8,13 +8,12 @@ from skimage.transform import resize
 
 from keras.regularizers import l2
 
-tf.logging.set_verbosity(tf.logging.ERROR)
+# tf.logging.set_verbosity(tf.logging.ERROR)
 from keras.models import Model
 from keras.applications import mobilenet_v2, mobilenet, resnet50, densenet
 
 from keras.layers import Dense, MaxPooling2D, Conv2D, Flatten, \
-    BatchNormalization, Activation, GlobalAveragePooling2D, DepthwiseConv2D, Dropout, ReLU, Concatenate, \
-    Deconvolution2D, Input
+    BatchNormalization, Activation, GlobalAveragePooling2D, DepthwiseConv2D, Dropout, ReLU, Concatenate, Input
 
 from keras.callbacks import ModelCheckpoint
 from keras import backend as K

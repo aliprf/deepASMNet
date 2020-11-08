@@ -39,7 +39,7 @@ class Train:
         self.dataset_name = dataset_name
 
         if dataset_name == DatasetName.ibug:
-            self.SUM_OF_ALL_TRAIN_SAMPLES = IbugConf.number_of_all_sample
+            self.SUM_OF_ALL_TRAIN_SAMPLES = IbugConf.orig_number_of_training
             self.output_len = IbugConf.num_of_landmarks * 2
             if accuracy == 100:
                 self.tf_train_path = IbugConf.tf_train_path
@@ -49,24 +49,24 @@ class Train:
                 self.tf_eval_path = IbugConf.tf_evaluation_path_95
 
         elif dataset_name == DatasetName.cofw:
-            self.SUM_OF_ALL_TRAIN_SAMPLES = CofwConf.number_of_all_sample
+            self.SUM_OF_ALL_TRAIN_SAMPLES = CofwConf.orig_number_of_training
             self.output_len = CofwConf.num_of_landmarks * 2
             if accuracy == 100:
-                self.tf_train_path = CofwConf.tf_train_path
-                self.tf_eval_path = CofwConf.tf_evaluation_path
+                self.tf_train_path = CofwConf.no_aug_train_tf_path+'train100.tfrecords'
+                self.tf_eval_path = CofwConf.no_aug_train_tf_path+'eval100.tfrecords'
             elif accuracy == 90:
-                self.tf_train_path = CofwConf.tf_train_path_95
-                self.tf_eval_path = CofwConf.tf_evaluation_path_95
+                self.tf_train_path = CofwConf.no_aug_train_tf_path+'train90.tfrecords'
+                self.tf_eval_path = CofwConf.no_aug_train_tf_path+'eval90.tfrecords'
 
         elif dataset_name == DatasetName.wflw:
-            self.SUM_OF_ALL_TRAIN_SAMPLES = WflwConf.number_of_all_sample
+            self.SUM_OF_ALL_TRAIN_SAMPLES = WflwConf.orig_number_of_training
             self.output_len = WflwConf.num_of_landmarks * 2
             if accuracy == 100:
-                self.tf_train_path = WflwConf.tf_train_path
-                self.tf_eval_path = WflwConf.tf_evaluation_path
+                self.tf_train_path = WflwConf.no_aug_train_tf_path + 'train100.tfrecords'
+                self.tf_eval_path = WflwConf.no_aug_train_tf_path + 'eval100.tfrecords'
             elif accuracy == 90:
-                self.tf_train_path = WflwConf.tf_train_path_95
-                self.tf_eval_path = WflwConf.tf_evaluation_path_95
+                self.tf_train_path = WflwConf.no_aug_train_tf_path + 'train90.tfrecords'
+                self.tf_eval_path = WflwConf.no_aug_train_tf_path + 'eval90.tfrecords'
 
         self.BATCH_SIZE = LearningConfig.batch_size
         self.STEPS_PER_VALIDATION_EPOCH = LearningConfig.steps_per_validation_epochs
@@ -76,7 +76,8 @@ class Train:
         if custom_loss:
             self.loss = c_loss.custom_loss_hm
         else:
-            self.loss = losses.mean_squared_error
+            # self.loss = losses.mean_squared_error
+            self.loss = losses.mean_absolute_error
 
         self.arch = arch
         self.inception_mode = inception_mode
