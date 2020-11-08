@@ -71,7 +71,7 @@ class CNNModel:
         mobilenet_model.layers.pop()
 
         # x = mobilenet_model.get_layer('global_average_pooling2d_3').output  # 1280
-        x = mobilenet_model.get_layer('global_average_pooling2d_1').output  # 1280
+        x = mobilenet_model.get_layer('global_average_pooling2d').output  # 1280
         out_landmarks = Dense(output_len, name='O_L')(x)
         inp = mobilenet_model.input
 
