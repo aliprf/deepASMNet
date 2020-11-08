@@ -352,8 +352,9 @@ class Train:
             step_size=LearningConfig.STEP_SIZE * (self.SUM_OF_ALL_TRAIN_SAMPLES // self.BATCH_SIZE))
 
         logdir = "logs/scalars/" + datetime.now().strftime("%Y%m%d-%H%M%S")
-        tensorboard_callback = keras.callbacks.TensorBoard(log_dir=logdir)
-        return [checkpoint, early_stop, csv_logger, clr, tensorboard_callback]
+        # tensorboard_callback = keras.callbacks.TensorBoard(log_dir=logdir)
+        # return [checkpoint, early_stop, csv_logger, clr, tensorboard_callback]
+        return [checkpoint, early_stop, csv_logger, clr]
 
 
     def _create_generators(self):
