@@ -3,16 +3,15 @@ from configuration import DatasetName, DatasetType, \
 from hg_Class import HourglassNet
 
 import tensorflow as tf
-import keras
+from tensorflow import keras
 from skimage.transform import resize
-
 from keras.regularizers import l2
 
 # tf.logging.set_verbosity(tf.logging.ERROR)
-from keras.models import Model
-from keras.applications import mobilenet_v2, mobilenet, resnet50, densenet
+from tensorflow.keras.models import Model
+from tensorflow.keras.applications import mobilenet_v2, mobilenet, resnet50, densenet
 
-from keras.layers import Dense, MaxPooling2D, Conv2D, Flatten, \
+from tensorflow.keras.layers import Dense, MaxPooling2D, Conv2D, Flatten, \
     BatchNormalization, Activation, GlobalAveragePooling2D, DepthwiseConv2D, Dropout, ReLU, Concatenate, Input
 
 from keras.callbacks import ModelCheckpoint
@@ -32,7 +31,7 @@ from keras.utils.vis_utils import plot_model
 from scipy.spatial import distance
 import scipy.io as sio
 
-import efficientnet.keras as efn
+import efficientnet.tfkeras as efn
 
 
 

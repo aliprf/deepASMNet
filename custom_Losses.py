@@ -1,27 +1,17 @@
-from datetime import date
-
-from configuration import DatasetName, DatasetType, \
-    AffectnetConf, IbugConf, W300Conf, InputDataSize, LearningConfig
-from tf_record_utility import TFRecordUtility
-from cnn_model import CNNModel
-from pca_utility import PCAUtility
-from image_utility import ImageUtility
-from Data_custom_generator import CustomHeatmapGenerator
-import tensorflow as tf
-import keras
-
-from keras import backend as K
-import numpy as np
-import matplotlib.pyplot as plt
 import math
 
-import cv2
-import os.path
-from keras.utils.vis_utils import plot_model
-from scipy.spatial import distance
-import scipy.io as sio
-import img_printer as imgpr
+import numpy as np
+import tensorflow as tf
 from PIL import Image
+from tensorflow.keras import backend as K
+from scipy.spatial import distance
+
+from cnn_model import CNNModel
+from configuration import DatasetName, IbugConf, LearningConfig
+from image_utility import ImageUtility
+from pca_utility import PCAUtility
+from tf_record_utility import TFRecordUtility
+
 print(tf.__version__)
 
 

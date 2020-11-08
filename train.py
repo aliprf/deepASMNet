@@ -7,25 +7,25 @@ from custom_Losses import Custom_losses
 from Data_custom_generator import CustomHeatmapGenerator
 from PW_Data_custom_generator import PWCustomHeatmapGenerator
 import tensorflow as tf
-import keras
+from tensorflow import keras
 
 print(tf.__version__)
 print(keras.__version__)
 
-from keras.callbacks import ModelCheckpoint
+from tensorflow.keras.callbacks import ModelCheckpoint
 
-from keras.optimizers import Adam
+from tensorflow.keras.optimizers import Adam
 import numpy as np
 import matplotlib.pyplot as plt
 import math
-from keras.callbacks import CSVLogger
+from tensorflow.keras.callbacks import CSVLogger
 from datetime import datetime
 from sklearn.utils import shuffle
 import os
 from sklearn.model_selection import train_test_split
 from numpy import save, load, asarray
 import os.path
-from keras import losses
+from tensorflow.keras import losses
 from keras import backend as K
 import csv
 from skimage.io import imread
