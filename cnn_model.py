@@ -451,7 +451,7 @@ class CNNModel:
         if is_teacher:  # for teacher we use a heavier network
             eff_net = efn.EfficientNetB3(include_top=True,
                                          weights=None,
-                                         input_tensor=input_tensor,
+                                         input_tensor=None,
                                          input_shape=inp_shape,
                                          pooling=None,
                                          classes=output_len)
@@ -459,7 +459,7 @@ class CNNModel:
         else:  # for student we use the small network
             eff_net = efn.EfficientNetB0(include_top=True,
                                          weights=None,
-                                         input_tensor=input_tensor,
+                                         input_tensor=None,
                                          input_shape=inp_shape,
                                          pooling=None,
                                          classes=output_len)  # or weights='noisy-student'
