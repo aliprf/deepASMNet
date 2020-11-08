@@ -9,10 +9,9 @@ from PW_Data_custom_generator import PWCustomHeatmapGenerator
 import tensorflow as tf
 import keras
 
-tf.logging.set_verbosity(tf.logging.ERROR)
 from keras.callbacks import ModelCheckpoint
 
-from keras.optimizers import adam
+from keras.optimizers import Adam
 import numpy as np
 import matplotlib.pyplot as plt
 import math

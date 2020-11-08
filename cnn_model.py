@@ -18,7 +18,7 @@ from keras.layers import Dense, MaxPooling2D, Conv2D, Flatten, \
 from keras.callbacks import ModelCheckpoint
 from keras import backend as K
 
-from keras.optimizers import adam
+from keras.optimizers import Adam
 import numpy as np
 import matplotlib.pyplot as plt
 import math

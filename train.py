@@ -12,10 +12,9 @@ import keras
 print(tf.__version__)
 print(keras.__version__)
 
-tf.logging.set_verbosity(tf.logging.ERROR)
 from keras.callbacks import ModelCheckpoint
 
-from keras.optimizers import adam
+from keras.optimizers import Adam
 import numpy as np
 import matplotlib.pyplot as plt
 import math
@@ -338,7 +337,7 @@ class Train:
         return wights
 
     def _get_optimizer(self):
-        return adam(lr=1e-2, beta_1=0.9, beta_2=0.999, decay=1e-5, amsgrad=False)
+        return Adam(lr=1e-2, beta_1=0.9, beta_2=0.999, decay=1e-5, amsgrad=False)
 
     def _prepare_callback(self):
         early_stop = keras.callbacks.EarlyStopping(monitor='val_loss', min_delta=0, patience=50, verbose=1, mode='min')

@@ -148,8 +148,8 @@ class WflwConf:
 
 class CofwConf:
     # Cofw_prefix_path = '/media/data3/ali/FL/new_data/cofw/'  # --> zeus
-    # Cofw_prefix_path = '/media/data2/alip/FL/new_data/cofw/'  # --> atlas
-    Cofw_prefix_path = '/media/ali/data/new_data/cofw/'  # --> local
+    Cofw_prefix_path = '/media/data2/alip/FL/new_data/cofw/'  # --> atlas
+    # Cofw_prefix_path = '/media/ali/data/new_data/cofw/'  # --> local
 
     img_path_prefix = Cofw_prefix_path + 'all/'
     rotated_img_path_prefix = Cofw_prefix_path + '0_rotated/'

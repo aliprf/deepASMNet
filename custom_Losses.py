@@ -10,7 +10,6 @@ from Data_custom_generator import CustomHeatmapGenerator
 import tensorflow as tf
 import keras
 
-tf.logging.set_verbosity(tf.logging.ERROR)
 from keras import backend as K
 import numpy as np
 import matplotlib.pyplot as plt

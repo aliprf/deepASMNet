@@ -313,7 +313,7 @@ class TFRecordUtility:
         dataset = dataset.batch(BATCH_SIZE)
 
         # Create an iterator
-        iterator = dataset.make_one_shot_iterator()
+        iterator = tf.compat.v1.data.make_one_shot_iterator(dataset)
 
         # Create your tf representation of the iterator
 
@@ -647,11 +647,11 @@ class TFRecordUtility:
         return hm
 
     def __parse_function_points(self, proto):
-        keys_to_features = {'landmarks': tf.FixedLenFeature([self.number_of_landmark], tf.float32),
-                            'image_raw': tf.FixedLenFeature([InputDataSize.image_input_size,
+        keys_to_features = {'landmarks': tf.compat.v1.FixedLenFeature([self.number_of_landmark], tf.float32),
+                            'image_raw': tf.compat.v1.FixedLenFeature([InputDataSize.image_input_size,
                                                              InputDataSize.image_input_size, 3], tf.float32)}
 
-        parsed_features = tf.parse_single_example(proto, keys_to_features)
+        parsed_features = tf.compat.v1.parse_single_example(proto, keys_to_features)
         _images = parsed_features['image_raw']
         _landmarks = parsed_features["landmarks"]
 
@@ -659,14 +659,14 @@ class TFRecordUtility:
 
     def __parse_function(self, proto):
         keys_to_features = {
-            'landmarks': tf.FixedLenFeature([self.number_of_landmark], tf.float32),
-            'pose': tf.FixedLenFeature([InputDataSize.pose_len], tf.float32),
-            'image_raw': tf.FixedLenFeature([InputDataSize.image_input_size , InputDataSize.image_input_size , 3], tf.float32),
-            'heatmap': tf.FixedLenFeature([56, 56, self.number_of_landmark // 2], tf.float32),
-            'image_name': tf.FixedLenFeature([], tf.string)
+            'landmarks': tf.compat.v1.FixedLenFeature([self.number_of_landmark], tf.float32),
+            'pose': tf.compat.v1.FixedLenFeature([InputDataSize.pose_len], tf.float32),
+            'image_raw': tf.compat.v1.FixedLenFeature([InputDataSize.image_input_size , InputDataSize.image_input_size , 3], tf.float32),
+            'heatmap': tf.compat.v1.FixedLenFeature([56, 56, self.number_of_landmark // 2], tf.float32),
+            'image_name': tf.compat.v1.FixedLenFeature([], tf.string)
         }
 
-        parsed_features = tf.parse_single_example(proto, keys_to_features)
+        parsed_features = tf.compat.v1.parse_single_example(proto, keys_to_features)
 
         landmarks = parsed_features['landmarks']
         pose = parsed_features['pose']
