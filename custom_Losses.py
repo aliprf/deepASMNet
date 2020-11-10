@@ -91,7 +91,8 @@ class Custom_losses:
         print(vec_mse.shape)
         imgs = []
         for lnd in vec_mse:
-            lnd = lnd.tostring()
+            # lnd = lnd.tostring()
+            lnd = self.get_hash_key(lnd)
             print("-------------------")
             print(lnd)
             print("-------------------")
