@@ -91,8 +91,7 @@ class Custom_losses:
         print(vec_mse.shape)
         imgs = []
         for lnd in vec_mse:
-            lnd = self._decode_tf_file_name(lnd.tostring()).decode("utf-8")
-            # lnd = lnd.tostring()
+            lnd = lnd.tostring()
             print("-------------------")
             print(lnd)
             print("-------------------")
