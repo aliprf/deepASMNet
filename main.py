@@ -80,7 +80,7 @@ if __name__ == '__main__':
     st_trainer.train(teachers_arch=["efficientNet", "efficientNet"],
                      teachers_weight_files=["ds_cofw_ac_100_teacher.h5",
                                             "ds_cofw_ac_90_teacher.h5"],
-                     teachers_weight_loss=[0.2, -1.2],
+                     teachers_weight_loss=[0.5, -1.5],
                      teachers_tf_train_paths=[CofwConf.augmented_train_tf_path+'train100.tfrecords',
                                               CofwConf.augmented_train_tf_path+'train90.tfrecords'],
                      student_weight_file=None,
