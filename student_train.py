@@ -125,7 +125,7 @@ class StudentTrainer:
         callbacks_list = self._prepare_callback()
 
         ''' define optimizers'''
-        optimizer = Adam(lr=1e-2, beta_1=0.9, beta_2=0.999, decay=1e-5, amsgrad=False)
+        optimizer = Adam(lr=1e-3, beta_1=0.9, beta_2=0.999, decay=1e-5, amsgrad=False)
 
         '''create loss'''
         file = open("map_aug" + self.dataset_name, 'rb')

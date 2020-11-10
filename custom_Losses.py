@@ -91,7 +91,11 @@ class Custom_losses:
         print(vec_mse.shape)
         imgs = []
         for lnd in vec_mse:
-            lnd = lnd.tostring()
+            lnd = self._decode_tf_file_name(lnd.tostring().decode("utf-8"))
+            # lnd = lnd.tostring()
+            print("-------------------")
+            print(lnd)
+            print("-------------------")
             key = lnd
             img_name = lnd_img_map[key]
             imgs.append(img_path + img_name)
@@ -99,6 +103,9 @@ class Custom_losses:
 
     def get_hash_key(self, input):
         return hash(str(input).replace("\n", "").replace(" ", ""))
+
+    def _decode_tf_file_name(self, file_name):
+        return str(file_name).replace("X", "")
 
     # def _create_inter_fwd(self, ds_name, y_pred, bath_size):
     #     """based on the database, we return the distance between each facial elements"""
