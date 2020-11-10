@@ -93,9 +93,8 @@ class Custom_losses:
         for lnd in vec_mse:
             print(lnd.shape)
             lnd = np.array2string(lnd)
-            print(lnd)
-            lnd_hash = lnd
-            # lnd_hash = self.get_hash_key(lnd)
+            # print(lnd)
+            lnd_hash = self.get_hash_key(lnd)
             print("-------------------")
             print(lnd_hash)
             print("-------------------")
