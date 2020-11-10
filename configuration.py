@@ -60,7 +60,7 @@ class LearningConfig:
     batch_size = 40
     steps_per_validation_epochs = 5
 
-    epochs = 200
+    epochs = 500
     # landmark_len = 136
     # point_len = 68
     pose_len = 3
@@ -120,8 +120,8 @@ class W300Conf:
 
 
 class WflwConf:
-    Wflw_prefix_path = '/media/data3/ali/FL/wflw/'  # --> Zeus
-    # Wflw_prefix_path = '/media/data2/alip/FL/wflw/'  # --> Atlas
+    Wflw_prefix_path = '/media/data3/ali/FL/new_data/wflw/'  # --> Zeus
+    # Wflw_prefix_path = '/media/data3/ali/FL/new_data/wflw/'  # --> Atlas
     # Wflw_prefix_path = '/media/ali/data/wflw/'  # --> local
 
     img_path_prefix = Wflw_prefix_path + 'all/'
@@ -129,11 +129,19 @@ class WflwConf:
     train_images_dir = Wflw_prefix_path + '1_train_images_pts_dir/'
     normalized_points_npy_dir = Wflw_prefix_path + '2_normalized_npy_dir/'
     pose_npy_dir = Wflw_prefix_path + '4_pose_npy_dir/'
-    tf_train_path = Wflw_prefix_path + 'train.tfrecords'
-    tf_test_path = Wflw_prefix_path + 'test.tfrecords'
-    tf_evaluation_path = Wflw_prefix_path + 'evaluation.tfrecords'
-    tf_train_path_95 = Wflw_prefix_path + 'train_90.tfrecords'
-    tf_evaluation_path_95 = Wflw_prefix_path + 'evaluation_90.tfrecords'
+
+    '''     augmented version'''
+    augmented_train_pose = Wflw_prefix_path + 'training_set/augmented/pose/'
+    augmented_train_annotation = Wflw_prefix_path + 'training_set/augmented/annotations/'
+    augmented_train_atr = Wflw_prefix_path + 'training_set/augmented/atrs/'
+    augmented_train_image = Wflw_prefix_path + 'training_set/augmented/images/'
+    augmented_train_tf_path = Wflw_prefix_path + 'training_set/augmented/tf/'
+    '''     original version'''
+    no_aug_train_annotation = Wflw_prefix_path + 'training_set/no_aug/annotations/'
+    no_aug_train_atr = Wflw_prefix_path + 'training_set/no_aug/atrs/'
+    no_aug_train_pose = Wflw_prefix_path + 'training_set/no_aug/pose/'
+    no_aug_train_image = Wflw_prefix_path + 'training_set/no_aug/images/'
+    no_aug_train_tf_path = Wflw_prefix_path + 'training_set/no_aug/tf/'
 
     orig_number_of_training = 7500
     orig_number_of_test = 2500
@@ -147,15 +155,13 @@ class WflwConf:
     num_of_landmarks = 98
 
 class CofwConf:
-    # Cofw_prefix_path = '/media/data3/ali/FL/new_data/cofw/'  # --> zeus
-    Cofw_prefix_path = '/media/data2/alip/FL/new_data/cofw/'  # --> atlas
+    Cofw_prefix_path = '/media/data3/ali/FL/new_data/cofw/'  # --> zeus
+    # Cofw_prefix_path = '/media/data2/alip/FL/new_data/cofw/'  # --> atlas
     # Cofw_prefix_path = '/media/ali/data/new_data/cofw/'  # --> local
 
-    img_path_prefix = Cofw_prefix_path + 'all/'
-    rotated_img_path_prefix = Cofw_prefix_path + '0_rotated/'
-    train_images_dir = Cofw_prefix_path + '1_train_images_pts_dir/'
-    normalized_points_npy_dir = Cofw_prefix_path + '2_normalized_npy_dir/'
-    pose_npy_dir = Cofw_prefix_path + '4_pose_npy_dir/'
+    augmented_train_pose = Cofw_prefix_path + 'training_set/augmented/pose/'
+    augmented_train_annotation = Cofw_prefix_path + 'training_set/augmented/annotations/'
+    augmented_train_image = Cofw_prefix_path + 'training_set/augmented/images/'
 
     augmented_train_tf_path = Cofw_prefix_path + 'training_set/augmented/tf/'
     no_aug_train_tf_path = Cofw_prefix_path + 'training_set/no_aug/tf/'

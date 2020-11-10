@@ -344,7 +344,7 @@ class Train:
         return Adam(lr=1e-2, beta_1=0.9, beta_2=0.999, decay=1e-5, amsgrad=False)
 
     def _prepare_callback(self):
-        early_stop = keras.callbacks.EarlyStopping(monitor='val_loss', min_delta=0, patience=50, verbose=1, mode='min')
+        early_stop = keras.callbacks.EarlyStopping(monitor='val_loss', min_delta=0, patience=200, verbose=1, mode='min')
         file_path = "ds_"+str(self.dataset_name)+"_ac_" + str(self.accuracy) + "_weights-{epoch:02d}-{loss:.5f}.h5"
         checkpoint = ModelCheckpoint(file_path, monitor='loss', verbose=1, save_best_only=True, mode='min')
         csv_logger = CSVLogger('log.csv', append=True, separator=';')

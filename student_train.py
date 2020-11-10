@@ -7,7 +7,7 @@ from custom_Losses import Custom_losses
 from Data_custom_generator import CustomHeatmapGenerator
 from PW_Data_custom_generator import PWCustomHeatmapGenerator
 import tensorflow as tf
-import keras
+from tensorflow import keras
 
 from keras.callbacks import ModelCheckpoint
 
@@ -44,9 +44,9 @@ class StudentTrainer:
         elif dataset_name == DatasetName.cofw:
             self.SUM_OF_ALL_TRAIN_SAMPLES = CofwConf.number_of_all_sample
             self.output_len = CofwConf.num_of_landmarks * 2
-            self.tf_train_path = CofwConf.tf_train_path
-            self.tf_eval_path = CofwConf.tf_evaluation_path
-            self.img_path = CofwConf.train_images_dir
+            self.tf_train_path = CofwConf.augmented_train_tf_path + 'train100.tfrecords'
+            self.tf_eval_path = CofwConf.augmented_train_tf_path + 'eval100.tfrecords'
+            self.img_path = CofwConf.augmented_train_image
 
         elif dataset_name == DatasetName.wflw:
             self.SUM_OF_ALL_TRAIN_SAMPLES = WflwConf.number_of_all_sample
@@ -125,10 +125,10 @@ class StudentTrainer:
         callbacks_list = self._prepare_callback()
 
         ''' define optimizers'''
-        optimizer = adam(lr=1e-2, beta_1=0.9, beta_2=0.999, decay=1e-5, amsgrad=False)
+        optimizer = Adam(lr=1e-2, beta_1=0.9, beta_2=0.999, decay=1e-5, amsgrad=False)
 
         '''create loss'''
-        file = open("map_" + self.dataset_name, 'rb')
+        file = open("map_aug" + self.dataset_name, 'rb')
         landmark_img_map = pickle.load(file)
         file.close()
 
@@ -142,7 +142,8 @@ class StudentTrainer:
                                                        teacher_models=teacher_models,
                                                        teachers_weight_loss=teachers_weight_loss,
                                                        bath_size=self.BATCH_SIZE,
-                                                       num_points=self.output_len)
+                                                       num_points=self.output_len,
+                                                       ds_name=self.dataset_name, loss_type=0)
 
         '''compiling model'''
         student_model.compile(loss=loss_func,
@@ -160,7 +161,7 @@ class StudentTrainer:
                                     verbose=1, callbacks=callbacks_list)
 
     def _prepare_callback(self):
-        early_stop = keras.callbacks.EarlyStopping(monitor='val_loss', min_delta=0, patience=50, verbose=1, mode='min')
+        early_stop = keras.callbacks.EarlyStopping(monitor='val_loss', min_delta=0, patience=500, verbose=1, mode='min')
         file_path = "weights-{epoch:02d}-{loss:.5f}.h5"
         checkpoint = ModelCheckpoint(file_path, monitor='loss', verbose=1, save_best_only=True, mode='min')
         csv_logger = CSVLogger('log.csv', append=True, separator=';')

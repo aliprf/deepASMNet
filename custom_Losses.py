@@ -2,6 +2,7 @@ import math
 
 import numpy as np
 import tensorflow as tf
+
 tf.compat.v1.disable_eager_execution()
 
 from PIL import Image
@@ -18,55 +19,26 @@ print(tf.__version__)
 
 
 class Custom_losses:
-
-    def custom_teacher_student_loss_cos(self, lnd_img_map, img_path, teacher_models, teachers_weight_loss, bath_size,
-                                        num_points, cos_weight):
+    def custom_face_web_loss(self, bath_size, ds_name, num_points, loss_type, main_loss_wight,
+                             inter_faceweb_weight, intra_faceweb_weight):
         def loss(y_true, y_pred):
-            cosine_loss = tf.keras.losses.cosine_similarity(axis=1)
-            image_utility = ImageUtility()
-
-            t0_model = teacher_models[0]
-            l0_weight = teachers_weight_loss[0]
-
-            t1_model = teacher_models[1]
-            l1_weight = teachers_weight_loss[1]
-
-            y_true_n = tf.reshape(y_true, [bath_size, num_points], name=None)
-            imgs_address = self.get_y(y_true_n, lnd_img_map, img_path)
-            imgs_batch = [np.array(Image.open(img_file)) / 255.0 for img_file in imgs_address]
-
-            y_pred_T0 = np.array([t0_model.predict(np.expand_dims(img, axis=0))[0] for img in imgs_batch])
-            y_pred_T1 = np.array([t1_model.predict(np.expand_dims(img, axis=0))[0] for img in imgs_batch])
-
-            '''test teacher Nets'''
-            # counter = 0
-            # for pre_points in y_pred_T1:
-            #     labels_predict_transformed, landmark_arr_x_p, landmark_arr_y_p = \
-            #         image_utility.create_landmarks_from_normalized(pre_points, 224, 224, 112, 112)
-            #     imgpr.print_image_arr((counter + 1) * 1000, imgs_batch[counter], landmark_arr_x_p, landmark_arr_y_p)
-            #     counter += 1
-
-            y_pred_T0_ten = K.variable(y_pred_T0)
-            y_pred_T1_ten = K.variable(y_pred_T1)
-
-            mse_te0 = K.mean(K.square(y_pred_T0_ten - y_true))
-            mse_te0_cos = cosine_loss(y_pred_T0_ten, y_true)
-
-            mse_te1 = K.mean(K.square(y_pred_T1_ten - y_true))
-            mse_te1_cos = cosine_loss(y_pred_T1_ten, y_true)
-
-            mse_main = K.mean(K.square(y_pred - y_true))
-            mse_main_cos = cosine_loss(y_pred, y_true)
-
-            return (mse_main + cos_weight * mse_main_cos) \
-                   + l0_weight * (mse_te0 + cos_weight * mse_te0_cos)\
-                   + l1_weight * (mse_te1 + cos_weight * mse_te1_cos)
+            """"""
+            '''calculate the main loss'''
+            if loss_type == 0:
+                '''MAE'''
+                main_loss = tf.reduce_mean(tf.abs(y_true - y_pred))
+            elif loss_type == 1:
+                '''MSE'''
+                main_loss = tf.reduce_mean(tf.square(y_true - y_pred))
+            '''calculate the inter faceweb distance: the distance between each facial elements(nose to mouth)'''
+            inter_fb_gt = self._create_inter_fwd(ds_name, y_true, bath_size)
+            inter_fb_pr = self._create_inter_fwd(ds_name, y_pred, bath_size)
+            '''calculate the intra faceweb distance: the internal distance between a facial element(eye)'''
 
         return loss
 
     def custom_teacher_student_loss(self, lnd_img_map, img_path, teacher_models, teachers_weight_loss, bath_size,
-                                    num_points):
-
+                                    num_points, ds_name, loss_type):
         def loss(y_true, y_pred):
             image_utility = ImageUtility()
 
@@ -93,9 +65,22 @@ class Custom_losses:
             y_pred_T0_ten = K.variable(y_pred_T0)
             y_pred_T1_ten = K.variable(y_pred_T1)
 
-            mse_te0 = K.mean(K.square(y_pred_T0_ten - y_true))
-            mse_te1 = K.mean(K.square(y_pred_T1_ten - y_true))
-            mse_main = K.mean(K.square(y_pred - y_true))
+            if loss_type == 0:
+                '''MAE'''
+                mse_te0 = tf.reduce_mean(tf.abs(y_pred_T0_ten - y_true))
+                mse_te1 = tf.reduce_mean(tf.abs(y_pred_T1_ten - y_true))
+                mse_main = tf.reduce_mean(tf.abs(y_pred - y_true))
+            elif loss_type == 1:
+                '''MSE'''
+                mse_te0 = tf.reduce_mean(tf.square(y_pred_T0_ten - y_true))
+                mse_te1 = tf.reduce_mean(tf.square(y_pred_T1_ten - y_true))
+                mse_main = tf.reduce_mean(tf.square(y_pred - y_true))
+                '''     or:'''
+                # mse = tf.keras.losses.MeanSquaredError()
+                # mse_te0 = mse(y_pred_T0_ten, y_true)
+                '''     or:'''
+                # mse_main = K.mean(K.square(y_pred - y_true))
+                # mse_main = K.mean(K.square(y_pred - y_true))
 
             return mse_main + (l0_weight * mse_te0) + (l1_weight * mse_te1)
 
@@ -114,6 +99,12 @@ class Custom_losses:
 
     def get_hash_key(self, input):
         return hash(str(input).replace("\n", "").replace(" ", ""))
+
+    # def _create_inter_fwd(self, ds_name, y_pred, bath_size):
+    #     """based on the database, we return the distance between each facial elements"""
+    #     if ds_name == DatasetName.cofw:
+    #     # elif ds_name == DatasetName.ibug:
+    #     # elif ds_name == DatasetName.wflw:
 
     def asm_assisted_loss(self, hmp_85, hmp_90, hmp_95):
         def loss(y_true, y_pred):
@@ -436,6 +427,51 @@ class Custom_losses:
         # print('total_loss  ' + str(total_loss[0]))
         # print('      ')
         return tensor_total_loss
+
+    def custom_teacher_student_loss_cos(self, lnd_img_map, img_path, teacher_models, teachers_weight_loss, bath_size,
+                                        num_points, cos_weight):
+        def loss(y_true, y_pred):
+            cosine_loss = tf.keras.losses.cosine_similarity(axis=1)
+            image_utility = ImageUtility()
+
+            t0_model = teacher_models[0]
+            l0_weight = teachers_weight_loss[0]
+
+            t1_model = teacher_models[1]
+            l1_weight = teachers_weight_loss[1]
+
+            y_true_n = tf.reshape(y_true, [bath_size, num_points], name=None)
+            imgs_address = self.get_y(y_true_n, lnd_img_map, img_path)
+            imgs_batch = [np.array(Image.open(img_file)) / 255.0 for img_file in imgs_address]
+
+            y_pred_T0 = np.array([t0_model.predict(np.expand_dims(img, axis=0))[0] for img in imgs_batch])
+            y_pred_T1 = np.array([t1_model.predict(np.expand_dims(img, axis=0))[0] for img in imgs_batch])
+
+            '''test teacher Nets'''
+            # counter = 0
+            # for pre_points in y_pred_T1:
+            #     labels_predict_transformed, landmark_arr_x_p, landmark_arr_y_p = \
+            #         image_utility.create_landmarks_from_normalized(pre_points, 224, 224, 112, 112)
+            #     imgpr.print_image_arr((counter + 1) * 1000, imgs_batch[counter], landmark_arr_x_p, landmark_arr_y_p)
+            #     counter += 1
+
+            y_pred_T0_ten = K.variable(y_pred_T0)
+            y_pred_T1_ten = K.variable(y_pred_T1)
+
+            mse_te0 = K.mean(K.square(y_pred_T0_ten - y_true))
+            mse_te0_cos = cosine_loss(y_pred_T0_ten, y_true)
+
+            mse_te1 = K.mean(K.square(y_pred_T1_ten - y_true))
+            mse_te1_cos = cosine_loss(y_pred_T1_ten, y_true)
+
+            mse_main = K.mean(K.square(y_pred - y_true))
+            mse_main_cos = cosine_loss(y_pred, y_true)
+
+            return (mse_main + cos_weight * mse_main_cos) \
+                   + l0_weight * (mse_te0 + cos_weight * mse_te0_cos) \
+                   + l1_weight * (mse_te1 + cos_weight * mse_te1_cos)
+
+        return loss
 
     def init_tensors(self, test):
         batchsize = LearningConfig.batch_size

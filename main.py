@@ -59,32 +59,33 @@ if __name__ == '__main__':
     # test = Test(arch='mnv2_hm_r_v2', num_output_layers=1, weight_fname='weights-04-0.00995.h5', point=False)
     #
 
-    trainer = Train(use_tf_record=True,
-                    dataset_name=DatasetName.cofw,
-                    custom_loss=False,
-                    # arch='efficientNet',
-                    # arch='mnv2_hm_r_v2',
-                    arch='mobileNetV2',
-                    inception_mode=False,
-                    num_output_layers=1,
-                    # weight='last.h5',
-                    weight=None,
-                    train_on_batch=False,
-                    heatmap=False,
-                    accuracy=100,
-                    on_point=True)
+    # trainer = Train(use_tf_record=True,
+    #                 dataset_name=DatasetName.cofw,
+    #                 custom_loss=False,
+    #                 # arch='efficientNet',
+    #                 # arch='mnv2_hm_r_v2',
+    #                 arch='mobileNetV2',
+    #                 inception_mode=False,
+    #                 num_output_layers=1,
+    #                 # weight='last.h5',
+    #                 weight=None,
+    #                 train_on_batch=False,
+    #                 heatmap=False,
+    #                 accuracy=100,
+    #                 on_point=True)
 
     '''StudentTraining'''
 
-    # st_trainer = StudentTrainer(dataset_name=DatasetName.wflw, arch="mobileNetV2")
-    # st_trainer.train(teachers_arch=["efficientNet", "efficientNet"],
-    #                  teachers_weight_files=["ds_wflw_ac_100_teacher.h5",
-    #                                         "ds_wflw_ac_90_teacher.h5"],
-    #                  teachers_weight_loss=[0.8, -1.8],
-    #                  teachers_tf_train_paths=[WflwConf.tf_train_path, WflwConf.tf_train_path_95],
-    #                  student_weight_file=None,
-    #                  cos_weight=0.5
-    #                  )
+    st_trainer = StudentTrainer(dataset_name=DatasetName.cofw, arch="mobileNetV2")
+    st_trainer.train(teachers_arch=["efficientNet", "efficientNet"],
+                     teachers_weight_files=["ds_cofw_ac_100_teacher.h5",
+                                            "ds_cofw_ac_90_teacher.h5"],
+                     teachers_weight_loss=[0.2, -1.2],
+                     teachers_tf_train_paths=[CofwConf.augmented_train_tf_path+'train100.tfrecords',
+                                              CofwConf.augmented_train_tf_path+'train90.tfrecords'],
+                     student_weight_file=None,
+                     cos_weight=0
+                     )
 
 
 
