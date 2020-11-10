@@ -67,13 +67,13 @@ class Custom_losses:
 
             if loss_type == 0:
                 '''MAE'''
-                mse_te0 = tf.reduce_mean(tf.abs(y_pred_T0_ten - y_true))
-                mse_te1 = tf.reduce_mean(tf.abs(y_pred_T1_ten - y_true))
+                mse_te0 = tf.reduce_mean(tf.abs(y_pred - y_pred_T0_ten))
+                mse_te1 = tf.reduce_mean(tf.abs(y_pred - y_pred_T1_ten))
                 mse_main = tf.reduce_mean(tf.abs(y_pred - y_true))
             elif loss_type == 1:
                 '''MSE'''
-                mse_te0 = tf.reduce_mean(tf.square(y_pred_T0_ten - y_true))
-                mse_te1 = tf.reduce_mean(tf.square(y_pred_T1_ten - y_true))
+                mse_te0 = tf.reduce_mean(tf.square(y_pred - y_pred_T0_ten))
+                mse_te1 = tf.reduce_mean(tf.square(y_pred - y_pred_T1_ten))
                 mse_main = tf.reduce_mean(tf.square(y_pred - y_true))
                 '''     or:'''
                 # mse = tf.keras.losses.MeanSquaredError()
