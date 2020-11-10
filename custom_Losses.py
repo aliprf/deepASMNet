@@ -107,7 +107,7 @@ class Custom_losses:
     def np_to_str(self, input):
         str_out = ''
         for item in input:
-            str_out += str(np.round(item, 3))
+            str_out += str(item)[:3]
         return self.get_hash_key(str_out)
 
     def get_hash_key(self, input):
