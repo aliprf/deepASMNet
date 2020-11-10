@@ -92,7 +92,7 @@ class Custom_losses:
         imgs = []
         for lnd in vec_mse:
             print(lnd.shape)
-            lnd = np.array2string(lnd)
+            lnd = lnd.tostring()
             # print(lnd)
             lnd_hash = self.get_hash_key(lnd)
             print("-------------------")
@@ -104,7 +104,7 @@ class Custom_losses:
         return np.array(imgs)
 
     def get_hash_key(self, input):
-        return hash(str(input).replace("\n", "").replace(" ", ""))
+        return str(hash(str(input).replace("\n", "").replace(" ", "")))
 
     def _decode_tf_file_name(self, file_name):
         return str(file_name).replace("X", "")
