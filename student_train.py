@@ -37,9 +37,9 @@ class StudentTrainer:
         if dataset_name == DatasetName.ibug:
             self.SUM_OF_ALL_TRAIN_SAMPLES = IbugConf.number_of_all_sample
             self.output_len = IbugConf.num_of_landmarks * 2
-            self.tf_train_path = IbugConf.tf_train_path
-            self.tf_eval_path = IbugConf.tf_evaluation_path
-            self.img_path = IbugConf.train_images_dir
+            self.tf_train_path = IbugConf.augmented_train_tf_path + 'train100.tfrecords'
+            self.tf_eval_path = IbugConf.augmented_train_tf_path + 'eval100.tfrecords'
+            self.img_path = IbugConf.augmented_train_image
 
         elif dataset_name == DatasetName.cofw:
             self.SUM_OF_ALL_TRAIN_SAMPLES = CofwConf.number_of_all_sample
@@ -51,8 +51,8 @@ class StudentTrainer:
         elif dataset_name == DatasetName.wflw:
             self.SUM_OF_ALL_TRAIN_SAMPLES = WflwConf.number_of_all_sample
             self.output_len = WflwConf.num_of_landmarks * 2
-            self.tf_train_path = WflwConf.tf_train_path
-            self.tf_eval_path = WflwConf.tf_evaluation_path
+            self.tf_train_path = WflwConf.augmented_train_tf_path + 'train100.tfrecords'
+            self.tf_eval_path = WflwConf.augmented_train_tf_path + 'eval100.tfrecords'
             self.img_path = WflwConf.train_images_dir
 
         self.BATCH_SIZE = LearningConfig.batch_size

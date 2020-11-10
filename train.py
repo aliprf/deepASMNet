@@ -43,11 +43,11 @@ class Train:
             self.SUM_OF_ALL_TRAIN_SAMPLES = IbugConf.orig_number_of_training
             self.output_len = IbugConf.num_of_landmarks * 2
             if accuracy == 100:
-                self.tf_train_path = IbugConf.tf_train_path
-                self.tf_eval_path = IbugConf.tf_evaluation_path
+                self.tf_train_path = IbugConf.no_aug_train_tf_path+'train100.tfrecords'
+                self.tf_eval_path = IbugConf.no_aug_train_tf_path+'eval100.tfrecords'
             elif accuracy == 90:
-                self.tf_train_path = IbugConf.tf_train_path_95
-                self.tf_eval_path = IbugConf.tf_evaluation_path_95
+                self.tf_train_path = IbugConf.no_aug_train_tf_path+'train90.tfrecords'
+                self.tf_eval_path = IbugConf.no_aug_train_tf_path+'eval90.tfrecords'
 
         elif dataset_name == DatasetName.cofw:
             '''we use AUGmented data for teacher'''

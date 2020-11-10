@@ -183,45 +183,20 @@ class CofwConf:
 
 
 class IbugConf:
-    # _Ibug_prefix_path = '/media/data3/ali/FL/ibug/'  # --> Zeus
-    # _Ibug_prefix_path = '/media/data2/alip/FL/ibug/'  # --> Atlas
-    _Ibug_prefix_path = '/media/ali/data/ibug/'  # --> local
+    w300w_prefix_path = '/media/data3/ali/FL/new_data/300W/'  # --> zeus
+    # w300w_prefix_path = '/media/data2/alip/FL/new_data/300W/'  # --> atlas
+    # w300w_prefix_path = '/media/ali/data/new_data/300W/'  # --> local
 
-    img_path_prefix = _Ibug_prefix_path + 'all/'
-    rotated_img_path_prefix = _Ibug_prefix_path + '0_rotated/'
-    train_images_dir = _Ibug_prefix_path + '1_train_images_pts_dir/'
-    normalized_points_npy_dir = _Ibug_prefix_path + '2_normalized_npy_dir/'
-    # normalized_pose_npy_dir = _Ibug_prefix_path + '3_normalized_pose_npy_dir/'
-    pose_npy_dir = _Ibug_prefix_path + '4_pose_npy_dir/'
-    tf_train_path = _Ibug_prefix_path + 'train.tfrecords'
-    tf_test_path = _Ibug_prefix_path + 'test.tfrecords'
-    tf_evaluation_path = _Ibug_prefix_path + 'evaluation.tfrecords'
-    tf_train_path_95 = _Ibug_prefix_path + 'train_90.tfrecords'
-    tf_evaluation_path_95 = _Ibug_prefix_path + 'evaluation_90.tfrecords'
+    orig_300W_train = w300w_prefix_path + 'orig_300W_train/'
+    augmented_train_pose = w300w_prefix_path + 'training_set/augmented/pose/'
+    augmented_train_annotation = w300w_prefix_path + 'training_set/augmented/annotations/'
+    augmented_train_image = w300w_prefix_path + 'training_set/augmented/images/'
+    augmented_train_tf_path = w300w_prefix_path + 'training_set/augmented/tf/'
 
-    # train_hm_dir = '/media/data2/alip/fala/ibug/train_hm_dir/'
-    # train_hm_dir_85 = '/media/data2/alip/fala/ibug/train_hm_dir_85/'
-    # train_hm_dir_90 = '/media/data2/alip/fala/ibug/train_hm_dir_90/'
-    # train_hm_dir_97 = '/media/data2/alip/fala/ibug/train_hm_dir_97/'
-
-    '''local'''
-    # img_path_prefix = '/media/ali/data/train_set/'
-    # rotated_img_path_prefix = '/media/ali/data/rotated/'
-    # train_images_dir = '/media/ali/data/train_images_dir/'
-    # normalized_points_npy_dir = '/media/ali/data/normalized_points_npy_dir/'
-    # pose_npy_dir = '/media/ali/data/train_before_heatmap_pose/'
-    # train_hm_dir = '/media/ali/data/train_before_heatmap_npy/'
-    # train_hm_dir_85 = '/media/ali/data/train_hm_dir_85/'
-    # train_hm_dir_90 = '/media/ali/data/train_hm_dir_90/'
-    # train_hm_dir_97 = '/media/ali/data/train_hm_dir_97/'
-    # tf_train_path = '/media/ali/data/train.tfrecords'
-    # tf_test_path = '/media/ali/data/test.tfrecords'
-    # tf_evaluation_path = '/media/ali/data/evaluation.tfrecords'
-
-
-    # origin_number_of_all_sample = 3148  # afw, train_helen, train_lfpw
-    # origin_number_of_train_sample = 2834  # 95 % for train
-    # origin_number_of_evaluation_sample = 314  # 5% for evaluation
+    no_aug_train_annotation = w300w_prefix_path + 'training_set/no_aug/annotations/'
+    no_aug_train_pose = w300w_prefix_path + 'training_set/no_aug/pose/'
+    no_aug_train_image = w300w_prefix_path + 'training_set/no_aug/images/'
+    no_aug_train_tf_path = w300w_prefix_path + 'training_set/no_aug/tf/'
 
     orig_number_of_training = 3148
     orig_number_of_test_full = 689
