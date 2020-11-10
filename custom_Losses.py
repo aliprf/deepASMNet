@@ -108,7 +108,7 @@ class Custom_losses:
         str_out = ''
         for item in input:
             str_out += str(item)[:3]
-        return self.get_hash_key(str_out)
+        return str_out
 
     def get_hash_key(self, input):
         return str(hash(str(input).replace("\n", "").replace(" ", "")))
