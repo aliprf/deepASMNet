@@ -62,16 +62,15 @@ if __name__ == '__main__':
     trainer = Train(use_tf_record=True,
                     dataset_name=DatasetName.ibug,
                     custom_loss=False,
-                    arch='efficientNet',
-                    # arch='mnv2_hm_r_v2',
-                    # arch='mobileNetV2',
+                    # arch='efficientNet',
+                    arch='mobileNetV2',
                     inception_mode=False,
                     num_output_layers=1,
                     # weight='last.h5',
                     weight=None,
                     train_on_batch=False,
                     heatmap=False,
-                    accuracy=90,
+                    accuracy=100,
                     on_point=True)
 
     '''StudentTraining'''
