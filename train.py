@@ -40,14 +40,17 @@ class Train:
         self.dataset_name = dataset_name
 
         if dataset_name == DatasetName.ibug:
-            self.SUM_OF_ALL_TRAIN_SAMPLES = IbugConf.number_of_all_sample
+            self.SUM_OF_ALL_TRAIN_SAMPLES = IbugConf.orig_number_of_training
+            # self.SUM_OF_ALL_TRAIN_SAMPLES = IbugConf.number_of_all_sample
             self.output_len = IbugConf.num_of_landmarks * 2
             if accuracy == 100:
-                self.tf_train_path = IbugConf.augmented_train_tf_path+'train100.tfrecords'
-                self.tf_eval_path = IbugConf.augmented_train_tf_path+'eval100.tfrecords'
+                # self.tf_train_path = IbugConf.augmented_train_tf_path+'train100.tfrecords'
+                self.tf_train_path = IbugConf.no_aug_train_tf_path+'train100.tfrecords'
+                self.tf_eval_path = IbugConf.no_aug_train_tf_path+'eval100.tfrecords'
             elif accuracy == 90:
-                self.tf_train_path = IbugConf.augmented_train_tf_path+'train90.tfrecords'
-                self.tf_eval_path = IbugConf.augmented_train_tf_path+'eval90.tfrecords'
+                # self.tf_train_path = IbugConf.augmented_train_tf_path+'train90.tfrecords'
+                self.tf_train_path = IbugConf.no_aug_train_tf_path+'train90.tfrecords'
+                self.tf_eval_path = IbugConf.no_aug_train_tf_path+'eval90.tfrecords'
 
         elif dataset_name == DatasetName.cofw:
             '''we use AUGmented data for teacher'''
@@ -62,14 +65,14 @@ class Train:
 
         elif dataset_name == DatasetName.wflw:
             '''we use original data for teacher'''
-            self.SUM_OF_ALL_TRAIN_SAMPLES = WflwConf.number_of_all_sample
+            self.SUM_OF_ALL_TRAIN_SAMPLES = WflwConf.orig_number_of_training
             self.output_len = WflwConf.num_of_landmarks * 2
             if accuracy == 100:
-                self.tf_train_path = WflwConf.augmented_train_tf_path + 'train100.tfrecords'
-                self.tf_eval_path = WflwConf.augmented_train_tf_path + 'eval100.tfrecords'
+                self.tf_train_path = WflwConf.no_aug_train_tf_path + 'train100.tfrecords'
+                self.tf_eval_path = WflwConf.no_aug_train_tf_path + 'eval100.tfrecords'
             elif accuracy == 90:
-                self.tf_train_path = WflwConf.augmented_train_tf_path + 'train90.tfrecords'
-                self.tf_eval_path = WflwConf.augmented_train_tf_path + 'eval90.tfrecords'
+                self.tf_train_path = WflwConf.no_aug_train_tf_path + 'train90.tfrecords'
+                self.tf_eval_path = WflwConf.no_aug_train_tf_path + 'eval90.tfrecords'
 
         self.BATCH_SIZE = LearningConfig.batch_size
         self.STEPS_PER_VALIDATION_EPOCH = LearningConfig.steps_per_validation_epochs
@@ -341,7 +344,7 @@ class Train:
         return wights
 
     def _get_optimizer(self):
-        return Adam(lr=1e-2, beta_1=0.9, beta_2=0.999, decay=1e-5, amsgrad=False)
+        return Adam(lr=1e-1, beta_1=0.9, beta_2=0.999, decay=1e-5, amsgrad=False)
 
     def _prepare_callback(self):
         early_stop = keras.callbacks.EarlyStopping(monitor='val_loss', min_delta=0, patience=1000, verbose=1, mode='min')
