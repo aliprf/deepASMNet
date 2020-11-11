@@ -472,7 +472,7 @@ class CNNModel:
 
         x = eff_net.get_layer('top_activation').output
         x = GlobalAveragePooling2D()(x)
-        x = keras.layers.Dropout(rate=0.3)(x)
+        x = keras.layers.Dropout(rate=0.5)(x)
         output = Dense(output_len, activation='linear', name='out')(x)
 
         eff_net = Model(inp, output)
