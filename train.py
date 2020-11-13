@@ -292,13 +292,13 @@ class Train:
 
         '''creating model'''
         cnn = CNNModel()
+        # model = tf.keras.models.load_model(self.weight)
+
+        model = cnn.get_model(train_images=train_images, arch=self.arch, num_output_layers=self.num_output_layers,
+                              output_len=self.output_len,
+                              input_tensor=train_images, inp_shape=None)
         if self.weight is not None:
-            # model.load_weights(self.weight)
-            model = tf.keras.models.load_model(self.weight)
-        else:
-            model = cnn.get_model(train_images=train_images, arch=self.arch, num_output_layers=self.num_output_layers,
-                                  output_len=self.output_len,
-                                  input_tensor=train_images, inp_shape=None)
+            model.load_weights(self.weight)
 
         '''compiling model'''
         model.compile(loss=self._generate_loss(),
