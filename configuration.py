@@ -120,8 +120,8 @@ class W300Conf:
 
 
 class WflwConf:
-    Wflw_prefix_path = '/media/data3/ali/FL/new_data/wflw/'  # --> Zeus
-    # Wflw_prefix_path = '/media/data3/ali/FL/new_data/wflw/'  # --> Atlas
+    # Wflw_prefix_path = '/media/data3/ali/FL/new_data/wflw/'  # --> Zeus
+    Wflw_prefix_path = '/media/data3/ali/FL/new_data/wflw/'  # --> Atlas
     # Wflw_prefix_path = '/media/ali/data/wflw/'  # --> local
 
     img_path_prefix = Wflw_prefix_path + 'all/'
@@ -183,8 +183,8 @@ class CofwConf:
 
 
 class IbugConf:
-    w300w_prefix_path = '/media/data3/ali/FL/new_data/300W/'  # --> zeus
-    # w300w_prefix_path = '/media/data2/alip/FL/new_data/300W/'  # --> atlas
+    # w300w_prefix_path = '/media/data3/ali/FL/new_data/300W/'  # --> zeus
+    w300w_prefix_path = '/media/data2/alip/FL/new_data/300W/'  # --> atlas
     # w300w_prefix_path = '/media/ali/data/new_data/300W/'  # --> local
 
     orig_300W_train = w300w_prefix_path + 'orig_300W_train/'
