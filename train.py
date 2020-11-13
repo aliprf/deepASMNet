@@ -82,8 +82,8 @@ class Train:
         if custom_loss:
             self.loss = c_loss.custom_loss_hm
         else:
-            self.loss = losses.mean_squared_error
-            # self.loss = losses.mean_absolute_error
+            # self.loss = losses.mean_squared_error
+            self.loss = losses.mean_absolute_error
 
         self.arch = arch
         self.inception_mode = inception_mode
@@ -116,8 +116,7 @@ class Train:
 
         '''loading weights'''
         if self.weight is not None:
-            asm_model.load_weights('weights-101-0.00021_asm_model.h5')
-            # model.load_weights(self.weight)
+            model.load_weights(self.weight)
 
         '''compiling model'''
         model.compile(loss=self._generate_loss(),
@@ -293,12 +292,13 @@ class Train:
 
         '''creating model'''
         cnn = CNNModel()
-        model = cnn.get_model(train_images=train_images, arch=self.arch, num_output_layers=self.num_output_layers,
-                              output_len=self.output_len,
-                              input_tensor=train_images, inp_shape=None)
-
         if self.weight is not None:
-            model.load_weights(self.weight)
+            # model.load_weights(self.weight)
+            model = tf.keras.models.load_model(self.weight)
+        else:
+            model = cnn.get_model(train_images=train_images, arch=self.arch, num_output_layers=self.num_output_layers,
+                                  output_len=self.output_len,
+                                  input_tensor=train_images, inp_shape=None)
 
         '''compiling model'''
         model.compile(loss=self._generate_loss(),
@@ -365,7 +365,7 @@ class Train:
 
 
     def _create_generators(self):
-        tf_utils = TFRecordUtility()
+        # tf_utils = TFRecordUtility()
 
         # if os.path.isfile('x_train_filenames.npy') and \
         #         os.path.isfile('x_val_filenames.npy') and \
