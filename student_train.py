@@ -99,7 +99,7 @@ class StudentTrainer:
             model_student.save('./models/stu_model_' + str(epoch) + '_' + self.dataset_name + '_.h5')
             model_student.save_weights('./models/stu_weight_' + '_' + str(epoch) + self.dataset_name + '_.h5')
 
-    @tf.function
+    # @tf.function
     def train_step(self, epoch, step, images, model_student, annotation_gr,
                    annotation_tough_teacher, annotation_tol_teacher,
                    l_w_stu, l_w_togh_t, loss_w_tol_t,
