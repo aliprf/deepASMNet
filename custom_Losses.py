@@ -77,10 +77,10 @@ class Custom_losses:
         """"""
         '''creating np version of input tensors'''
         loss_shape = (x_pr.shape[0], x_pr.shape[1])
-        np_x_pr = np.array(x_pr).reshape(x_pr.shape[0] * x_pr.shape[1])
-        np_x_gt = np.array(x_gt).reshape(x_gt.shape[0] * x_gt.shape[1])
-        np_x_tough = np.array(x_tough).reshape(x_tough.shape[0] * x_tough.shape[1])
-        np_x_tol = np.array(x_tol).reshape(x_tol.shape[0] * x_tol.shape[1])
+        np_x_pr = x_pr.reshape(x_pr.shape[0] * x_pr.shape[1])
+        np_x_gt = x_gt.reshape(x_gt.shape[0] * x_gt.shape[1])
+        np_x_tough = x_tough.reshape(x_tough.shape[0] * x_tough.shape[1])
+        np_x_tol = x_tol.reshape(x_tol.shape[0] * x_tol.shape[1])
         # np_x_pr = K.eval(x_pr).reshape(x_pr.shape[0] * x_pr.shape[1])
         # np_x_gt = K.eval(x_gt).reshape(x_gt.shape[0] * x_gt.shape[1])
         # np_x_tough = K.eval(x_tough).reshape(x_tough.shape[0] * x_tough.shape[1])
