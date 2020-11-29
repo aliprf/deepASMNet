@@ -89,7 +89,7 @@ class StudentTrainer:
                 annotation_tough_teacher = tf.cast(annotation_tough_teacher, tf.float32)
                 annotation_tol_teacher = tf.cast(annotation_tol_teacher, tf.float32)
                 '''train step'''
-                self.train_step(epoch=epoch, step=step_per_epoch, images=images, model_student=model_student,
+                self.train_step(epoch=epoch, step=batch_index, images=images, model_student=model_student,
                                 annotation_gr=annotation_gr, annotation_tough_teacher=annotation_tough_teacher,
                                 annotation_tol_teacher=annotation_tol_teacher,
                                 l_w_stu=loss_weight_student, l_w_togh_t=loss_weight_tough_teacher,
@@ -98,7 +98,7 @@ class StudentTrainer:
             '''save weights'''
             model_student.save('./models/stu_model_' + str(epoch) + '_' + self.dataset_name + '_.h5')
             model_student.save_weights('./models/stu_weight_' + '_' + str(epoch) + self.dataset_name + '_.h5')
-
+    @tf.function
     def train_step(self, epoch, step, images, model_student, annotation_gr,
                    annotation_tough_teacher, annotation_tol_teacher,
                    l_w_stu, l_w_togh_t, loss_w_tol_t,
