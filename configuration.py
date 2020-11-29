@@ -53,11 +53,11 @@ class LearningConfig:
     loss_weight_mouth = 1
 
     CLR_METHOD = "triangular"
-    MIN_LR = 1e-7
+    MIN_LR = 1e-5
     MAX_LR = 1e-2
     STEP_SIZE = 10
     # batch_size = 80
-    batch_size = 40
+    batch_size = 30
     steps_per_validation_epochs = 5
 
     epochs = 500
@@ -121,8 +121,8 @@ class W300Conf:
 
 class WflwConf:
     # Wflw_prefix_path = '/media/data3/ali/FL/new_data/wflw/'  # --> Zeus
-    Wflw_prefix_path = '/media/data2/alip/FL/new_data/wflw/'  # --> Atlas
-    # Wflw_prefix_path = '/media/ali/data/wflw/'  # --> local
+    # Wflw_prefix_path = '/media/data2/alip/FL/new_data/wflw/'  # --> Atlas
+    Wflw_prefix_path = '/media/ali/data/wflw/'  # --> local
 
     img_path_prefix = Wflw_prefix_path + 'all/'
     rotated_img_path_prefix = Wflw_prefix_path + '0_rotated/'
@@ -155,9 +155,9 @@ class WflwConf:
     num_of_landmarks = 98
 
 class CofwConf:
-    Cofw_prefix_path = '/media/data3/ali/FL/new_data/cofw/'  # --> zeus
+    # Cofw_prefix_path = '/media/data3/ali/FL/new_data/cofw/'  # --> zeus
     # Cofw_prefix_path = '/media/data2/alip/FL/new_data/cofw/'  # --> atlas
-    # Cofw_prefix_path = '/media/ali/data/new_data/cofw/'  # --> local
+    Cofw_prefix_path = '/media/ali/data/new_data/cofw/'  # --> local
 
     augmented_train_pose = Cofw_prefix_path + 'training_set/augmented/pose/'
     augmented_train_annotation = Cofw_prefix_path + 'training_set/augmented/annotations/'

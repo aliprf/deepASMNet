@@ -293,7 +293,7 @@ class TFRecordUtility:
             """ the output image is x y x y array"""
             return lbl_arr, img_arr
 
-    def create_training_tensor_points(sefl, tfrecord_filename, batch_size):
+    def create_training_tensor_points(self, tfrecord_filename, batch_size):
         SHUFFLE_BUFFER = 100
         BATCH_SIZE = batch_size
 
@@ -301,7 +301,7 @@ class TFRecordUtility:
 
         # Maps the parser on every file path in the array. You can set the number of parallel loaders here
 
-        dataset = dataset.map(sefl.__parse_function_points, num_parallel_calls=32)
+        dataset = dataset.map(self.__parse_function_points, num_parallel_calls=32)
 
         # This dataset will go on forever
         dataset = dataset.repeat()
@@ -451,19 +451,14 @@ class TFRecordUtility:
 
     # def retrive_hm_and_test(self):
 
-    def create_image_and_labels_name(self):
-        images_dir = IbugConf.train_images_dir
-        lbls_dir = IbugConf.train_hm_dir
-
+    def create_image_and_labels_name(self, img_path, annotation_path):
         img_filenames = []
         lbls_filenames = []
 
-        for file in os.listdir(images_dir):
+        for file in os.listdir(img_path):
             if file.endswith(".jpg") or file.endswith(".png"):
-                # lbl_file = lbls_dir + str(file)[:-3] + "npy"  # filename and address
                 lbl_file = str(file)[:-3] + "npy"  # just name
-                if os.path.exists(lbls_dir + lbl_file):
-                    # img_filenames.append(images_dir + str(file)) # filename and address
+                if os.path.exists(annotation_path + lbl_file):
                     img_filenames.append(str(file))
                     lbls_filenames.append(lbl_file)
 

@@ -38,13 +38,15 @@ import efficientnet.tfkeras as efn
 
 
 class CNNModel:
-    def get_model(self, train_images, arch, num_output_layers, input_tensor, output_len, inp_shape=[224, 224, 3]):
+    def get_model(self, arch, input_tensor, output_len,
+                  inp_shape=[InputDataSize.image_input_size, InputDataSize.image_input_size, 3],
+                  train_images=None, num_output_layers=1):
         if arch == 'asmnet':
             model = self.create_asmnet(inp_shape=inp_shape, num_branches=num_output_layers, output_len=output_len)
         elif arch == 'efficientNet':
             model = self.create_efficientNet(inp_shape=inp_shape, input_tensor=input_tensor, output_len=output_len)
         elif arch == 'mobileNetV2':
-            model = self.create_MobileNet(inp_tensor=input_tensor, output_len=output_len)
+            model = self.create_MobileNet(inp_shape=inp_shape, inp_tensor=input_tensor, output_len=output_len)
         elif arch == 'mb_mn':
             model = self.create_multi_branch_mn(inp_shape=inp_shape, num_branches=num_output_layers)
             # model = cnn.create_multi_branch_mn_one_input(inp_shape=[224, 224, 3], num_branches=self.num_output_layers)
@@ -61,8 +63,8 @@ class CNNModel:
             model = self.mnv2_hm(tensor=train_images)
         return model
 
-    def create_MobileNet(self, inp_tensor, output_len):
-        mobilenet_model = mobilenet_v2.MobileNetV2(input_shape=None,
+    def create_MobileNet(self, inp_shape, inp_tensor, output_len):
+        mobilenet_model = mobilenet_v2.MobileNetV2(input_shape=inp_shape,
                                                    alpha=1.0,
                                                    include_top=True,
                                                    weights=None,

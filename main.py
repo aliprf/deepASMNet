@@ -4,8 +4,9 @@ from cnn_model import CNNModel
 from pca_utility import PCAUtility
 from image_utility import ImageUtility
 from student_train import StudentTrainer
+# from old_student_train import StudentTrainer
 from test import Test
-from train import Train
+# from train import Train
 
 # from Train_Gan import TrainGan
 
@@ -30,7 +31,6 @@ if __name__ == '__main__':
     '''generate points with different accuracy'''
     # tf_record_util.normalize_points_and_save(dataset_name=DatasetName.ibug)
     # tf_record_util.normalize_points_and_save(dataset_name=DatasetName.ibug, pca_percentage=90)
-
 
     '''generate heatmap with different accuracy'''
     # tf_record_util.generate_hm_and_save(dataset_name=DatasetName.ibug)
@@ -59,35 +59,33 @@ if __name__ == '__main__':
     # test = Test(arch='mnv2_hm_r_v2', num_output_layers=1, weight_fname='weights-04-0.00995.h5', point=False)
     #
 
-    trainer = Train(use_tf_record=True,
-                    dataset_name=DatasetName.ibug,
-                    custom_loss=False,
-                    arch='efficientNet',
-                    # arch='mobileNetV2',
-                    inception_mode=False,
-                    num_output_layers=1,
-                    weight='orig_weights/last_300w_ef100.h5',
-                    # weight='orig_weights/last_wflw_ef100.h5',
-                    # weight=None,
-                    train_on_batch=False,
-                    heatmap=False,
-                    accuracy=100,
-                    on_point=True)
+    # trainer = Train(use_tf_record=True,
+    #                 dataset_name=DatasetName.ibug,
+    #                 custom_loss=False,
+    #                 arch='efficientNet',
+    #                 # arch='mobileNetV2',
+    #                 inception_mode=False,
+    #                 num_output_layers=1,
+    #                 weight='orig_weights/last_300w_ef100.h5',
+    #                 # weight='orig_weights/last_wflw_ef100.h5',
+    #                 # weight=None,
+    #                 train_on_batch=False,
+    #                 heatmap=False,
+    #                 accuracy=100,
+    #                 on_point=True)
 
-    '''StudentTraining'''
+    '''StudentTraining old'''
 
-    # st_trainer = StudentTrainer(dataset_name=DatasetName.cofw, arch="mobileNetV2")
+    # st_trainer = StudentTrainer(dataset_name=DatasetName.ibug, arch="mobileNetV2")
     # st_trainer.train(teachers_arch=["efficientNet", "efficientNet"],
-    #                  teachers_weight_files=["ds_cofw_ac_100_teacher.h5",
-    #                                         "ds_cofw_ac_90_teacher.h5"],
-    #                  teachers_weight_loss=[0.5, -1],
-    #                  teachers_tf_train_paths=[CofwConf.augmented_train_tf_path+'train100.tfrecords',
-    #                                           CofwConf.augmented_train_tf_path+'train90.tfrecords'],
-    #                  student_weight_file=None,
-    #                  cos_weight=0
-    #                  )
-    #
-
-
-
-
+    #                  teachers_weight_files=["ds_300w_ef_100.h5",
+    #                                         "ds_300w_ef_95.h5"],
+    #                  teachers_weight_loss=[1, 1],
+    #                  teachers_tf_train_paths=[CofwConf.no_aug_train_tf_path + 'train100.tfrecords',
+    #                                           CofwConf.no_aug_train_tf_path + 'train90.tfrecords'],
+    #                  student_weight_file=None)
+    '''new'''
+    st_trainer = StudentTrainer(dataset_name=DatasetName.ibug, use_augmneted=False)
+    st_trainer.train(arch_student='mobileNetV2', weight_path_student=None, loss_weight_student=2.0,
+                     arch_tough_teacher='efficientNet', weight_path_tough_teacher='ds_300w_ef_100.h5', loss_weight_tough_teacher=0.80,
+                     arch_tol_teacher='efficientNet', weight_path_tol_teacher='ds_300w_ef_95.h5', loss_weight_tol_teacher=0.60)

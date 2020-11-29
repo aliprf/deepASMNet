@@ -37,6 +37,105 @@ class Custom_losses:
 
         return loss
 
+    # def kd_loss(self, y_pr, y_gt, y_togh_t, y_tol_t, l_w_stu_t, l_w_togh_t, l_w_tol_t, loss_type=0):
+    #     """"""
+    #     '''calculate the sign of difference'''
+    #     sign_delta_gt_and_tough_teacher = tf.sign((y_gt - y_togh_t))
+    #     sign_delta_gt_and_tol_teacher = tf.sign((y_gt - y_tol_t))
+    #     '''create weight_map'''
+    #     weight_map_t_tough = tf.math.multiply(tf.ones_like(y_gt), l_w_togh_t)
+    #     weight_map_t_tol = tf.math.multiply(tf.ones_like(y_gt), l_w_tol_t)
+    #
+    #     '''find indices that need to be modified'''
+    #     minus_one_tough = tf.constant(l_w_togh_t, dtype=tf.float32)
+    #     minus_one_tol = tf.constant(l_w_tol_t, dtype=tf.float32)
+    #     where_cond_tough = tf.not_equal(sign_delta_gt_and_tough_teacher, minus_one_tough)
+    #     where_cond_tol = tf.not_equal(sign_delta_gt_and_tol_teacher, minus_one_tol)
+    #
+    #     '''calculate the opposite sign items and fill map'''
+    #     indices_tough = tf.where(where_cond_tough)
+    #     indices_tol = tf.where(where_cond_tol)
+    #     weight_map_t_tough = self._fill_opposite_sign_map(indices=indices_tough, y_gt=y_gt, y_pr=y_pr,
+    #                                                       y_t=y_togh_t,
+    #                                                       loss_weight=l_w_togh_t,
+    #                                                       loss_map=weight_map_t_tough)
+    #     weight_map_t_tol = self._fill_opposite_sign_map(indices=indices_tough, y_gt=y_gt, y_pr=y_pr,
+    #                                                     y_t=y_tol_t,
+    #                                                     loss_weight=l_w_tol_t,
+    #                                                     loss_map=weight_map_t_tol)
+    #     '''apply map to the teacher weights'''
+    #     y_togh_t = tf.math.multiply(weight_map_t_tough, y_togh_t)
+    #     y_tol_t = tf.math.multiply(weight_map_t_tol, y_tol_t)
+    #
+    #     return loss
+
+    def kd_loss(self, x_pr, x_gt, x_tough, x_tol,
+                alpha_tough, alpha_mi_tough,
+                alpha_tol, alpha_mi_tol,
+                main_loss_weight, tough_loss_weight, tol_loss_weight,
+                num_of_landmarks):
+        """"""
+        '''creating np version of input tensors'''
+        loss_shape = (x_pr.shape[0], x_pr.shape[1])
+        np_x_pr = K.eval(x_pr).reshape(x_pr.shape[0] * x_pr.shape[1])
+        np_x_gt = K.eval(x_gt).reshape(x_gt.shape[0] * x_gt.shape[1])
+        np_x_tough = K.eval(x_tough).reshape(x_tough.shape[0] * x_tough.shape[1])
+        np_x_tol = K.eval(x_tol).reshape(x_tol.shape[0] * x_tol.shape[1])
+        # np_x_tol = np.array(x_tol).reshape(LearningConfig.batch_size*num_of_landmarks)
+
+        '''calculate the weight map'''
+        weight_map_tough = np.zeros_like(np_x_tough)
+        weight_map_tol = np.zeros_like(np_x_tol)
+        vv = np_x_pr.shape[0]
+        for i in range(np_x_pr.shape[0]):
+            weight_map_tough[i] = self.calc_teacher_weight_loss(x_pr=np_x_pr[i], x_gt=np_x_gt[i], x_t=np_x_tough[i],
+                                                                alpha=alpha_tough, alpha_mi=alpha_mi_tough)
+            weight_map_tol[i] = self.calc_teacher_weight_loss(x_pr=np_x_pr[i], x_gt=np_x_gt[i], x_t=np_x_tol[i],
+                                                              alpha=alpha_tol, alpha_mi=alpha_mi_tol)
+        '''reshape loss'''
+        weight_map_tough = weight_map_tough.reshape(loss_shape)
+        weight_map_tol = weight_map_tol.reshape(loss_shape)
+
+        loss_tough = tf.reduce_mean(weight_map_tough * tf.abs(x_tough - x_pr))
+        loss_tol = tf.reduce_mean(weight_map_tol * tf.abs(x_tol - x_pr))
+        '''calculate the losses'''
+
+        loss_main = main_loss_weight * tf.reduce_mean(tf.abs(x_gt - x_pr))
+        loss_tough = tough_loss_weight * loss_tough
+        loss_tol = tol_loss_weight * loss_tol
+        loss_total = loss_main + loss_tough + loss_tol
+        '''returns all losses'''
+        return loss_total, loss_main, loss_tough, loss_tol
+
+    def calc_teacher_weight_loss(self, x_pr, x_gt, x_t, alpha, alpha_mi):
+        weight_loss_t = 0
+        '''calculate betas'''
+        beta = x_gt + 0.4 * abs(x_gt - x_t)
+        beta_mi = x_gt - 0.4 * abs(x_gt - x_t)
+        if x_t > x_gt:
+            if x_pr >= x_t:
+                weight_loss_t = alpha
+            elif beta <= x_pr < x_t:
+                weight_loss_t = alpha_mi
+            elif x_gt <= x_pr < beta:
+                weight_loss_t = (alpha_mi / (beta - x_gt)) * (x_pr - x_gt)
+            elif beta_mi < x_pr < x_gt:
+                weight_loss_t = (alpha / (beta_mi - x_gt)) * (x_pr - x_gt)
+            elif x_pr <= beta_mi:
+                weight_loss_t = alpha
+        elif x_t < x_gt:
+            if x_pr <= x_t:
+                weight_loss_t = alpha
+            elif x_t < x_pr <= beta_mi:
+                weight_loss_t = alpha_mi
+            elif beta_mi < x_pr <= x_gt:
+                weight_loss_t = (-alpha_mi / (x_gt - beta_mi)) * (x_pr - x_gt)
+            elif x_gt < x_pr <= beta:
+                weight_loss_t = (alpha / (beta - x_gt)) * (x_pr - x_gt)
+            elif x_pr > beta:
+                weight_loss_t = alpha
+        return weight_loss_t
+
     def custom_teacher_student_loss(self, lnd_img_map, img_path, teacher_models, teachers_weight_loss, bath_size,
                                     num_points, ds_name, loss_type):
         def loss(y_true, y_pred):
@@ -62,18 +161,56 @@ class Custom_losses:
             #     imgpr.print_image_arr((counter + 1) * 1000, imgs_batch[counter], landmark_arr_x_p, landmark_arr_y_p)
             #     counter += 1
 
-            y_pred_T0_ten = K.variable(y_pred_T0)
-            y_pred_T1_ten = K.variable(y_pred_T1)
+            y_pred_Tough_ten = K.variable(y_pred_T0)
+            y_pred_Tol_ten = K.variable(y_pred_T1)
 
+            '''calculate the sign of difference'''
+            sign_delta_gt_and_tough_teacher = tf.sign((y_true - y_pred_Tough_ten))
+            sign_delta_gt_and_tol_teacher = tf.sign((y_true - y_pred_Tol_ten))
+            '''for each point, if signs are the same, we sum losses, 
+                    but if signs are different, we minus the 
+                    teacher loses from the main loss, IF:
+                    asb(y_pred - y_pred_tech_i)) < '''
+
+            '''assign weight loss'''
+            tough_teacher_weight_loss = 1
+            tol_teacher_weight_loss = 1
+
+            '''create weight_map'''
+            weight_map_t_tough = tf.math.multiply(tf.ones_like(y_true), tough_teacher_weight_loss)
+            weight_map_t_tol = tf.math.multiply(tf.ones_like(y_true), tol_teacher_weight_loss)
+
+            '''find indices that need to be modified'''
+            minus_one_tough = tf.constant(tough_teacher_weight_loss, dtype=tf.float32)
+            minus_one_tol = tf.constant(tough_teacher_weight_loss, dtype=tf.float32)
+            where_cond_tough = tf.not_equal(sign_delta_gt_and_tough_teacher, minus_one_tough)
+            where_cond_tol = tf.not_equal(sign_delta_gt_and_tol_teacher, minus_one_tol)
+
+            '''calculate the opposite sign items and fill map'''
+            indices_tough = tf.where(where_cond_tough)
+            indices_tol = tf.where(where_cond_tol)
+
+            weight_map_t_tough = self._fill_opposite_sign_map(indices=indices_tough, y_gt=y_true, y_pr=y_pred,
+                                                              y_t=y_pred_Tough_ten,
+                                                              loss_weight=tough_teacher_weight_loss,
+                                                              loss_map=weight_map_t_tough)
+            weight_map_t_tol = self._fill_opposite_sign_map(indices=indices_tough, y_gt=y_true, y_pr=y_pred,
+                                                            y_t=y_pred_Tol_ten,
+                                                            loss_weight=tol_teacher_weight_loss,
+                                                            loss_map=weight_map_t_tol)
+            '''apply map to the teacher weights'''
+            y_pred_Tough_ten = tf.math.multiply(weight_map_t_tough, y_pred_Tough_ten)
+            y_pred_Tol_ten = tf.math.multiply(weight_map_t_tol, y_pred_Tol_ten)
+            ''''''
             if loss_type == 0:
                 '''MAE'''
-                mse_te0 = tf.reduce_mean(tf.abs(y_pred - y_pred_T0_ten))
-                mse_te1 = tf.reduce_mean(tf.abs(y_pred - y_pred_T1_ten))
+                mse_te0 = tf.reduce_mean(tf.abs(y_pred - y_pred_Tough_ten))
+                mse_te1 = tf.reduce_mean(tf.abs(y_pred - y_pred_Tol_ten))
                 mse_main = tf.reduce_mean(tf.abs(y_pred - y_true))
             elif loss_type == 1:
                 '''MSE'''
-                mse_te0 = tf.reduce_mean(tf.square(y_pred - y_pred_T0_ten))
-                mse_te1 = tf.reduce_mean(tf.square(y_pred - y_pred_T1_ten))
+                mse_te0 = tf.reduce_mean(tf.square(y_pred - y_pred_Tough_ten))
+                mse_te1 = tf.reduce_mean(tf.square(y_pred - y_pred_Tol_ten))
                 mse_main = tf.reduce_mean(tf.square(y_pred - y_true))
                 '''     or:'''
                 # mse = tf.keras.losses.MeanSquaredError()
@@ -85,6 +222,11 @@ class Custom_losses:
             return 10 * mse_main + ((l0_weight * mse_te0) + (l1_weight * mse_te1))
 
         return loss
+
+    def _fill_opposite_sign_map(self, indices, y_gt, y_pr, y_t, loss_weight, loss_map):
+        for index in indices:
+            loss_map[index] = loss_weight * y_pr[index] / abs(y_gt[index] - y_t[index])
+        return loss_map
 
     def get_y(self, y_true_n, lnd_img_map, img_path):
         vec_mse = K.eval(y_true_n)
