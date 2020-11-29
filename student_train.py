@@ -122,11 +122,14 @@ class StudentTrainer:
         '''apply Gradients:'''
         optimizer.apply_gradients(zip(gradients_of_student, model_student.trainable_variables))
         '''printing loss Values: '''
-        tf.print("->EPOCH: ", str(epoch), "->STEP: ", str(step), ' -> : LOSS: ', loss_total,
-                 ' -> : loss_main: ', loss_main, ' -> : loss_tough: ', loss_tough, ' -> : loss_tolerant: ', loss_tol)
+        # tf.print("->EPOCH: ", str(epoch), "->STEP: ", str(step), ' -> : LOSS: ', loss_total,
+        #          ' -> : loss_main: ', loss_main, ' -> : loss_tough: ', loss_tough, ' -> : loss_tolerant: ', loss_tol)
+        print("->EPOCH: ", str(epoch), "->STEP: ", str(step), ' -> : LOSS: ', tf.keras.backend.eval(loss_total),
+              ' -> : loss_main: ', tf.keras.backend.eval(loss_main),
+              ' -> : loss_tough: ', tf.keras.backend.eval(loss_tough),
+              ' -> : loss_tolerant: ', tf.keras.backend.eval(loss_tol))
         with summary_writer.as_default():
             tf.summary.scalar('LOSS', loss_total, step=epoch)
-        print('========================')
 
     def make_model(self, arch, w_path):
         cnn = CNNModel()
