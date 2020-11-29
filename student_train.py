@@ -95,9 +95,9 @@ class StudentTrainer:
                                 l_w_stu=loss_weight_student, l_w_togh_t=loss_weight_tough_teacher,
                                 loss_w_tol_t=loss_weight_tol_teacher,
                                 optimizer=optimizer_student, summary_writer=summary_writer, c_loss=c_loss)
-                '''save weights'''
-                model_student.save('./models/stu_model_' + str(epoch) + self.dataset_name + '_.h5')
-                model_student.save_weights('./models/stu_weight_' + str(epoch) + self.dataset_name + '_.h5')
+            '''save weights'''
+            model_student.save('./models/stu_model_' + str(epoch) + self.dataset_name + '_.h5')
+            model_student.save_weights('./models/stu_weight_' + str(epoch) + self.dataset_name + '_.h5')
 
     def train_step(self, epoch, step, images, model_student, annotation_gr,
                    annotation_tough_teacher, annotation_tol_teacher,
