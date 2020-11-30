@@ -90,7 +90,8 @@ class StudentTrainer:
                 annotation_tough_teacher = tf.cast(annotation_tough_teacher, tf.float32)
                 annotation_tol_teacher = tf.cast(annotation_tol_teacher, tf.float32)
                 '''train step'''
-                self.train_step(epoch=epoch, step=batch_index, images=images, model_student=model_student,
+                self.train_step(epoch=epoch, step=batch_index, total_steps=step_per_epoch, images=images,
+                                model_student=model_student,
                                 annotation_gr=annotation_gr, annotation_tough_teacher=annotation_tough_teacher,
                                 annotation_tol_teacher=annotation_tol_teacher,
                                 l_w_stu=loss_weight_student, l_w_togh_t=loss_weight_tough_teacher,
@@ -101,7 +102,7 @@ class StudentTrainer:
             model_student.save_weights('./models/stu_weight_' + '_' + str(epoch) + self.dataset_name + '_.h5')
 
     # @tf.function
-    def train_step(self, epoch, step, images, model_student, annotation_gr,
+    def train_step(self, epoch, step, total_steps, images, model_student, annotation_gr,
                    annotation_tough_teacher, annotation_tol_teacher,
                    l_w_stu, l_w_togh_t, loss_w_tol_t,
                    optimizer, summary_writer, c_loss):
@@ -124,7 +125,7 @@ class StudentTrainer:
         '''apply Gradients:'''
         optimizer.apply_gradients(zip(gradients_of_student, model_student.trainable_variables))
         '''printing loss Values: '''
-        tf.print("->EPOCH: ", str(epoch), "->STEP: ", str(step), ' -> : LOSS: ', loss_total,
+        tf.print("->EPOCH: ", str(epoch), "->STEP: ", str(step)+'/'+str(total_steps), ' -> : LOSS: ', loss_total,
                  ' -> : loss_main: ', loss_main, ' -> : loss_tough: ', loss_tough, ' -> : loss_tolerant: ', loss_tol)
         # print("->EPOCH: ", str(epoch), "->STEP: ", str(step), ' -> : LOSS: ', tf.keras.backend.eval(loss_total),
         #       ' -> : loss_main: ', tf.keras.backend.eval(loss_main),
