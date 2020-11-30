@@ -68,7 +68,7 @@ class StudentTrainer:
         model_tol_teacher = self.make_model(arch=arch_tol_teacher, w_path=weight_path_tol_teacher)
 
         '''create optimizer'''
-        optimizer_student = self._get_optimizer(lr=1e-2)
+        optimizer_student = self._get_optimizer(lr=1e-3)
 
         '''create sample generator'''
         x_train_filenames, x_val_filenames, y_train_filenames, y_val_filenames = self._create_generators()
