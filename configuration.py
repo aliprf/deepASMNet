@@ -56,9 +56,9 @@ class LearningConfig:
     MIN_LR = 1e-5
     MAX_LR = 1e-2
     STEP_SIZE = 10
-    # batch_size = 80
-    batch_size = 35
-    steps_per_validation_epochs = 5
+    batch_size = 2
+    batch_size = 45
+    # steps_per_validation_epochs = 5
 
     epochs = 500
     # landmark_len = 136
@@ -184,8 +184,8 @@ class CofwConf:
 
 class IbugConf:
     # w300w_prefix_path = '/media/data3/ali/FL/new_data/300W/'  # --> zeus
-    w300w_prefix_path = '/media/data2/alip/FL/new_data/300W/'  # --> atlas
-    # w300w_prefix_path = '/media/ali/data/new_data/300W/'  # --> local
+    # w300w_prefix_path = '/media/data2/alip/FL/new_data/300W/'  # --> atlas
+    w300w_prefix_path = '/media/ali/data/new_data/300W/'  # --> local
 
     orig_300W_train = w300w_prefix_path + 'orig_300W_train/'
     augmented_train_pose = w300w_prefix_path + 'training_set/augmented/pose/'

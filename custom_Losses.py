@@ -3,7 +3,8 @@ import math
 import numpy as np
 import tensorflow as tf
 
-tf.compat.v1.disable_eager_execution()
+#tf.compat.v1.disable_eager_execution()
+# tf.compat.v1.enable_eager_execution()
 
 from PIL import Image
 from tensorflow.keras import backend as K
@@ -77,14 +78,15 @@ class Custom_losses:
         """"""
         '''creating np version of input tensors'''
         loss_shape = (x_pr.shape[0], x_pr.shape[1])
-        # np_x_pr = x_pr.reshape(x_pr.shape[0] * x_pr.shape[1])
-        # np_x_gt = x_gt.reshape(x_gt.shape[0] * x_gt.shape[1])
-        # np_x_tough = x_tough.reshape(x_tough.shape[0] * x_tough.shape[1])
-        # np_x_tol = x_tol.reshape(x_tol.shape[0] * x_tol.shape[1])
-        np_x_pr = K.eval(x_pr).reshape(x_pr.shape[0] * x_pr.shape[1])
-        np_x_gt = K.eval(x_gt).reshape(x_gt.shape[0] * x_gt.shape[1])
-        np_x_tough = K.eval(x_tough).reshape(x_tough.shape[0] * x_tough.shape[1])
-        np_x_tol = K.eval(x_tol).reshape(x_tol.shape[0] * x_tol.shape[1])
+        # np_x_pr = x_pr.numpy().reshape(x_pr.shape[0] * x_pr.shape[1])
+        np_x_pr = tf.reshape(tensor=x_pr, shape=x_pr.shape[0] * x_pr.shape[1])
+        np_x_gt = tf.reshape(tensor=x_gt, shape=x_gt.shape[0] * x_gt.shape[1])
+        np_x_tough = tf.reshape(tensor=x_tough, shape=x_tough.shape[0] * x_tough.shape[1])
+        np_x_tol = tf.reshape(tensor=x_tol, shape=x_tol.shape[0] * x_tol.shape[1])
+        # np_x_pr = K.eval(x_pr).reshape(x_pr.shape[0] * x_pr.shape[1])
+        # np_x_gt = K.eval(x_gt).reshape(x_gt.shape[0] * x_gt.shape[1])
+        # np_x_tough = K.eval(x_tough).reshape(x_tough.shape[0] * x_tough.shape[1])
+        # np_x_tol = K.eval(x_tol).reshape(x_tol.shape[0] * x_tol.shape[1])
 
         '''calculate the weight map'''
         weight_map_tough = np.zeros_like(np_x_tough)

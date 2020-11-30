@@ -7,7 +7,7 @@ from custom_Losses import Custom_losses
 from Data_custom_generator import CustomHeatmapGenerator
 from PW_Data_custom_generator import PWCustomHeatmapGenerator
 import tensorflow as tf
-tf.compat.v1.disable_eager_execution()
+#tf.compat.v1.disable_eager_execution()
 
 from tensorflow import keras
 
