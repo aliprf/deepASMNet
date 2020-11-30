@@ -90,23 +90,26 @@ class Custom_losses:
 
         '''calculate the weight map'''
 
-        weight_map_tough = [self.calc_teacher_weight_loss(x_pr=np_x_pr[i], x_gt=np_x_gt[i], x_t=np_x_tough[i],
-                                                          alpha=alpha_tough, alpha_mi=alpha_mi_tough)
-                            for i in range(np_x_pr.shape[0])]
-        weight_map_tol = [self.calc_teacher_weight_loss(x_pr=np_x_pr[i], x_gt=np_x_gt[i], x_t=np_x_tol[i],
-                                                        alpha=alpha_tol, alpha_mi=alpha_mi_tol)
-                          for i in range(np_x_pr.shape[0])]
+        # weight_map_tough = [self.calc_teacher_weight_loss(x_pr=np_x_pr[i], x_gt=np_x_gt[i], x_t=np_x_tough[i],
+        #                                                   alpha=alpha_tough, alpha_mi=alpha_mi_tough)
+        #                     for i in range(np_x_pr.shape[0])]
+        # weight_map_tol = [self.calc_teacher_weight_loss(x_pr=np_x_pr[i], x_gt=np_x_gt[i], x_t=np_x_tol[i],
+        #                                                 alpha=alpha_tol, alpha_mi=alpha_mi_tol)
+        #                   for i in range(np_x_pr.shape[0])]
 
-        # weight_map_tough = np.zeros_like(np_x_tough)
-        # weight_map_tol = np.zeros_like(np_x_tol)
+        weight_map_tough = np.zeros_like(np_x_tough)
+        weight_map_tol = np.zeros_like(np_x_tol)
         # for i in range(np_x_pr.shape[0]):
         #     weight_map_tough[i] = self.calc_teacher_weight_loss(x_pr=np_x_pr[i], x_gt=np_x_gt[i], x_t=np_x_tough[i],
         #                                                         alpha=alpha_tough, alpha_mi=alpha_mi_tough)
         #     weight_map_tol[i] = self.calc_teacher_weight_loss(x_pr=np_x_pr[i], x_gt=np_x_gt[i], x_t=np_x_tol[i],
         #                                                       alpha=alpha_tol, alpha_mi=alpha_mi_tol)
         '''reshape loss'''
-        weight_map_tough = np.array(weight_map_tough).reshape(loss_shape)
-        weight_map_tol = np.array(weight_map_tol).reshape(loss_shape)
+        weight_map_tough = weight_map_tough.reshape(loss_shape)
+        weight_map_tol = weight_map_tol.reshape(loss_shape)
+
+        # weight_map_tough = np.array(weight_map_tough).reshape(loss_shape)
+        # weight_map_tol = np.array(weight_map_tol).reshape(loss_shape)
 
         loss_tough = tf.reduce_mean(weight_map_tough * tf.abs(x_tough - x_pr))
         loss_tol = tf.reduce_mean(weight_map_tol * tf.abs(x_tol - x_pr))
