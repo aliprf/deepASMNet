@@ -75,6 +75,11 @@ class Custom_losses:
                 alpha_tol, alpha_mi_tol,
                 main_loss_weight, tough_loss_weight, tol_loss_weight,
                 num_of_landmarks):
+
+        loss_main = tf.reduce_mean(tf.abs(x_gt - x_pr))
+        return loss_main, 0, 0, 0
+
+
         """"""
         '''creating np version of input tensors'''
         loss_shape = (x_pr.shape[0], x_pr.shape[1])
