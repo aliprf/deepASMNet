@@ -77,8 +77,8 @@ class Custom_losses:
                 num_of_landmarks):
 
         # loss_main = tf.reduce_mean(tf.sqrt(tf.abs(x_gt - x_pr)))
-        loss_main = tf.reduce_mean(tf.abs(x_gt - x_pr))
-        return loss_main, 0, 0, 0
+        # loss_main = tf.reduce_mean(tf.square(x_gt - x_pr))
+        # return loss_main, 0, 0, 0
 
 
         """"""
