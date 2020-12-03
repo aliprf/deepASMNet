@@ -23,6 +23,7 @@ import pickle
 
 # tf.compat.v1.enable_eager_execution()
 
+
 class StudentTrainer:
 
     def __init__(self, dataset_name, use_augmneted):
@@ -120,10 +121,10 @@ class StudentTrainer:
                                                                          tough_loss_weight=l_w_togh_t,
                                                                          tol_loss_weight=loss_w_tol_t,
                                                                          num_of_landmarks=self.num_landmark)
-        '''calculate gradient'''
-        gradients_of_student = tape_student.gradient(loss_total, model_student.trainable_variables)
-        '''apply Gradients:'''
-        optimizer.apply_gradients(zip(gradients_of_student, model_student.trainable_variables))
+            '''calculate gradient'''
+            gradients_of_student = tape_student.gradient(loss_total, model_student.trainable_variables)
+            '''apply Gradients:'''
+            optimizer.apply_gradients(zip(gradients_of_student, model_student.trainable_variables))
         '''printing loss Values: '''
         tf.print("->EPOCH: ", str(epoch), "->STEP: ", str(step)+'/'+str(total_steps), ' -> : LOSS: ', loss_total,
                  ' -> : loss_main: ', loss_main, ' -> : loss_tough: ', loss_tough, ' -> : loss_tolerant: ', loss_tol)
