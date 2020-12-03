@@ -76,8 +76,8 @@ class Custom_losses:
                 main_loss_weight, tough_loss_weight, tol_loss_weight,
                 num_of_landmarks):
 
-        loss_main = tf.reduce_mean(tf.sqrt(tf.abs(x_gt - x_pr)))
-        # loss_main = tf.reduce_mean(tf.abs(x_gt - x_pr))
+        # loss_main = tf.reduce_mean(tf.sqrt(tf.abs(x_gt - x_pr)))
+        loss_main = tf.reduce_mean(tf.abs(x_gt - x_pr))
         return loss_main, 0, 0, 0
 
 
