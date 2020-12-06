@@ -182,8 +182,11 @@ class StudentTrainer:
         else:
             pn_batch = np.array([self._load_and_normalize(pn_tr_path + file_name) for file_name in batch_y])
         '''prediction to create tough and tolerant batches'''
-        pn_batch_tough = model_tough_t.predict_on_batch(img_batch)
-        pn_batch_tol = model_tol_t.predict_on_batch(img_batch)
+        # pn_batch_tough = model_tough_t.predict_on_batch(img_batch)
+        # pn_batch_tol = model_tol_t.predict_on_batch(img_batch)
+
+        pn_batch_tough = 0
+        pn_batch_tol = 0
 
         '''test: print'''
         # image_utility = ImageUtility()
