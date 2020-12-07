@@ -79,6 +79,7 @@ class StudentTrainer:
 
         '''start train:'''
         for epoch in range(LearningConfig.epochs):
+            x_train_filenames, y_train_filenames = self._create_generators()
             for batch_index in range(step_per_epoch):
                 '''load annotation and images'''
                 images, annotation_gr, annotation_tough_teacher, annotation_tol_teacher = self._get_batch_sample(

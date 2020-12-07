@@ -93,8 +93,8 @@ if __name__ == '__main__':
     #                  loss_weight_tol_teacher=0.60)
     st_trainer = StudentTrainer(dataset_name=DatasetName.wflw, use_augmneted=True)
     st_trainer.train(arch_student='mobileNetV2',
-                     # weight_path_student='./teacher_models/ds_wflw_mnbase_1.h5',
-                     weight_path_student=None,
+                     weight_path_student='./teacher_models/ds_wflw_mnbase_1.h5',
+                     # weight_path_student=None,
                      loss_weight_student=2.0,
                      arch_tough_teacher='efficientNet', weight_path_tough_teacher='./teacher_models/ds_wflw_ef_100.h5',
                      loss_weight_tough_teacher=0.80,
