@@ -69,10 +69,10 @@ class StudentTrainer:
         model_tol_teacher = self.make_model(arch=arch_tol_teacher, w_path=weight_path_tol_teacher)
 
         '''create optimizer'''
-        optimizer_student = self._get_optimizer(lr=1e-1)
+        optimizer_student = self._get_optimizer(lr=0.05)
 
         '''create sample generator'''
-        x_train_filenames, x_val_filenames, y_train_filenames, y_val_filenames = self._create_generators()
+        x_train_filenames, y_train_filenames = self._create_generators()
 
         '''create train configuration'''
         step_per_epoch = len(x_train_filenames) // LearningConfig.batch_size
@@ -109,7 +109,7 @@ class StudentTrainer:
                    optimizer, summary_writer, c_loss):
         with tf.GradientTape() as tape_student:
             '''create annotation_predicted'''
-            annotation_predicted = model_student(images)
+            annotation_predicted = model_student(images,  training=True)
             '''calculate loss'''
             loss_total, loss_main, loss_tough, loss_tol = c_loss.kd_loss(x_pr=annotation_predicted,
                                                                          x_gt=annotation_gr,
@@ -121,10 +121,10 @@ class StudentTrainer:
                                                                          tough_loss_weight=l_w_togh_t,
                                                                          tol_loss_weight=loss_w_tol_t,
                                                                          num_of_landmarks=self.num_landmark)
-            '''calculate gradient'''
-            gradients_of_student = tape_student.gradient(loss_total, model_student.trainable_variables)
-            '''apply Gradients:'''
-            optimizer.apply_gradients(zip(gradients_of_student, model_student.trainable_variables))
+        '''calculate gradient'''
+        gradients_of_student = tape_student.gradient(loss_total, model_student.trainable_variables)
+        '''apply Gradients:'''
+        optimizer.apply_gradients(zip(gradients_of_student, model_student.trainable_variables))
         '''printing loss Values: '''
         tf.print("->EPOCH: ", str(epoch), "->STEP: ", str(step)+'/'+str(total_steps), ' -> : LOSS: ', loss_total,
                  ' -> : loss_main: ', loss_main, ' -> : loss_tough: ', loss_tough, ' -> : loss_tolerant: ', loss_tol)
@@ -158,15 +158,15 @@ class StudentTrainer:
         filenames, labels = tf_utils.create_image_and_labels_name(img_path=self.img_path,
                                                                   annotation_path=self.annotation_path)
         filenames_shuffled, y_labels_shuffled = shuffle(filenames, labels)
-        x_train_filenames, x_val_filenames, y_train, y_val = train_test_split(
-            filenames_shuffled, y_labels_shuffled, test_size=0.01, random_state=1)
+        # x_train_filenames, x_val_filenames, y_train, y_val = train_test_split(
+        #     filenames_shuffled, y_labels_shuffled, test_size=0.01, random_state=1)
 
-        save(x_trains_path, x_train_filenames)
-        save(x_validations_path, x_val_filenames)
-        save(y_trains_path, y_train)
-        save(y_validations_path, y_val)
+        # save(x_trains_path, x_train_filenames)
+        # save(x_validations_path, x_val_filenames)
+        # save(y_trains_path, y_train)
+        # save(y_validations_path, y_val)
 
-        return x_train_filenames, x_val_filenames, y_train, y_val
+        return filenames_shuffled, y_labels_shuffled
 
     def _get_batch_sample(self, batch_index, x_train_filenames, y_train_filenames, model_tough_t, model_tol_t):
         img_path = self.img_path
