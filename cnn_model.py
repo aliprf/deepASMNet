@@ -64,6 +64,8 @@ class CNNModel:
         return model
 
     def create_MobileNet(self, inp_shape, inp_tensor, output_len):
+        initializer = tf.keras.initializers.HeUniform()
+
         mobilenet_model = mobilenet_v2.MobileNetV2(input_shape=inp_shape,
                                                    alpha=1.0,
                                                    include_top=True,
@@ -74,7 +76,8 @@ class CNNModel:
 
         # x = mobilenet_model.get_layer('global_average_pooling2d_2').output  # 1280
         x = mobilenet_model.get_layer('global_average_pooling2d').output  # 1280
-        out_landmarks = Dense(output_len, name='O_L')(x)
+        out_landmarks = Dense(output_len, activation=keras.activations.linear,
+                              use_bias=False, kernel_initializer=initializer, name='O_L')(x)
         inp = mobilenet_model.input
 
         revised_model = Model(inp, out_landmarks)
