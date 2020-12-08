@@ -56,8 +56,8 @@ class LearningConfig:
     MIN_LR = 1e-5
     MAX_LR = 1e-2
     STEP_SIZE = 10
-    # batch_size = 2
-    batch_size = 150
+    batch_size = 2
+    # batch_size = 150
     # steps_per_validation_epochs = 5
 
     epochs = 500
@@ -156,8 +156,8 @@ class WflwConf:
 
 class CofwConf:
     # Cofw_prefix_path = '/media/data3/ali/FL/new_data/cofw/'  # --> zeus
-    Cofw_prefix_path = '/media/data2/alip/FL/new_data/cofw/'  # --> atlas
-    # Cofw_prefix_path = '/media/ali/data/new_data/cofw/'  # --> local
+    # Cofw_prefix_path = '/media/data2/alip/FL/new_data/cofw/'  # --> atlas
+    Cofw_prefix_path = '/media/ali/data/new_data/cofw/'  # --> local
 
     augmented_train_pose = Cofw_prefix_path + 'training_set/augmented/pose/'
     augmented_train_annotation = Cofw_prefix_path + 'training_set/augmented/annotations/'

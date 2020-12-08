@@ -191,9 +191,15 @@ class StudentTrainer:
 
         '''test: print'''
         # image_utility = ImageUtility()
-        # gr_s, gr_px_1, gr_Py_1 = image_utility.create_landmarks_from_normalized(pn_batch[0], 224, 224, 112, 112)
-        # tou_s, tou_px_1, tou_Py_1 = image_utility.create_landmarks_from_normalized(pn_batch_tough[0], 224, 224, 112, 112)
-        # tol_s, tol_px_1, tol_Py_1 = image_utility.create_landmarks_from_normalized(pn_batch_tol[0], 224, 224, 112, 112)
+        # if self.dataset_name == DatasetName.cofw:  # this ds is not normalized
+        #     gr_s, gr_px_1, gr_Py_1 = image_utility.create_landmarks(pn_batch[0])
+        #     tou_s, tou_px_1, tou_Py_1 = image_utility.create_landmarks(pn_batch_tough[0])
+        #     tol_s, tol_px_1, tol_Py_1 = image_utility.create_landmarks(pn_batch_tol[0])
+        # else:
+        #     gr_s, gr_px_1, gr_Py_1 = image_utility.create_landmarks_from_normalized(pn_batch[0], 224, 224, 112, 112)
+        #     tou_s, tou_px_1, tou_Py_1 = image_utility.create_landmarks_from_normalized(pn_batch_tough[0], 224, 224, 112, 112)
+        #     tol_s, tol_px_1, tol_Py_1 = image_utility.create_landmarks_from_normalized(pn_batch_tol[0], 224, 224, 112, 112)
+        #
         # imgpr.print_image_arr(str(batch_index)+'pts_gt', img_batch[0], gr_px_1, gr_Py_1)
         # imgpr.print_image_arr(str(batch_index)+'pts_t100', img_batch[0], tou_px_1, tou_Py_1)
         # imgpr.print_image_arr(str(batch_index)+'pts_t90', img_batch[0], tol_px_1, tol_Py_1)

@@ -326,7 +326,7 @@ class ImageUtility:
 
         return landmark_arr_xy, landmark_arr_x, landmark_arr_y
 
-    def create_landmarks(self, landmarks, scale_factor_x, scale_factor_y):
+    def create_landmarks(self, landmarks, scale_factor_x=1, scale_factor_y=1):
         # landmarks_splited = _landmarks.split(';')
         landmark_arr_xy = []
         landmark_arr_x = []
