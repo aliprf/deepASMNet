@@ -69,17 +69,19 @@ class StudentTrainer:
         model_tol_teacher = self.make_model(arch=arch_tol_teacher, w_path=weight_path_tol_teacher)
 
         '''create optimizer'''
-        optimizer_student = self._get_optimizer(lr=0.05)
+        _lr = 0.0005
+        optimizer_student = self._get_optimizer(lr=_lr)
 
         '''create sample generator'''
-        x_train_filenames, y_train_filenames = self._create_generators()
+        x_train_filenames, x_val_filenames, y_train_filenames, y_val_filenames = self._create_generators()
+        # x_train_filenames, y_train_filenames = self._create_generators()
 
         '''create train configuration'''
         step_per_epoch = len(x_train_filenames) // LearningConfig.batch_size
 
         '''start train:'''
         for epoch in range(LearningConfig.epochs):
-            x_train_filenames, y_train_filenames = self._create_generators()
+            x_train_filenames, y_train_filenames = self._shuffle_data(x_train_filenames, y_train_filenames)
             for batch_index in range(step_per_epoch):
                 '''load annotation and images'''
                 images, annotation_gr, annotation_tough_teacher, annotation_tol_teacher = self._get_batch_sample(
@@ -99,9 +101,18 @@ class StudentTrainer:
                                 l_w_stu=loss_weight_student, l_w_togh_t=loss_weight_tough_teacher,
                                 loss_w_tol_t=loss_weight_tol_teacher,
                                 optimizer=optimizer_student, summary_writer=summary_writer, c_loss=c_loss)
+            '''evaluating part'''
+            img_batch_eval, pn_batch_eval = self._create_evaluation_batch(x_val_filenames, y_val_filenames)
+            loss_eval = self._eval_model(img_batch_eval, pn_batch_eval, model_student)
+            with summary_writer.as_default():
+                tf.summary.scalar('Eval-LOSS', loss_eval, step=epoch)
             '''save weights'''
-            model_student.save('./models/stu_model_' + str(epoch) + '_' + self.dataset_name + '_.h5')
-            model_student.save_weights('./models/stu_weight_' + '_' + str(epoch) + self.dataset_name + '_.h5')
+            model_student.save('./models/stu_model_' + str(epoch) + '_' + self.dataset_name + '_' + str(loss_eval) + '.h5')
+            model_student.save_weights('./models/stu_weight_' + '_' + str(epoch) + self.dataset_name + '_' + str(loss_eval) + '.h5')
+            '''lr reduction'''
+            if epoch != 0 and epoch % 100 == 0:
+                _lr -= _lr * 0.4
+                optimizer = self._get_optimizer(lr=_lr)
 
     # @tf.function
     def train_step(self, epoch, step, total_steps, images, model_student, annotation_gr,
@@ -144,30 +155,52 @@ class StudentTrainer:
             model.load_weights(w_path)
         return model
 
+    def _eval_model(self, img_batch_eval, pn_batch_eval, model):
+        annotation_predicted = model(img_batch_eval)
+        los_eval = np.array(tf.reduce_mean(tf.abs(pn_batch_eval - annotation_predicted)))
+        return los_eval
+
     def _get_optimizer(self, lr=1e-2, beta_1=0.9, beta_2=0.999, decay=1e-4):
         return tf.keras.optimizers.Adam(lr=lr, beta_1=beta_1, beta_2=beta_2, decay=decay)
 
+    def _shuffle_data(self, filenames, labels):
+        filenames_shuffled, y_labels_shuffled = shuffle(filenames, labels)
+        return filenames_shuffled, y_labels_shuffled
+
     def _create_generators(self):
         fn_prefix = './file_names/' + self.dataset_name + '_'
-        x_trains_path = fn_prefix + 'x_train_fns.npy'
-        x_validations_path = fn_prefix + 'x_val_fns.npy'
-        y_trains_path = fn_prefix + 'y_train_fns.npy'
-        y_validations_path = fn_prefix + 'y_val_fns.npy'
+        # x_trains_path = fn_prefix + 'x_train_fns.npy'
+        # x_validations_path = fn_prefix + 'x_val_fns.npy'
 
         tf_utils = TFRecordUtility(number_of_landmark=self.num_landmark)
 
         filenames, labels = tf_utils.create_image_and_labels_name(img_path=self.img_path,
                                                                   annotation_path=self.annotation_path)
         filenames_shuffled, y_labels_shuffled = shuffle(filenames, labels)
-        # x_train_filenames, x_val_filenames, y_train, y_val = train_test_split(
-        #     filenames_shuffled, y_labels_shuffled, test_size=0.01, random_state=1)
+        x_train_filenames, x_val_filenames, y_train, y_val = train_test_split(
+            filenames_shuffled, y_labels_shuffled, test_size=LearningConfig.batch_size, random_state=1)
+
+        # save(x_trains_path, filenames_shuffled)
+        # save(x_validations_path, y_labels_shuffled)
 
         # save(x_trains_path, x_train_filenames)
         # save(x_validations_path, x_val_filenames)
         # save(y_trains_path, y_train)
         # save(y_validations_path, y_val)
 
-        return filenames_shuffled, y_labels_shuffled
+        # return filenames_shuffled, y_labels_shuffled
+        return x_train_filenames, x_val_filenames, y_train, y_val
+
+    def _create_evaluation_batch(self, x_eval_filenames, y_eval_filenames):
+        img_path = self.img_path
+        pn_tr_path = self.annotation_path
+        '''create batch data and normalize images'''
+        batch_x = x_eval_filenames[0:LearningConfig.batch_size]
+        batch_y = y_eval_filenames[0:LearningConfig.batch_size]
+        '''create img and annotations'''
+        img_batch = np.array([imread(img_path + file_name) for file_name in batch_x]) / 255.0
+        pn_batch = np.array([self._load_and_normalize(pn_tr_path + file_name) for file_name in batch_y])
+        return img_batch, pn_batch
 
     def _get_batch_sample(self, batch_index, x_train_filenames, y_train_filenames, model_tough_t, model_tol_t):
         img_path = self.img_path
