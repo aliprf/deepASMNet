@@ -69,7 +69,7 @@ class StudentTrainer:
         model_tol_teacher = self.make_model(arch=arch_tol_teacher, w_path=weight_path_tol_teacher)
 
         '''create optimizer'''
-        _lr = 0.0005
+        _lr = 0.005
         optimizer_student = self._get_optimizer(lr=_lr)
 
         '''create sample generator'''
@@ -112,7 +112,7 @@ class StudentTrainer:
             '''lr reduction'''
             if epoch != 0 and epoch % 100 == 0:
                 _lr -= _lr * 0.4
-                optimizer = self._get_optimizer(lr=_lr)
+                optimizer_student = self._get_optimizer(lr=_lr)
 
     # @tf.function
     def train_step(self, epoch, step, total_steps, images, model_student, annotation_gr,
