@@ -111,5 +111,5 @@ if __name__ == '__main__':
                      loss_weight_student=2.0,
                      arch_tough_teacher='efficientNet', weight_path_tough_teacher='./teacher_models/ds_wflw_ef_100.h5',
                      loss_weight_tough_teacher=0.80,
-                     arch_tol_teacher='efficientNet', weight_path_tol_teacher='./teacher_models/ds_wflw_ef_90.h5',
+                     arch_tol_teacher='efficientNet', weight_path_tol_teacher='./teacher_models/ds_wflw_ef_95.h5',
                      loss_weight_tol_teacher=0.60)
