@@ -85,8 +85,8 @@ class CNNModel:
         inp = mobilenet_model.input
         revised_model = Model(inp, out_landmarks)
         revised_model.summary()
-        model.save_weights('W_ds_wflw_mn_base_with_drop.h5')
-        model.save('M_ds_wflw_mn_base_with_drop.h5')
+        revised_model.save_weights('W_ds_wflw_mn_base_with_drop.h5')
+        revised_model.save('M_ds_wflw_mn_base_with_drop.h5')
         model_json = revised_model.to_json()
         with open("mobileNet_v2_main.json", "w") as json_file:
             json_file.write(model_json)
