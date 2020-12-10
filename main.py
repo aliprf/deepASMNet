@@ -97,9 +97,11 @@ if __name__ == '__main__':
                      weight_path_student='./teacher_models/ds_cofw_mn_base.h5',
                      # weight_path_student=None,
                      loss_weight_student=2.0,
-                     arch_tough_teacher='efficientNet', weight_path_tough_teacher='./teacher_models/ds_cofw_ef_100.h5',
+                     arch_tough_teacher='efficientNet', weight_path_tough_teacher=None,
+                     # arch_tough_teacher='efficientNet', weight_path_tough_teacher='./teacher_models/ds_cofw_ef_100.h5',
                      loss_weight_tough_teacher=0.80,
-                     arch_tol_teacher='efficientNet', weight_path_tol_teacher='./teacher_models/ds_cofw_ef_95.h5',
+                     arch_tol_teacher='efficientNet', weight_path_tol_teacher=None,
+                     # arch_tol_teacher='efficientNet', weig/ht_path_tol_teacher='./teacher_models/ds_cofw_ef_95.h5',
                      loss_weight_tol_teacher=0.60)
 
     '''Cofw dataset: this ds is not normal for both mn_base and efn100'''
