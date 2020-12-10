@@ -1,6 +1,6 @@
 # Byte-compiled / optimized / DLL files
 __pycache__/
-./train_logs/*
+./train_logs/fit/*
 *.pdf
 *.jpg
 *.csv
