@@ -199,7 +199,10 @@ class StudentTrainer:
         batch_y = y_eval_filenames[0:LearningConfig.batch_size]
         '''create img and annotations'''
         img_batch = np.array([imread(img_path + file_name) for file_name in batch_x]) / 255.0
-        pn_batch = np.array([self._load_and_normalize(pn_tr_path + file_name) for file_name in batch_y])
+        if self.dataset_name == DatasetName.cofw:  # this ds is not normalized
+            pn_batch = np.array([load(pn_tr_path + file_name) for file_name in batch_y])
+        else:
+            pn_batch = np.array([self._load_and_normalize(pn_tr_path + file_name) for file_name in batch_y])
         return img_batch, pn_batch
 
     def _get_batch_sample(self, batch_index, x_train_filenames, y_train_filenames, model_tough_t, model_tol_t):
