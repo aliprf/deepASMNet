@@ -150,8 +150,8 @@ class StudentTrainer:
 
     def make_model(self, arch, w_path):
         cnn = CNNModel()
-        model = cnn.get_model(arch=arch, output_len=self.num_landmark, input_tensor=None)
-        if w_path is not None:
+        model = cnn.get_model(arch=arch, output_len=self.num_landmark, input_tensor=None, weight_path=w_path)
+        if w_path is not None and arch != 'mobileNetV2_d':
             model.load_weights(w_path)
         return model
 
