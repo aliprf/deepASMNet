@@ -69,7 +69,7 @@ class StudentTrainer:
         model_tol_teacher = self.make_model(arch=arch_tol_teacher, w_path=weight_path_tol_teacher)
 
         '''create optimizer'''
-        _lr = 0.009
+        _lr = 1e-4
         optimizer_student = self._get_optimizer(lr=_lr)
 
         '''create sample generator'''
@@ -111,7 +111,7 @@ class StudentTrainer:
             model_student.save_weights('./models/stu_weight_' + '_' + str(epoch) + self.dataset_name + '_' + str(loss_eval) + '.h5')
             '''calculate Learning rate'''
             _lr = self.calc_learning_rate(iterations=epoch, step_size=10, base_lr=1e-4, max_lr=1e-1)
-            optimizer = self._get_optimizer(lr=_lr)
+            optimizer_student = self._get_optimizer(lr=_lr)
 
     def calc_learning_rate(self, iterations, step_size, base_lr, max_lr):
         cycle = np.floor(1 + iterations / (2 * step_size))
