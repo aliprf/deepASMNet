@@ -109,10 +109,16 @@ class StudentTrainer:
             '''save weights'''
             model_student.save('./models/stu_model_' + str(epoch) + '_' + self.dataset_name + '_' + str(loss_eval) + '.h5')
             model_student.save_weights('./models/stu_weight_' + '_' + str(epoch) + self.dataset_name + '_' + str(loss_eval) + '.h5')
-            '''lr reduction'''
-            if epoch != 0 and epoch % 100 == 0:
-                _lr -= _lr * 0.4
-                optimizer_student = self._get_optimizer(lr=_lr)
+            '''calculate Learning rate'''
+            _lr = self.calc_learning_rate(iterations=epoch, step_size=10, base_lr=1e-4, max_lr=1e-1)
+            optimizer = self._get_optimizer(lr=_lr)
+
+    def calc_learning_rate(self, iterations, step_size, base_lr, max_lr):
+        cycle = np.floor(1 + iterations / (2 * step_size))
+        x = np.abs(iterations / step_size - 2 * cycle + 1)
+        lr = base_lr + (max_lr - base_lr) * np.maximum(0, (1 - x)) / float(2 ** (cycle - 1))
+        print('LR is: ' + str(lr))
+        return lr
 
     # @tf.function
     def train_step(self, epoch, step, total_steps, images, model_student, annotation_gr,
