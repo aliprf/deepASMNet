@@ -69,7 +69,7 @@ class StudentTrainer:
         model_tol_teacher = self.make_model(arch=arch_tol_teacher, w_path=weight_path_tol_teacher)
 
         '''create optimizer'''
-        _lr = 1e-4
+        _lr = 1e-5
         optimizer_student = self._get_optimizer(lr=_lr)
 
         '''create sample generator'''
@@ -108,9 +108,9 @@ class StudentTrainer:
                 tf.summary.scalar('Eval-LOSS', loss_eval, step=epoch)
             '''save weights'''
             model_student.save('./models/stu_model_' + str(epoch) + '_' + self.dataset_name + '_' + str(loss_eval) + '.h5')
-            model_student.save_weights('./models/stu_weight_' + '_' + str(epoch) + self.dataset_name + '_' + str(loss_eval) + '.h5')
+            # model_student.save_weights('./models/stu_weight_' + '_' + str(epoch) + self.dataset_name + '_' + str(loss_eval) + '.h5')
             '''calculate Learning rate'''
-            _lr = self.calc_learning_rate(iterations=epoch, step_size=10, base_lr=1e-4, max_lr=1e-1)
+            _lr = self.calc_learning_rate(iterations=epoch, step_size=50, base_lr=1e-5, max_lr=1e-1)
             optimizer_student = self._get_optimizer(lr=_lr)
 
     def calc_learning_rate(self, iterations, step_size, base_lr, max_lr):
