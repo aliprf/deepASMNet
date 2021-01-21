@@ -39,15 +39,17 @@ import efficientnet.tfkeras as efn
 class CNNModel:
     def get_model(self, arch, input_tensor, output_len,
                   inp_shape=[InputDataSize.image_input_size, InputDataSize.image_input_size, 3],
-                  train_images=None, num_output_layers=1, weight_path=None):
+                  train_images=None, num_output_layers=1, weight_path=None, is_old=False):
         if arch == 'asmnet':
             model = self.create_asmnet(inp_shape=inp_shape, num_branches=num_output_layers, output_len=output_len)
         elif arch == 'efficientNet':
             model = self.create_efficientNet(inp_shape=inp_shape, input_tensor=input_tensor, output_len=output_len)
         elif arch == 'mobileNetV2':
-            model = self.create_MobileNet(inp_shape=inp_shape, inp_tensor=input_tensor, output_len=output_len)
+            model = self.create_MobileNet(inp_shape=inp_shape, inp_tensor=input_tensor, output_len=output_len,
+                                          is_old=is_old, weight_path=weight_path)
         elif arch == 'mobileNetV2_d':
-            model = self.create_MobileNet_with_drop(inp_shape=inp_shape, inp_tensor=input_tensor, output_len=output_len, weight_path=weight_path)
+            model = self.create_MobileNet_with_drop(inp_shape=inp_shape, inp_tensor=input_tensor,
+                                                    output_len=output_len, weight_path=weight_path)
         elif arch == 'mb_mn':
             model = self.create_multi_branch_mn(inp_shape=inp_shape, num_branches=num_output_layers)
             # model = cnn.create_multi_branch_mn_one_input(inp_shape=[224, 224, 3], num_branches=self.num_output_layers)
@@ -92,8 +94,7 @@ class CNNModel:
             json_file.write(model_json)
         return revised_model
 
-
-    def create_MobileNet(self, inp_shape, inp_tensor, output_len):
+    def create_MobileNet(self, inp_shape, inp_tensor, output_len, is_old, weight_path):
         # initializer = tf.keras.initializers.HeUniform()
         initializer = tf.keras.initializers.glorot_uniform()
 
@@ -114,10 +115,38 @@ class CNNModel:
         revised_model = Model(inp, out_landmarks)
 
         revised_model.summary()
-        # plot_model(revised_model, to_file='mobileNet_v2_main.png', show_shapes=True, show_layer_names=True)
-        model_json = revised_model.to_json()
+        if is_old:
+            revised_model.load_weights(weight_path)
 
-        with open("mobileNet_v2_main.json", "w") as json_file:
+        '''now we add other layers'''
+        global_avg = revised_model.get_layer('global_average_pooling2d').output  # 1280
+        inp = revised_model.input
+        out_landmarks = revised_model.get_layer('O_L').output
+
+        x = Dense(3*output_len)(global_avg)
+        x = BatchNormalization()(x)
+        x = ReLU()(x)
+        x = Dense(2 * output_len)(x)
+        x = BatchNormalization()(x)
+        x = ReLU()(x)
+        x = Dropout(0.1)(x)
+        out_tol_dif_stu = Dense(output_len, name='O_tol_d_s')(x)
+        out_tol_dif_gt = Dense(output_len, name='O_tol_d_g')(x)
+
+        x = Dense(3*output_len)(global_avg)
+        x = BatchNormalization()(x)
+        x = ReLU()(x)
+        x = Dense(2 * output_len)(x)
+        x = BatchNormalization()(x)
+        x = ReLU()(x)
+        x = Dropout(0.1)(x)
+        out_tou_dif_stu = Dense(output_len, name='O_tou_d_s')(x)
+        out_tou_dif_gt = Dense(output_len, name='O_tou_d_g')(x)
+
+        revised_model = Model(inp, [out_landmarks, out_tol_dif_stu, out_tol_dif_gt, out_tou_dif_stu, out_tou_dif_gt])
+        model_json = revised_model.to_json()
+        revised_model.save('ds_300w_3o_stu_.h5')
+        with open("mobileNet_v2_5_out.json", "w") as json_file:
             json_file.write(model_json)
 
         return revised_model

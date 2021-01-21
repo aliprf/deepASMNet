@@ -70,17 +70,53 @@ class Custom_losses:
     #
     #     return loss
 
+    def kd_loss_with_dif(self, x_pr, x_gt, x_tough, x_tol, alpha_tough, alpha_mi_tough, alpha_tol, alpha_mi_tol,
+                         main_loss_weight, tough_loss_weight, tol_loss_weight, num_of_landmarks,
+                         pr_tol_dif_stu, pr_tol_dif_gt, pr_tou_dif_stu, pr_tou_dif_gt
+                         ):
+        """"""
+        main_loss = 3 * tf.reduce_mean(tf.abs(x_pr - x_gt))
+        '''los KD'''
+        # we revise teachers for reflection:
+        x_tough = x_gt + tf.sign(x_pr - x_gt) * tf.abs(x_tough - x_gt)
+        b_tough = x_gt + tf.sign(x_pr - x_gt) * tf.abs(x_tough - x_gt)*0.25
+        x_tol = x_gt + tf.sign(x_pr - x_gt) * tf.abs(x_tol - x_gt)
+        b_tol = x_gt + tf.sign(x_pr - x_gt) * tf.abs(x_tol - x_gt) * 0.25
+        # Region A: from T -> +inf
+        tou_pos_map = tf.where(tf.sign(x_pr - x_tough) * tf.sign(x_tough - x_gt) > 0, alpha_tough, 0.0)
+        tou_neg_map = tf.where(tf.sign(x_tough - x_pr)*tf.sign(x_pr - b_tough) >= 0, alpha_mi_tough, 0.0)
+        # tou_red_map = tf.where(tf.sign(tf.abs(b_tough) - tf.abs(x_pr))*tf.sign(tf.abs(x_pr) - tf.abs(x_gt)) > 0, 0.1, 0.0)
+        tou_map = tou_pos_map + tou_neg_map# + tou_red_map
+
+        tol_pos_map = tf.where(tf.sign(x_pr - x_tol) * tf.sign(x_tol - x_gt) > 0, alpha_tol, 0.0)
+        tol_neg_map = tf.where(tf.sign(x_tol - x_pr)*tf.sign(x_pr - b_tol) >= 0, alpha_mi_tol, 0.0)
+        # tol_red_map = tf.where(tf.sign(tf.abs(b_tol) - tf.abs(x_pr))*tf.sign(tf.abs(x_pr) - tf.abs(x_gt)) > 0, 0.1, 0.0)
+        tol_map = tol_pos_map + tol_neg_map# + tou_red_map
+
+        '''dif loss:'''
+        gt_tol_dif_stu = x_tol - x_pr
+        loss_tol_dif_stu = tf.reduce_mean(tf.abs(pr_tol_dif_stu - gt_tol_dif_stu))
+
+        gt_tol_dif_gt = x_tol - x_gt
+        loss_tol_dif_gt = tf.reduce_mean(tf.abs(pr_tol_dif_gt - gt_tol_dif_gt))
+
+        gt_tou_dif_stu = x_tough - x_pr
+        loss_tou_dif_stu = tf.reduce_mean(tf.abs(pr_tou_dif_stu - gt_tou_dif_stu))
+
+        gt_tou_dif_stu = x_tough - x_gt
+        loss_tou_dif_gt = tf.reduce_mean(tf.abs(pr_tou_dif_stu - gt_tou_dif_stu))
+
+        ''''''
+
     def kd_loss(self, x_pr, x_gt, x_tough, x_tol,
                 alpha_tough, alpha_mi_tough,
                 alpha_tol, alpha_mi_tol,
                 main_loss_weight, tough_loss_weight, tol_loss_weight,
                 num_of_landmarks):
-
         # loss_main = tf.reduce_mean(tf.sqrt(tf.abs(x_gt - x_pr)))
         # loss_main = tf.reduce_mean(tf.square(x_gt - x_pr))
         loss_main = tf.reduce_mean(tf.abs(x_gt - x_pr))
         return loss_main, 0, 0, 0
-
 
         """"""
         '''creating np version of input tensors'''

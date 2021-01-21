@@ -21,6 +21,7 @@ import csv
 from skimage.io import imread
 import pickle
 
+
 # tf.compat.v1.enable_eager_execution()
 
 
@@ -64,12 +65,12 @@ class StudentTrainer:
             "./train_logs/fit/" + datetime.now().strftime("%Y%m%d-%H%M%S"))
 
         '''making models'''
-        model_student = self.make_model(arch=arch_student, w_path=weight_path_student)
+        model_student = self.make_model(arch=arch_student, w_path=weight_path_student, is_old=False)
         model_tough_teacher = self.make_model(arch=arch_tough_teacher, w_path=weight_path_tough_teacher)
         model_tol_teacher = self.make_model(arch=arch_tol_teacher, w_path=weight_path_tol_teacher)
 
         '''create optimizer'''
-        _lr = 1e-5
+        _lr = 1e-3
         optimizer_student = self._get_optimizer(lr=_lr)
 
         '''create sample generator'''
@@ -107,7 +108,8 @@ class StudentTrainer:
             with summary_writer.as_default():
                 tf.summary.scalar('Eval-LOSS', loss_eval, step=epoch)
             '''save weights'''
-            model_student.save('./models/stu_model_' + str(epoch) + '_' + self.dataset_name + '_' + str(loss_eval) + '.h5')
+            model_student.save(
+                './models/stu_model_' + str(epoch) + '_' + self.dataset_name + '_' + str(loss_eval) + '.h5')
             # model_student.save_weights('./models/stu_weight_' + '_' + str(epoch) + self.dataset_name + '_' + str(loss_eval) + '.h5')
             '''calculate Learning rate'''
             _lr = self.calc_learning_rate(iterations=epoch, step_size=50, base_lr=1e-5, max_lr=1e-1)
@@ -127,24 +129,29 @@ class StudentTrainer:
                    optimizer, summary_writer, c_loss):
         with tf.GradientTape() as tape_student:
             '''create annotation_predicted'''
-            annotation_predicted = model_student(images,  training=True)
+            annotation_predicted, pr_tol_dif_stu, pr_tol_dif_gt, pr_tou_dif_stu, pr_tou_dif_gt = model_student(
+                images, training=True)
             '''calculate loss'''
-            loss_total, loss_main, loss_tough, loss_tol = c_loss.kd_loss(x_pr=annotation_predicted,
-                                                                         x_gt=annotation_gr,
-                                                                         x_tough=annotation_tough_teacher,
-                                                                         x_tol=annotation_tol_teacher,
-                                                                         alpha_tough=0.9, alpha_mi_tough=-0.45,
-                                                                         alpha_tol=0.8, alpha_mi_tol=-0.4,
-                                                                         main_loss_weight=l_w_stu,
-                                                                         tough_loss_weight=l_w_togh_t,
-                                                                         tol_loss_weight=loss_w_tol_t,
-                                                                         num_of_landmarks=self.num_landmark)
+            loss_total, loss_main, loss_tough, loss_tol = c_loss.kd_loss_with_dif(x_pr=annotation_predicted,
+                                                                                  x_gt=annotation_gr,
+                                                                                  x_tough=annotation_tough_teacher,
+                                                                                  x_tol=annotation_tol_teacher,
+                                                                                  alpha_tough=0.9, alpha_mi_tough=-0.45,
+                                                                                  alpha_tol=0.8, alpha_mi_tol=-0.4,
+                                                                                  main_loss_weight=l_w_stu,
+                                                                                  tough_loss_weight=l_w_togh_t,
+                                                                                  tol_loss_weight=loss_w_tol_t,
+                                                                                  num_of_landmarks=self.num_landmark,
+                                                                                  pr_tol_dif_stu=pr_tol_dif_stu,
+                                                                                  pr_tol_dif_gt=pr_tol_dif_gt,
+                                                                                  pr_tou_dif_stu=pr_tou_dif_stu,
+                                                                                  pr_tou_dif_gt=pr_tou_dif_gt)
         '''calculate gradient'''
         gradients_of_student = tape_student.gradient(loss_total, model_student.trainable_variables)
         '''apply Gradients:'''
         optimizer.apply_gradients(zip(gradients_of_student, model_student.trainable_variables))
         '''printing loss Values: '''
-        tf.print("->EPOCH: ", str(epoch), "->STEP: ", str(step)+'/'+str(total_steps), ' -> : LOSS: ', loss_total,
+        tf.print("->EPOCH: ", str(epoch), "->STEP: ", str(step) + '/' + str(total_steps), ' -> : LOSS: ', loss_total,
                  ' -> : loss_main: ', loss_main, ' -> : loss_tough: ', loss_tough, ' -> : loss_tolerant: ', loss_tol)
         # print("->EPOCH: ", str(epoch), "->STEP: ", str(step), ' -> : LOSS: ', tf.keras.backend.eval(loss_total),
         #       ' -> : loss_main: ', tf.keras.backend.eval(loss_main),
@@ -154,10 +161,11 @@ class StudentTrainer:
         with summary_writer.as_default():
             tf.summary.scalar('LOSS', loss_total, step=epoch)
 
-    def make_model(self, arch, w_path):
+    def make_model(self, arch, w_path, is_old=False):
         cnn = CNNModel()
-        model = cnn.get_model(arch=arch, output_len=self.num_landmark, input_tensor=None, weight_path=w_path)
-        if w_path is not None and arch != 'mobileNetV2_d':
+        model = cnn.get_model(arch=arch, output_len=self.num_landmark, input_tensor=None, weight_path=w_path,
+                              is_old=is_old)
+        if w_path is not None and arch != 'mobileNetV2_d' and not is_old:
             model.load_weights(w_path)
         return model
 
@@ -225,11 +233,11 @@ class StudentTrainer:
         else:
             pn_batch = np.array([self._load_and_normalize(pn_tr_path + file_name) for file_name in batch_y])
         '''prediction to create tough and tolerant batches'''
-        # pn_batch_tough = model_tough_t.predict_on_batch(img_batch)
-        # pn_batch_tol = model_tol_t.predict_on_batch(img_batch)
+        pn_batch_tough = model_tough_t.predict_on_batch(img_batch)
+        pn_batch_tol = model_tol_t.predict_on_batch(img_batch)
 
-        pn_batch_tough = 0
-        pn_batch_tol = 0
+        # pn_batch_tough = 0
+        # pn_batch_tol = 0
 
         '''test: print'''
         # image_utility = ImageUtility()
