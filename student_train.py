@@ -70,7 +70,7 @@ class StudentTrainer:
         model_tol_teacher = self.make_model(arch=arch_tol_teacher, w_path=weight_path_tol_teacher)
 
         '''create optimizer'''
-        _lr = 1e-3
+        _lr = 1e-4
         optimizer_student = self._get_optimizer(lr=_lr)
 
         '''create sample generator'''
@@ -104,18 +104,23 @@ class StudentTrainer:
                                 optimizer=optimizer_student, summary_writer=summary_writer, c_loss=c_loss)
             '''evaluating part'''
             img_batch_eval, pn_batch_eval = self._create_evaluation_batch(x_val_filenames, y_val_filenames)
-            loss_eval = self._eval_model(img_batch_eval, pn_batch_eval, model_student)
+            loss_eval, loss_eval_tol_dif_stu, loss_eval_tol_dif_gt, loss_eval_tou_dif_stu, loss_eval_tou_dif_gt = \
+                self._eval_model(img_batch_eval, pn_batch_eval, model_student)
             with summary_writer.as_default():
                 tf.summary.scalar('Eval-LOSS', loss_eval, step=epoch)
+                tf.summary.scalar('Eval-loss_eval_tol_dif_stu', loss_eval_tol_dif_stu, step=epoch)
+                tf.summary.scalar('Eval-loss_eval_tol_dif_gt', loss_eval_tol_dif_gt, step=epoch)
+                tf.summary.scalar('Eval-loss_eval_tou_dif_stu', loss_eval_tou_dif_stu, step=epoch)
+                tf.summary.scalar('Eval-loss_eval_tou_dif_gt', loss_eval_tou_dif_gt, step=epoch)
             '''save weights'''
             model_student.save(
                 './models/stu_model_' + str(epoch) + '_' + self.dataset_name + '_' + str(loss_eval) + '.h5')
             # model_student.save_weights('./models/stu_weight_' + '_' + str(epoch) + self.dataset_name + '_' + str(loss_eval) + '.h5')
             '''calculate Learning rate'''
-            _lr = self.calc_learning_rate(iterations=epoch, step_size=50, base_lr=1e-5, max_lr=1e-1)
+            _lr = self._calc_learning_rate(iterations=epoch, step_size=20, base_lr=1e-6, max_lr=1e-3)
             optimizer_student = self._get_optimizer(lr=_lr)
 
-    def calc_learning_rate(self, iterations, step_size, base_lr, max_lr):
+    def _calc_learning_rate(self, iterations, step_size, base_lr, max_lr):
         cycle = np.floor(1 + iterations / (2 * step_size))
         x = np.abs(iterations / step_size - 2 * cycle + 1)
         lr = base_lr + (max_lr - base_lr) * np.maximum(0, (1 - x)) / float(2 ** (cycle - 1))
@@ -178,9 +183,13 @@ class StudentTrainer:
         return model
 
     def _eval_model(self, img_batch_eval, pn_batch_eval, model):
-        annotation_predicted = model(img_batch_eval)
-        los_eval = np.array(tf.reduce_mean(tf.abs(pn_batch_eval - annotation_predicted)))
-        return los_eval
+        annotation_predicted, pr_tol_dif_stu, pr_tol_dif_gt, pr_tou_dif_stu, pr_tou_dif_gt = model(img_batch_eval)
+        loss_eval = np.array(tf.reduce_mean(tf.abs(pn_batch_eval - annotation_predicted)))
+        loss_eval_tol_dif_stu = np.array(tf.reduce_mean(tf.abs(pn_batch_eval - annotation_predicted)))
+        loss_eval_tol_dif_gt = np.array(tf.reduce_mean(tf.abs(pn_batch_eval - annotation_predicted)))
+        loss_eval_tou_dif_stu = np.array(tf.reduce_mean(tf.abs(pn_batch_eval - annotation_predicted)))
+        loss_eval_tou_dif_gt = np.array(tf.reduce_mean(tf.abs(pn_batch_eval - annotation_predicted)))
+        return loss_eval, loss_eval_tol_dif_stu, loss_eval_tol_dif_gt, loss_eval_tou_dif_stu, loss_eval_tou_dif_gt
 
     def _get_optimizer(self, lr=1e-2, beta_1=0.9, beta_2=0.999, decay=1e-4):
         return tf.keras.optimizers.Adam(lr=lr, beta_1=beta_1, beta_2=beta_2, decay=decay)
