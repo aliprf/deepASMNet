@@ -132,34 +132,42 @@ class StudentTrainer:
             annotation_predicted, pr_tol_dif_stu, pr_tol_dif_gt, pr_tou_dif_stu, pr_tou_dif_gt = model_student(
                 images, training=True)
             '''calculate loss'''
-            loss_total, loss_main, loss_tough, loss_tol = c_loss.kd_loss_with_dif(x_pr=annotation_predicted,
-                                                                                  x_gt=annotation_gr,
-                                                                                  x_tough=annotation_tough_teacher,
-                                                                                  x_tol=annotation_tol_teacher,
-                                                                                  alpha_tough=0.9, alpha_mi_tough=-0.45,
-                                                                                  alpha_tol=0.8, alpha_mi_tol=-0.4,
-                                                                                  main_loss_weight=l_w_stu,
-                                                                                  tough_loss_weight=l_w_togh_t,
-                                                                                  tol_loss_weight=loss_w_tol_t,
-                                                                                  num_of_landmarks=self.num_landmark,
-                                                                                  pr_tol_dif_stu=pr_tol_dif_stu,
-                                                                                  pr_tol_dif_gt=pr_tol_dif_gt,
-                                                                                  pr_tou_dif_stu=pr_tou_dif_stu,
-                                                                                  pr_tou_dif_gt=pr_tou_dif_gt)
+            loss_total, loss_main, loss_tough, loss_tol, loss_tol_dif_stu, loss_tol_dif_gt, \
+            loss_tou_dif_stu, loss_tou_dif_gt = c_loss.kd_loss_with_dif(
+                x_pr=annotation_predicted,
+                x_gt=annotation_gr,
+                x_tough=annotation_tough_teacher,
+                x_tol=annotation_tol_teacher,
+                alpha_tough=1.9, alpha_mi_tough=-0.45,
+                alpha_tol=1.8, alpha_mi_tol=-0.4,
+                main_loss_weight=l_w_stu,
+                tough_loss_weight=l_w_togh_t,
+                tol_loss_weight=loss_w_tol_t,
+                num_of_landmarks=self.num_landmark,
+                pr_tol_dif_stu=pr_tol_dif_stu,
+                pr_tol_dif_gt=pr_tol_dif_gt,
+                pr_tou_dif_stu=pr_tou_dif_stu,
+                pr_tou_dif_gt=pr_tou_dif_gt)
         '''calculate gradient'''
         gradients_of_student = tape_student.gradient(loss_total, model_student.trainable_variables)
         '''apply Gradients:'''
         optimizer.apply_gradients(zip(gradients_of_student, model_student.trainable_variables))
         '''printing loss Values: '''
         tf.print("->EPOCH: ", str(epoch), "->STEP: ", str(step) + '/' + str(total_steps), ' -> : LOSS: ', loss_total,
-                 ' -> : loss_main: ', loss_main, ' -> : loss_tough: ', loss_tough, ' -> : loss_tolerant: ', loss_tol)
-        # print("->EPOCH: ", str(epoch), "->STEP: ", str(step), ' -> : LOSS: ', tf.keras.backend.eval(loss_total),
-        #       ' -> : loss_main: ', tf.keras.backend.eval(loss_main),
-        #       ' -> : loss_tough: ', tf.keras.backend.eval(loss_tough),
-        #       ' -> : loss_tolerant: ', tf.keras.backend.eval(loss_tol))
-        # print('==--==--==--==--==--==--==--==--==--')
+                 ' -> : loss_main: ', loss_main, ' -> : loss_tough: ', loss_tough,
+                 ' -> : loss_tolerant: ', loss_tol,
+                 ' -> : loss_tol_dif_stu: ', loss_tol_dif_stu, ' -> : loss_tol_dif_gt: ', loss_tol_dif_gt,
+                 ' -> : loss_tou_dif_stu: ', loss_tou_dif_stu, ' -> : loss_tou_dif_gt: ', loss_tou_dif_gt)
+
         with summary_writer.as_default():
             tf.summary.scalar('LOSS', loss_total, step=epoch)
+            tf.summary.scalar('loss_main', loss_main, step=epoch)
+            tf.summary.scalar('loss_tough', loss_tough, step=epoch)
+            tf.summary.scalar('loss_tol', loss_tol, step=epoch)
+            tf.summary.scalar('loss_tol_dif_stu', loss_tol_dif_stu, step=epoch)
+            tf.summary.scalar('loss_tol_dif_gt', loss_tol_dif_gt, step=epoch)
+            tf.summary.scalar('loss_tou_dif_stu', loss_tou_dif_stu, step=epoch)
+            tf.summary.scalar('loss_tou_dif_gt', loss_tou_dif_gt, step=epoch)
 
     def make_model(self, arch, w_path, is_old=False):
         cnn = CNNModel()

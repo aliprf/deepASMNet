@@ -88,9 +88,9 @@ if __name__ == '__main__':
     st_trainer = StudentTrainer(dataset_name=DatasetName.ibug, use_augmneted=True)
     st_trainer.train(arch_student='mobileNetV2', weight_path_student='./models/last-ds_300w_3o_stu_.h5', loss_weight_student=2.0,
                      arch_tough_teacher='efficientNet', weight_path_tough_teacher='./teacher_models/ds_300w_ef_100.h5',
-                     loss_weight_tough_teacher=0.80,
+                     loss_weight_tough_teacher=0.9,
                      arch_tol_teacher='efficientNet', weight_path_tol_teacher='./teacher_models/ds_300w_ef_90.h5',
-                     loss_weight_tol_teacher=0.60)
+                     loss_weight_tol_teacher=0.9)
     '''wflw dataset'''
     # st_trainer = StudentTrainer(dataset_name=DatasetName.cofw, use_augmneted=True)
     # st_trainer.train(arch_student='mobileNetV2',
