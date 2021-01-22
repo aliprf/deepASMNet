@@ -130,7 +130,7 @@ class CNNModel:
         x = BatchNormalization()(x)
         x = ReLU()(x)
         x = Dropout(0.1)(x)
-        out_tol_dif_stu = Dense(output_len, name='O_tol_d_s')(x)
+        out_tol = Dense(output_len, name='O_tol')(x)
         out_tol_dif_gt = Dense(output_len, name='O_tol_d_g')(x)
 
         x = Dense(3*output_len)(global_avg)
@@ -140,10 +140,10 @@ class CNNModel:
         x = BatchNormalization()(x)
         x = ReLU()(x)
         x = Dropout(0.1)(x)
-        out_tou_dif_stu = Dense(output_len, name='O_tou_d_s')(x)
+        out_tou = Dense(output_len, name='O_tou')(x)
         out_tou_dif_gt = Dense(output_len, name='O_tou_d_g')(x)
 
-        revised_model = Model(inp, [out_landmarks, out_tol_dif_stu, out_tol_dif_gt, out_tou_dif_stu, out_tou_dif_gt])
+        revised_model = Model(inp, [out_landmarks, out_tol, out_tol_dif_gt, out_tou, out_tou_dif_gt])
         model_json = revised_model.to_json()
         revised_model.save('ds_300w_3o_stu_.h5')
         with open("mobileNet_v2_5_out.json", "w") as json_file:
