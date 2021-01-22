@@ -129,7 +129,7 @@ class CNNModel:
         x = Dense(2 * output_len)(x)
         x = BatchNormalization()(x)
         x = ReLU()(x)
-        x = Dropout(0.1)(x)
+        x = Dropout(0.3)(x)
         out_tol = Dense(output_len, name='O_tol')(x)
         out_tol_dif_gt = Dense(output_len, name='O_tol_d_g')(x)
 
@@ -139,7 +139,7 @@ class CNNModel:
         x = Dense(2 * output_len)(x)
         x = BatchNormalization()(x)
         x = ReLU()(x)
-        x = Dropout(0.1)(x)
+        x = Dropout(0.3)(x)
         out_tou = Dense(output_len, name='O_tou')(x)
         out_tou_dif_gt = Dense(output_len, name='O_tou_d_g')(x)
 

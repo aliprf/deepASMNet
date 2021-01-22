@@ -147,6 +147,8 @@ class StudentTrainer:
                 main_loss_weight=l_w_stu,
                 tough_loss_weight=l_w_togh_t,
                 tol_loss_weight=loss_w_tol_t,
+                x_pr_tol=pr_tol,
+                x_pr_tou=pr_tou,
                 pr_tol_dif_gt=pr_tol_dif_gt,
                 pr_tou_dif_gt=pr_tou_dif_gt)
         '''calculate gradient'''

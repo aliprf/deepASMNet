@@ -71,7 +71,7 @@ class Custom_losses:
     #     return loss
 
     def kd_loss_with_dif(self, x_pr, x_gt, x_tough, x_tol, alpha_tough, alpha_mi_tough, alpha_tol, alpha_mi_tol,
-                         main_loss_weight, tough_loss_weight, tol_loss_weight, pr_tol_dif_gt, pr_tou_dif_gt
+                         main_loss_weight, tough_loss_weight, tol_loss_weight, x_pr_tol, x_pr_tou, pr_tol_dif_gt, pr_tou_dif_gt
                          ):
         """km"""
         '''los KD'''
@@ -98,14 +98,14 @@ class Custom_losses:
         '''calculate loss'''
         loss_main_high_dif = tf.reduce_mean(high_diff_main_map * (tf.square(x_gt - x_pr) +3 * tf.abs(x_gt - x_tol) - 1 * tf.square(x_gt - x_tol)))
         loss_main_low_dif = tf.reduce_mean(low_diff_main_map * (3 * tf.abs(x_gt - x_pr)))
-        loss_main = loss_main_high_dif + loss_main_low_dif
+        loss_main = main_loss_weight * loss_main_high_dif + loss_main_low_dif
 
         loss_tough_assist = tough_loss_weight * tf.reduce_mean(tou_map * tf.abs(x_tough - x_pr))
         loss_tol_assist = tol_loss_weight * tf.reduce_mean(tol_map * tf.abs(x_tol - x_pr))
 
         '''dif loss:'''
-        loss_tol_main = tf.reduce_mean(tf.square(x_tol - x_pr))
-        loss_tough_main = tf.reduce_mean(tf.square(x_tough - x_pr))
+        loss_tol_main = tf.reduce_mean(tf.square(x_tol - x_pr_tol))
+        loss_tough_main = tf.reduce_mean(tf.square(x_tough - x_pr_tou))
 
         gt_tol_dif_gt = x_tol - x_gt
         loss_tol_dif_gt = tf.reduce_mean(tf.abs(pr_tol_dif_gt - gt_tol_dif_gt))
@@ -113,7 +113,8 @@ class Custom_losses:
         gt_tou_dif_gt = x_tough - x_gt
         loss_tou_dif_gt = tf.reduce_mean(tf.abs(pr_tou_dif_gt - gt_tou_dif_gt))
 
-        loss_total = 10 * (loss_main + loss_tough_assist + loss_tol_assist)
+        loss_total = 10 * (loss_main + loss_tough_assist + loss_tol_assist) +\
+                     2*(loss_tough_main + loss_tou_dif_gt) + 2*(loss_tol_main + loss_tol_dif_gt)
 
         return loss_total, loss_main, loss_tough_main, loss_tol_main, loss_tol_dif_gt, loss_tou_dif_gt
 
