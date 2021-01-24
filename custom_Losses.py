@@ -113,7 +113,7 @@ class Custom_losses:
         gt_tou_dif_gt = x_tough - x_gt
         loss_tou_dif_gt = tf.reduce_mean(tf.abs(pr_tou_dif_gt - gt_tou_dif_gt))
 
-        loss_total = 10 * (loss_main + loss_tough_assist + loss_tol_assist) +\
+        loss_total = 100 * (loss_main + loss_tough_assist + loss_tol_assist) +\
                      2*(loss_tough_main + loss_tou_dif_gt) + 2*(loss_tol_main + loss_tol_dif_gt)
 
         return loss_total, loss_main, loss_tough_main, loss_tol_main, loss_tol_dif_gt, loss_tou_dif_gt
