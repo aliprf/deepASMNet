@@ -117,8 +117,8 @@ class StudentTrainer:
             model_student.save(
                 './models/stu_model_' + str(epoch) + '_' + self.dataset_name + '_' + str(loss_eval) + '.h5')
             '''calculate Learning rate'''
-            _lr = self._calc_learning_rate(iterations=epoch, step_size=20, base_lr=1e-5, max_lr=1e-1)
-            optimizer_student = self._get_optimizer(lr=_lr)
+            # _lr = self._calc_learning_rate(iterations=epoch, step_size=20, base_lr=1e-5, max_lr=1e-1)
+            # optimizer_student = self._get_optimizer(lr=_lr)
 
     def _calc_learning_rate(self, iterations, step_size, base_lr, max_lr):
         cycle = np.floor(1 + iterations / (2 * step_size))
