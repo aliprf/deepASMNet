@@ -102,19 +102,20 @@ class StudentTrainer:
                                 l_w_stu=loss_weight_student, l_w_togh_t=loss_weight_tough_teacher,
                                 loss_w_tol_t=loss_weight_tol_teacher,
                                 optimizer=optimizer_student, summary_writer=summary_writer, c_loss=c_loss)
-            '''evaluating part'''
-            img_batch_eval, pn_batch_eval = self._create_evaluation_batch(x_val_filenames, y_val_filenames)
-            loss_eval, loss_eval_tol_dif_stu, loss_eval_tol_dif_gt, loss_eval_tou_dif_stu, loss_eval_tou_dif_gt = \
-                self._eval_model(img_batch_eval, pn_batch_eval, model_student)
-            with summary_writer.as_default():
-                tf.summary.scalar('Eval-LOSS', loss_eval, step=epoch)
-                tf.summary.scalar('Eval-loss_eval_tol_dif_stu', loss_eval_tol_dif_stu, step=epoch)
-                tf.summary.scalar('Eval-loss_eval_tol_dif_gt', loss_eval_tol_dif_gt, step=epoch)
-                tf.summary.scalar('Eval-loss_eval_tou_dif_stu', loss_eval_tou_dif_stu, step=epoch)
-                tf.summary.scalar('Eval-loss_eval_tou_dif_gt', loss_eval_tou_dif_gt, step=epoch)
             '''save weights'''
             model_student.save(
                 './models/stu_model_' + str(epoch) + '_' + self.dataset_name + '_' + str(loss_eval) + '.h5')
+
+            '''evaluating part'''
+            img_batch_eval, pn_batch_eval = self._create_evaluation_batch(x_val_filenames, y_val_filenames)
+            # loss_eval, loss_eval_tol_dif_stu, loss_eval_tol_dif_gt, loss_eval_tou_dif_stu, loss_eval_tou_dif_gt = \
+            loss_eval = self._eval_model(img_batch_eval, pn_batch_eval, model_student)
+            with summary_writer.as_default():
+                tf.summary.scalar('Eval-LOSS', loss_eval, step=epoch)
+                # tf.summary.scalar('Eval-loss_eval_tol_dif_stu', loss_eval_tol_dif_stu, step=epoch)
+                # tf.summary.scalar('Eval-loss_eval_tol_dif_gt', loss_eval_tol_dif_gt, step=epoch)
+                # tf.summary.scalar('Eval-loss_eval_tou_dif_stu', loss_eval_tou_dif_stu, step=epoch)
+                # tf.summary.scalar('Eval-loss_eval_tou_dif_gt', loss_eval_tou_dif_gt, step=epoch)
             # model_student.save_weights('./models/stu_weight_' + '_' + str(epoch) + self.dataset_name + '_' + str(loss_eval) + '.h5')
             '''calculate Learning rate'''
             _lr = self._calc_learning_rate(iterations=epoch, step_size=20, base_lr=1e-5, max_lr=1e-1)
@@ -183,13 +184,15 @@ class StudentTrainer:
         return model
 
     def _eval_model(self, img_batch_eval, pn_batch_eval, model):
-        annotation_predicted, pr_tol_dif_stu, pr_tol_dif_gt, pr_tou_dif_stu, pr_tou_dif_gt = model(img_batch_eval)
+        # annotation_predicted, pr_tol_dif_stu, pr_tol_dif_gt, pr_tou_dif_stu, pr_tou_dif_gt = model(img_batch_eval)
+        annotation_predicted = model(img_batch_eval)
         loss_eval = np.array(tf.reduce_mean(tf.abs(pn_batch_eval - annotation_predicted)))
-        loss_eval_tol_dif_stu = np.array(tf.reduce_mean(tf.abs(pn_batch_eval - annotation_predicted)))
-        loss_eval_tol_dif_gt = np.array(tf.reduce_mean(tf.abs(pn_batch_eval - annotation_predicted)))
-        loss_eval_tou_dif_stu = np.array(tf.reduce_mean(tf.abs(pn_batch_eval - annotation_predicted)))
-        loss_eval_tou_dif_gt = np.array(tf.reduce_mean(tf.abs(pn_batch_eval - annotation_predicted)))
-        return loss_eval, loss_eval_tol_dif_stu, loss_eval_tol_dif_gt, loss_eval_tou_dif_stu, loss_eval_tou_dif_gt
+        # loss_eval_tol_dif_stu = np.array(tf.reduce_mean(tf.abs(pn_batch_eval - annotation_predicted)))
+        # loss_eval_tol_dif_gt = np.array(tf.reduce_mean(tf.abs(pn_batch_eval - annotation_predicted)))
+        # loss_eval_tou_dif_stu = np.array(tf.reduce_mean(tf.abs(pn_batch_eval - annotation_predicted)))
+        # loss_eval_tou_dif_gt = np.array(tf.reduce_mean(tf.abs(pn_batch_eval - annotation_predicted)))
+        # return loss_eval, loss_eval_tol_dif_stu, loss_eval_tol_dif_gt, loss_eval_tou_dif_stu, loss_eval_tou_dif_gt
+        return loss_eval
 
     def _get_optimizer(self, lr=1e-2, beta_1=0.9, beta_2=0.999, decay=1e-4):
         return tf.keras.optimizers.Adam(lr=lr, beta_1=beta_1, beta_2=beta_2, decay=decay)
