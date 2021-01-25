@@ -119,37 +119,44 @@ class CNNModel:
             revised_model.load_weights(weight_path)
 
         '''now we add other layers'''
-        global_avg = revised_model.get_layer('global_average_pooling2d').output  # 1280
+        # global_avg = revised_model.get_layer('global_average_pooling2d').output  # 1280
         inp = revised_model.input
         out_landmarks = revised_model.get_layer('O_L').output
-
-        x = Dense(3*output_len)(global_avg)
-        x = BatchNormalization()(x)
-        x = ReLU()(x)
-        x = Dense(2 * output_len)(x)
-        x = BatchNormalization()(x)
-        x = ReLU()(x)
-        x = Dropout(0.3)(x)
-        out_tol = Dense(output_len, name='O_tol')(x)
-        out_tol_dif_gt = Dense(output_len, name='O_tol_d_g')(x)
-
-        x = Dense(3*output_len)(global_avg)
-        x = BatchNormalization()(x)
-        x = ReLU()(x)
-        x = Dense(2 * output_len)(x)
-        x = BatchNormalization()(x)
-        x = ReLU()(x)
-        x = Dropout(0.3)(x)
-        out_tou = Dense(output_len, name='O_tou')(x)
-        out_tou_dif_gt = Dense(output_len, name='O_tou_d_g')(x)
-
-        revised_model = Model(inp, [out_landmarks, out_tol, out_tol_dif_gt, out_tou, out_tou_dif_gt])
+        revised_model = Model(inp, [out_landmarks])
         model_json = revised_model.to_json()
-        revised_model.save('ds_300w_3o_stu_.h5')
-        with open("mobileNet_v2_5_out.json", "w") as json_file:
+        # revised_model.save('ds_300w_stu_.h5')
+        with open("mobileNet_v2_stu.json", "w") as json_file:
             json_file.write(model_json)
-
         return revised_model
+
+
+        # x = Dense(3*output_len)(global_avg)
+        # x = BatchNormalization()(x)
+        # x = ReLU()(x)
+        # x = Dense(2 * output_len)(x)
+        # x = BatchNormalization()(x)
+        # x = ReLU()(x)
+        # x = Dropout(0.1)(x)
+        # out_tol = Dense(output_len, name='O_tol')(x)
+        # out_tol_dif_gt = Dense(output_len, name='O_tol_d_g')(x)
+        #
+        # x = Dense(3*output_len)(global_avg)
+        # x = BatchNormalization()(x)
+        # x = ReLU()(x)
+        # x = Dense(2 * output_len)(x)
+        # x = BatchNormalization()(x)
+        # x = ReLU()(x)
+        # x = Dropout(0.3)(x)
+        # out_tou = Dense(output_len, name='O_tou')(x)
+        # out_tou_dif_gt = Dense(output_len, name='O_tou_d_g')(x)
+        #
+        # revised_model = Model(inp, [out_landmarks, out_tol, out_tol_dif_gt, out_tou, out_tou_dif_gt])
+        # model_json = revised_model.to_json()
+        # revised_model.save('ds_300w_3o_stu_.h5')
+        # with open("mobileNet_v2_5_out.json", "w") as json_file:
+        #     json_file.write(model_json)
+        #
+        # return revised_model
 
     def hour_glass_network(self, num_classes=68, num_stacks=10, num_filters=256,
                            in_shape=(224, 224), out_shape=(56, 56)):

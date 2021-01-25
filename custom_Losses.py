@@ -71,7 +71,8 @@ class Custom_losses:
     #     return loss
 
     def kd_loss_with_dif(self, x_pr, x_gt, x_tough, x_tol, alpha_tough, alpha_mi_tough, alpha_tol, alpha_mi_tol,
-                         main_loss_weight, tough_loss_weight, tol_loss_weight, x_pr_tol, x_pr_tou, pr_tol_dif_gt, pr_tou_dif_gt
+                         main_loss_weight, tough_loss_weight, tol_loss_weight, x_pr_tol, x_pr_tou, pr_tol_dif_gt,
+                         pr_tou_dif_gt
                          ):
         """km"""
         '''los KD'''
@@ -96,7 +97,8 @@ class Custom_losses:
         high_diff_main_map = tf.where(tf.abs(x_gt - x_pr) > tf.abs(x_gt - x_tol), 1.0, 0.0)
 
         '''calculate loss'''
-        loss_main_high_dif = tf.reduce_mean(high_diff_main_map * (tf.square(x_gt - x_pr) +3 * tf.abs(x_gt - x_tol) - 1 * tf.square(x_gt - x_tol)))
+        loss_main_high_dif = tf.reduce_mean(
+            high_diff_main_map * (tf.square(x_gt - x_pr) + 3 * tf.abs(x_gt - x_tol) - 1 * tf.square(x_gt - x_tol)))
         loss_main_low_dif = tf.reduce_mean(low_diff_main_map * (3 * tf.abs(x_gt - x_pr)))
         loss_main = main_loss_weight * loss_main_high_dif + loss_main_low_dif
 
@@ -113,67 +115,48 @@ class Custom_losses:
         gt_tou_dif_gt = x_tough - x_gt
         loss_tou_dif_gt = tf.reduce_mean(tf.abs(pr_tou_dif_gt - gt_tou_dif_gt))
 
-        loss_total = 100 * (loss_main + loss_tough_assist + loss_tol_assist) +\
-                     2*(loss_tough_main + loss_tou_dif_gt) + 2*(loss_tol_main + loss_tol_dif_gt)
+        loss_total = 100 * (loss_main + loss_tough_assist + loss_tol_assist) + \
+                     2 * (loss_tough_main + loss_tou_dif_gt) + 2 * (loss_tol_main + loss_tol_dif_gt)
 
         return loss_total, loss_main, loss_tough_main, loss_tol_main, loss_tol_dif_gt, loss_tou_dif_gt
 
-    def kd_loss(self, x_pr, x_gt, x_tough, x_tol,
-                alpha_tough, alpha_mi_tough,
-                alpha_tol, alpha_mi_tol,
-                main_loss_weight, tough_loss_weight, tol_loss_weight,
-                num_of_landmarks):
-        # loss_main = tf.reduce_mean(tf.sqrt(tf.abs(x_gt - x_pr)))
-        # loss_main = tf.reduce_mean(tf.square(x_gt - x_pr))
-        loss_main = tf.reduce_mean(tf.abs(x_gt - x_pr))
-        return loss_main, 0, 0, 0
+    def kd_loss(self, x_pr, x_gt, x_tough, x_tol, alpha_tough, alpha_mi_tough, alpha_tol, alpha_mi_tol,
+                main_loss_weight, tough_loss_weight, tol_loss_weight):
+        """km"""
+        '''los KD'''
+        # we revise teachers for reflection:
+        x_tough = x_gt + tf.sign(x_pr - x_gt) * tf.abs(x_tough - x_gt)
+        b_tough = x_gt + tf.sign(x_pr - x_gt) * tf.abs(x_tough - x_gt) * 0.15
+        x_tol = x_gt + tf.sign(x_pr - x_gt) * tf.abs(x_tol - x_gt)
+        b_tol = x_gt + tf.sign(x_pr - x_gt) * tf.abs(x_tol - x_gt) * 0.15
+        # Region A: from T -> +inf
+        tou_pos_map = tf.where(tf.sign(x_pr - x_tough) * tf.sign(x_tough - x_gt) > 0, alpha_tough, 0.0)
+        tou_neg_map = tf.where(tf.sign(x_tough - x_pr) * tf.sign(x_pr - b_tough) >= 0, alpha_mi_tough, 0.0)
+        # tou_red_map = tf.where(tf.sign(tf.abs(b_tough) - tf.abs(x_pr))*tf.sign(tf.abs(x_pr) - tf.abs(x_gt)) > 0, 0.1, 0.0)
+        tou_map = tou_pos_map + tou_neg_map  # + tou_red_map
 
-        """"""
-        '''creating np version of input tensors'''
-        loss_shape = (x_pr.shape[0], x_pr.shape[1])
-        # np_x_pr = x_pr.numpy().reshape(x_pr.shape[0] * x_pr.shape[1])
-        np_x_pr = tf.reshape(tensor=x_pr, shape=x_pr.shape[0] * x_pr.shape[1])
-        np_x_gt = tf.reshape(tensor=x_gt, shape=x_gt.shape[0] * x_gt.shape[1])
-        np_x_tough = tf.reshape(tensor=x_tough, shape=x_tough.shape[0] * x_tough.shape[1])
-        np_x_tol = tf.reshape(tensor=x_tol, shape=x_tol.shape[0] * x_tol.shape[1])
-        # np_x_pr = K.eval(x_pr).reshape(x_pr.shape[0] * x_pr.shape[1])
-        # np_x_gt = K.eval(x_gt).reshape(x_gt.shape[0] * x_gt.shape[1])
-        # np_x_tough = K.eval(x_tough).reshape(x_tough.shape[0] * x_tough.shape[1])
-        # np_x_tol = K.eval(x_tol).reshape(x_tol.shape[0] * x_tol.shape[1])
+        tol_pos_map = tf.where(tf.sign(x_pr - x_tol) * tf.sign(x_tol - x_gt) > 0, alpha_tol, 0.0)
+        tol_neg_map = tf.where(tf.sign(x_tol - x_pr) * tf.sign(x_pr - b_tol) >= 0, alpha_mi_tol, 0.0)
+        # tol_red_map = tf.where(tf.sign(tf.abs(b_tol) - tf.abs(x_pr))*tf.sign(tf.abs(x_pr) - tf.abs(x_gt)) > 0, 0.1, 0.0)
+        tol_map = tol_pos_map + tol_neg_map  # + tou_red_map
 
-        '''calculate the weight map'''
+        '''calculate dif map for linear and non-linear part'''
+        low_diff_main_map = tf.where(tf.abs(x_gt - x_pr) <= tf.abs(x_gt - x_tol), 1.0, 0.0)
+        high_diff_main_map = tf.where(tf.abs(x_gt - x_pr) > tf.abs(x_gt - x_tol), 1.0, 0.0)
 
-        # weight_map_tough = [self.calc_teacher_weight_loss(x_pr=np_x_pr[i], x_gt=np_x_gt[i], x_t=np_x_tough[i],
-        #                                                   alpha=alpha_tough, alpha_mi=alpha_mi_tough)
-        #                     for i in range(np_x_pr.shape[0])]
-        # weight_map_tol = [self.calc_teacher_weight_loss(x_pr=np_x_pr[i], x_gt=np_x_gt[i], x_t=np_x_tol[i],
-        #                                                 alpha=alpha_tol, alpha_mi=alpha_mi_tol)
-        #                   for i in range(np_x_pr.shape[0])]
+        '''calculate loss'''
+        loss_main_high_dif = tf.reduce_mean(
+            high_diff_main_map * (tf.square(x_gt - x_pr) + (3 * tf.abs(x_gt - x_tol)) - tf.square(x_gt - x_tol)))
+        loss_main_low_dif = tf.reduce_mean(low_diff_main_map * (3 * tf.abs(x_gt - x_pr)))
+        loss_main = main_loss_weight * (loss_main_high_dif + loss_main_low_dif)
 
-        weight_map_tough = np.zeros_like(np_x_tough)
-        weight_map_tol = np.zeros_like(np_x_tol)
-        for i in range(np_x_pr.shape[0]):
-            weight_map_tough[i] = self.calc_teacher_weight_loss(x_pr=np_x_pr[i], x_gt=np_x_gt[i], x_t=np_x_tough[i],
-                                                                alpha=alpha_tough, alpha_mi=alpha_mi_tough)
-            weight_map_tol[i] = self.calc_teacher_weight_loss(x_pr=np_x_pr[i], x_gt=np_x_gt[i], x_t=np_x_tol[i],
-                                                              alpha=alpha_tol, alpha_mi=alpha_mi_tol)
-        '''reshape loss'''
-        weight_map_tough = weight_map_tough.reshape(loss_shape)
-        weight_map_tol = weight_map_tol.reshape(loss_shape)
+        loss_tough_assist = tough_loss_weight * tf.reduce_mean(tou_map * tf.abs(x_tough - x_pr))
+        loss_tol_assist = tol_loss_weight * tf.reduce_mean(tol_map * tf.abs(x_tol - x_pr))
 
-        # weight_map_tough = np.array(weight_map_tough).reshape(loss_shape)
-        # weight_map_tol = np.array(weight_map_tol).reshape(loss_shape)
+        '''dif loss:'''
+        loss_total = loss_main + loss_tough_assist + loss_tol_assist
 
-        loss_tough = tf.reduce_mean(weight_map_tough * tf.abs(x_tough - x_pr))
-        loss_tol = tf.reduce_mean(weight_map_tol * tf.abs(x_tol - x_pr))
-        '''calculate the losses'''
-
-        loss_main = main_loss_weight * tf.reduce_mean(tf.abs(x_gt - x_pr))
-        loss_tough = tough_loss_weight * loss_tough
-        loss_tol = tol_loss_weight * loss_tol
-        loss_total = loss_main + loss_tough + loss_tol
-        '''returns all losses'''
-        return loss_total, loss_main, loss_tough, loss_tol
+        return loss_total, loss_main, loss_tough_assist, loss_tol_assist
 
     def calc_teacher_weight_loss(self, x_pr, x_gt, x_t, alpha, alpha_mi):
         weight_loss_t = 0
