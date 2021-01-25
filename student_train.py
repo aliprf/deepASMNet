@@ -102,10 +102,6 @@ class StudentTrainer:
                                 l_w_stu=loss_weight_student, l_w_togh_t=loss_weight_tough_teacher,
                                 loss_w_tol_t=loss_weight_tol_teacher,
                                 optimizer=optimizer_student, summary_writer=summary_writer, c_loss=c_loss)
-            '''save weights'''
-            model_student.save(
-                './models/stu_model_' + str(epoch) + '_' + self.dataset_name + '_' + str(loss_eval) + '.h5')
-
             '''evaluating part'''
             img_batch_eval, pn_batch_eval = self._create_evaluation_batch(x_val_filenames, y_val_filenames)
             # loss_eval, loss_eval_tol_dif_stu, loss_eval_tol_dif_gt, loss_eval_tou_dif_stu, loss_eval_tou_dif_gt = \
@@ -117,6 +113,9 @@ class StudentTrainer:
                 # tf.summary.scalar('Eval-loss_eval_tou_dif_stu', loss_eval_tou_dif_stu, step=epoch)
                 # tf.summary.scalar('Eval-loss_eval_tou_dif_gt', loss_eval_tou_dif_gt, step=epoch)
             # model_student.save_weights('./models/stu_weight_' + '_' + str(epoch) + self.dataset_name + '_' + str(loss_eval) + '.h5')
+            '''save weights'''
+            model_student.save(
+                './models/stu_model_' + str(epoch) + '_' + self.dataset_name + '_' + str(loss_eval) + '.h5')
             '''calculate Learning rate'''
             _lr = self._calc_learning_rate(iterations=epoch, step_size=20, base_lr=1e-5, max_lr=1e-1)
             optimizer_student = self._get_optimizer(lr=_lr)
