@@ -70,7 +70,7 @@ class StudentTrainer:
         model_tol_teacher = self.make_model(arch=arch_tol_teacher, w_path=weight_path_tol_teacher)
 
         '''create optimizer'''
-        _lr = 1e-2
+        _lr = 1e-3
         optimizer_student = self._get_optimizer(lr=_lr)
 
         '''create sample generator'''
@@ -180,6 +180,7 @@ class StudentTrainer:
                               is_old=is_old)
         if w_path is not None and arch != 'mobileNetV2_d' and not is_old:
             model.load_weights(w_path)
+        # model.save('test_model'+arch+'.h5')
         return model
 
     def _eval_model(self, img_batch_eval, pn_batch_eval, model):
