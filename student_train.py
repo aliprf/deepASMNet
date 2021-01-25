@@ -134,7 +134,8 @@ class StudentTrainer:
                    optimizer, summary_writer, c_loss):
         with tf.GradientTape() as tape_student:
             '''create annotation_predicted'''
-            annotation_predicted, pr_tol, pr_tol_dif_gt, pr_tou, pr_tou_dif_gt = model_student(
+            # annotation_predicted, pr_tol, pr_tol_dif_gt, pr_tou, pr_tou_dif_gt = model_student(
+            annotation_predicted = model_student(
                 images, training=True)
             '''calculate loss'''
             # loss_total, loss_main, loss_tough_main, loss_tol_main, loss_tol_dif_gt, loss_tou_dif_gt = c_loss.kd_loss_with_dif(
