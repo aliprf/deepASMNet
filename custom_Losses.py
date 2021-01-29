@@ -69,6 +69,15 @@ class Custom_losses:
     #     y_tol_t = tf.math.multiply(weight_map_t_tol, y_tol_t)
     #
     #     return loss
+    def diff_loss(self, pr_dif_gt_st, pr_dif_gt_pt, annotation_student, annotation_gr, annotation_tough_teacher):
+        gt_dif_gt_st = annotation_gr - annotation_student
+        gt_dif_gt_pt = annotation_gr - annotation_tough_teacher
+
+        loss_dif_gt_st = tf.reduce_mean(tf.abs(gt_dif_gt_st - pr_dif_gt_st))
+        loss_dif_gt_pt = tf.reduce_mean(tf.abs(gt_dif_gt_pt - pr_dif_gt_pt))
+
+        loss_total = loss_dif_gt_st + loss_dif_gt_pt
+        return loss_total, loss_dif_gt_st, loss_dif_gt_pt
 
     def kd_loss_with_dif(self, x_pr, x_gt, x_tough, x_tol, alpha_tough, alpha_mi_tough, alpha_tol, alpha_mi_tol,
                          main_loss_weight, tough_loss_weight, tol_loss_weight, x_pr_tol, x_pr_tou, pr_tol_dif_gt,

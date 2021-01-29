@@ -4,8 +4,10 @@ from cnn_model import CNNModel
 from pca_utility import PCAUtility
 from image_utility import ImageUtility
 from student_train import StudentTrainer
+from dif_model_train import StudentDiffTrainer
 # from old_student_train import StudentTrainer
 from test import Test
+
 # from train import Train
 
 # from Train_Gan import TrainGan
@@ -85,12 +87,20 @@ if __name__ == '__main__':
     #                                           CofwConf.no_aug_train_tf_path + 'train90.tfrecords'],
     #                  student_weight_file=None)
     # ''' 300w Dataset'''
-    st_trainer = StudentTrainer(dataset_name=DatasetName.ibug, use_augmneted=True)
-    st_trainer.train(arch_student='mobileNetV2', weight_path_student='./teacher_models/ds_300w_stu.h5', loss_weight_student=2.0,
-                     arch_tough_teacher='efficientNet', weight_path_tough_teacher='./teacher_models/ds_300w_ef_100.h5',
-                     loss_weight_tough_teacher=0.9,
-                     arch_tol_teacher='efficientNet', weight_path_tol_teacher='./teacher_models/ds_300w_ef_95.h5',
-                     loss_weight_tol_teacher=0.9)
+    st_dif_trainer = StudentDiffTrainer(dataset_name=DatasetName.ibug, use_augmneted=True)
+    st_dif_trainer.train(arch='mobileNetV2_dif', weight_path=None,
+                         # weight_path='./teacher_models/last-ds_300w_diff.h5',
+                         arch_student='mobileNetV2', weight_path_student='./teacher_models/last-ds_300w_mn_stu.h5',
+                         arch_tough_teacher='efficientNet',
+                         weight_path_tough_teacher='./teacher_models/ds_300w_ef_100.h5')
+    # mobileNetV2_dif
+
+    # st_trainer = StudentTrainer(dataset_name=DatasetName.ibug, use_augmneted=True)
+    # st_trainer.train(arch_student='mobileNetV2', weight_path_student='./teacher_models/last-ds_300w_mn_stu.h5', loss_weight_student=2.0,
+    #                  arch_tough_teacher='efficientNet', weight_path_tough_teacher='./teacher_models/ds_300w_ef_100.h5',
+    #                  loss_weight_tough_teacher=0.9,
+    #                  arch_tol_teacher='efficientNet', weight_path_tol_teacher='./teacher_models/ds_300w_ef_95.h5',
+    #                  loss_weight_tol_teacher=0.9)
 
     # '''Cofw dataset: this ds is not normal for both mn_base and efn100'''
     # st_trainer = StudentTrainer(dataset_name=DatasetName.cofw, use_augmneted=True)

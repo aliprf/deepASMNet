@@ -44,6 +44,9 @@ class CNNModel:
             model = self.create_asmnet(inp_shape=inp_shape, num_branches=num_output_layers, output_len=output_len)
         elif arch == 'efficientNet':
             model = self.create_efficientNet(inp_shape=inp_shape, input_tensor=input_tensor, output_len=output_len)
+        elif arch == 'mobileNetV2_dif':
+            model = self.create_MobileNet_dif(inp_shape=inp_shape, inp_tensor=input_tensor, output_len=output_len,
+                                              is_old=is_old, weight_path=weight_path)
         elif arch == 'mobileNetV2':
             model = self.create_MobileNet(inp_shape=inp_shape, inp_tensor=input_tensor, output_len=output_len,
                                           is_old=is_old, weight_path=weight_path)
@@ -94,6 +97,48 @@ class CNNModel:
             json_file.write(model_json)
         return revised_model
 
+    def create_MobileNet_dif(self, inp_shape, inp_tensor, output_len, is_old, weight_path):
+        initializer = tf.keras.initializers.glorot_uniform()
+
+        mobilenet_model = mobilenet_v2.MobileNetV2(input_shape=inp_shape,
+                                                   alpha=1.0,
+                                                   include_top=True,
+                                                   weights=None,
+                                                   input_tensor=inp_tensor,
+                                                   pooling=None)
+        mobilenet_model.layers.pop()
+        # mobilenet_model.summary()
+
+        # global_avg = mobilenet_model.get_layer('global_average_pooling2d_2').output  # 1280
+        global_avg = mobilenet_model.get_layer('global_average_pooling2d').output  # 1280
+        x = Dense(3 * output_len)(global_avg)
+        x = BatchNormalization()(x)
+        x = ReLU()(x)
+        x = Dense(2 * output_len)(x)
+        x = BatchNormalization()(x)
+        x = ReLU()(x)
+        x = Dropout(0.3)(x)
+        dif_gt_st = Dense(output_len, name='dif_gt_st')(x)
+
+        x = Dense(3 * output_len)(global_avg)
+        x = BatchNormalization()(x)
+        x = ReLU()(x)
+        x = Dense(2 * output_len)(x)
+        x = BatchNormalization()(x)
+        x = ReLU()(x)
+        x = Dropout(0.3)(x)
+        dif_gt_pt = Dense(output_len, name='dif_gt_pt')(x)
+
+        '''now we add other layers'''
+        # global_avg = revised_model.get_layer('global_average_pooling2d').output  # 1280
+        inp = mobilenet_model.input
+        revised_model = Model(inp, [dif_gt_st, dif_gt_pt])
+        model_json = revised_model.to_json()
+        # revised_model.save('ds_300w_stu_.h5')
+        with open("mobileNet_v2_stu_dif.json", "w") as json_file:
+            json_file.write(model_json)
+        return revised_model
+
     def create_MobileNet(self, inp_shape, inp_tensor, output_len, is_old, weight_path):
         # initializer = tf.keras.initializers.HeUniform()
         initializer = tf.keras.initializers.glorot_uniform()
@@ -104,10 +149,11 @@ class CNNModel:
                                                    weights=None,
                                                    input_tensor=inp_tensor,
                                                    pooling=None)
+        # mobilenet_model.summary()
         mobilenet_model.layers.pop()
 
-        # x = mobilenet_model.get_layer('global_average_pooling2d_2').output  # 1280
-        x = mobilenet_model.get_layer('global_average_pooling2d').output  # 1280
+        x = mobilenet_model.get_layer('global_average_pooling2d_1').output  # 1280
+        # x = mobilenet_model.get_layer('global_average_pooling2d').output  # 1280
         # x = Dropout(0.5)(x)
         out_landmarks = Dense(output_len, name='O_L')(x)
         inp = mobilenet_model.input
@@ -128,7 +174,6 @@ class CNNModel:
         with open("mobileNet_v2_stu.json", "w") as json_file:
             json_file.write(model_json)
         return revised_model
-
 
         # x = Dense(3*output_len)(global_avg)
         # x = BatchNormalization()(x)
