@@ -73,8 +73,8 @@ class Custom_losses:
         gt_dif_gt_st = annotation_gr - annotation_student
         gt_dif_gt_pt = annotation_gr - annotation_tough_teacher
 
-        loss_dif_gt_st = tf.reduce_mean(tf.abs(gt_dif_gt_st - pr_dif_gt_st))
-        loss_dif_gt_pt = tf.reduce_mean(tf.abs(gt_dif_gt_pt - pr_dif_gt_pt))
+        loss_dif_gt_st = tf.reduce_mean(tf.abs(gt_dif_gt_st - pr_dif_gt_st)/224.0)
+        loss_dif_gt_pt = tf.reduce_mean(tf.abs(gt_dif_gt_pt - pr_dif_gt_pt)/224.0)
 
         loss_total = loss_dif_gt_st + loss_dif_gt_pt
         return loss_total, loss_dif_gt_st, loss_dif_gt_pt
