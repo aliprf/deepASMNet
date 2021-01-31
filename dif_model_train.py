@@ -112,7 +112,7 @@ class StudentDiffTrainer:
             # model_student.save_weights('./models/stu_weight_' + '_' + str(epoch) + self.dataset_name + '_' + str(loss_eval) + '.h5')
             '''save weights'''
             model_student.save(
-                './models/stu_model_' + str(epoch) + '_' + self.dataset_name + '_' + str(loss_eval) + '.h5')
+                './models/stu_model_' + str(epoch) + '_' + self.dataset_name + '_' + str(loss_eval_total) + '.h5')
             '''calculate Learning rate'''
             # _lr = self._calc_learning_rate(iterations=epoch, step_size=20, base_lr=1e-5, max_lr=1e-1)
             # optimizer_student = self._get_optimizer(lr=_lr)
