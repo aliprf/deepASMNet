@@ -94,7 +94,7 @@ if __name__ == '__main__':
                          # arch_student='mobileNetV2', weight_path_student='./teacher_models/last-ds_wflw_stu.h5',
                          # arch_student='mobileNetV2', weight_path_student='./teacher_models/last-ds_wflw_stu.h5',
                          arch_tough_teacher='efficientNet',
-                         weight_path_tough_teacher='./teacher_models/ds_cofw_efn_100.h5.h5')
+                         weight_path_tough_teacher='./teacher_models/ds_cofw_efn_100.h5')
                          # weight_path_tough_teacher='./teacher_models/ds_wflw_ef_100.h5')
                          # weight_path_tough_teacher='./teacher_models/ds_300w_ef_100.h5')
     # mobileNetV2_dif
