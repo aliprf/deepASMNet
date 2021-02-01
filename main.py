@@ -90,13 +90,14 @@ if __name__ == '__main__':
     st_dif_trainer = StudentDiffTrainer(dataset_name=DatasetName.cofw, use_augmneted=True)
     st_dif_trainer.train(arch='mobileNetV2_dif', weight_path=None,
                          # weight_path='./teacher_models/last-ds_300w_diff.h5',
-                         arch_student='mobileNetV2', weight_path_student='./teacher_models/stu_model_cofw_nme4.11.h5',
+                         # arch_student='mobileNetV2', weight_path_student='./teacher_models/stu_model_cofw_nme4.11.h5',
                          # arch_student='mobileNetV2', weight_path_student='./teacher_models/last-ds_wflw_stu.h5',
-                         # arch_student='mobileNetV2', weight_path_student='./teacher_models/last-ds_wflw_stu.h5',
+                         arch_student='mobileNetV2', weight_path_student='./teacher_models/last-ds_300w_stu.h5',
+
                          arch_tough_teacher='efficientNet',
-                         weight_path_tough_teacher='./teacher_models/ds_cofw_efn_100.h5')
+                         # weight_path_tough_teacher='./teacher_models/ds_cofw_efn_100.h5')
                          # weight_path_tough_teacher='./teacher_models/ds_wflw_ef_100.h5')
-                         # weight_path_tough_teacher='./teacher_models/ds_300w_ef_100.h5')
+                         weight_path_tough_teacher='./teacher_models/ds_300w_ef_100.h5')
     # mobileNetV2_dif
 
     # st_trainer = StudentTrainer(dataset_name=DatasetName.ibug, use_augmneted=True)
