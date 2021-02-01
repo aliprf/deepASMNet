@@ -87,7 +87,7 @@ if __name__ == '__main__':
     #                                           CofwConf.no_aug_train_tf_path + 'train90.tfrecords'],
     #                  student_weight_file=None)
     # ''' 300w Dataset'''
-    st_dif_trainer = StudentDiffTrainer(dataset_name=DatasetName.cofw, use_augmneted=True)
+    st_dif_trainer = StudentDiffTrainer(dataset_name=DatasetName.wflw, use_augmneted=True)
     st_dif_trainer.train(arch='mobileNetV2_dif', weight_path=None,
                          # weight_path='./teacher_models/last-ds_300w_diff.h5',
                          # arch_student='mobileNetV2', weight_path_student='./teacher_models/stu_model_cofw_nme4.11.h5',
