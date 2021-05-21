@@ -1,6 +1,6 @@
 #bottleneck
 keras==2.3.1
-tensorflow==1.14
+tensorflow==2.5.0
 numpy
 matplotlib
 #opencv-python
